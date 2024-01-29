@@ -1,6 +1,7 @@
 package net.johnpgr.craftingtableiifabric.screens.handlers
 
 import net.johnpgr.craftingtableiifabric.inventories.InventoryCraftingTableII
+import net.johnpgr.craftingtableiifabric.inventories.slots.CraftingTableIISlot
 import net.johnpgr.craftingtableiifabric.screens.ModScreens
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
@@ -9,6 +10,7 @@ import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.slot.Slot
+import net.minecraft.screen.slot.SlotActionType
 
 class CraftingTableIIScreenHandler : ScreenHandler {
     private val inventory: Inventory
@@ -32,7 +34,7 @@ class CraftingTableIIScreenHandler : ScreenHandler {
         for (row in 0..<InventoryCraftingTableII.inventoryRowSize) {
             for (col in 0..<InventoryCraftingTableII.inventoryColSize) {
                 addSlot(
-                    Slot(
+                    CraftingTableIISlot(
                         inventory,
                         col + row * InventoryCraftingTableII.inventoryColSize,
                         8 + col * 18,
@@ -71,37 +73,23 @@ class CraftingTableIIScreenHandler : ScreenHandler {
         return inventory.canPlayerUse(player)
     }
 
+    override fun onClosed(player: PlayerEntity) {
+        super.onClosed(player)
+        this.inventory.onClose(player)
+    }
+
     override fun quickMove(
         playerEntity: PlayerEntity,
         invSlot: Int
     ): ItemStack {
         return ItemStack.EMPTY
-//        var newStack = ItemStack.EMPTY
-//        val slot = slots[invSlot]
-//        if (slot != null && slot.hasStack()) {
-//            val originalStack = slot.stack
-//            newStack = originalStack.copy()
-//            if (invSlot < inventory.size()) {
-//                if (!insertItem(
-//                        originalStack,
-//                        inventory.size(),
-//                        slots.size,
-//                        true
-//                    )
-//                ) {
-//                    return ItemStack.EMPTY
-//                }
-//            } else if (!insertItem(originalStack, 0, inventory.size(), false)) {
-//                return ItemStack.EMPTY
-//            }
-//
-//            if (originalStack.isEmpty) {
-//                slot.stack = ItemStack.EMPTY
-//            } else {
-//                slot.markDirty()
-//            }
-//        }
-//
-//        return newStack
+    }
+
+    override fun canInsertIntoSlot(slot: Slot?): Boolean {
+        return false
+    }
+
+    override fun canInsertIntoSlot(stack: ItemStack?, slot: Slot?): Boolean {
+        return false
     }
 }

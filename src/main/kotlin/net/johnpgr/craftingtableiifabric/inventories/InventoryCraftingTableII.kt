@@ -48,11 +48,23 @@ interface InventoryCraftingTableII : Inventory {
     }
 
     override fun setStack(slot: Int, stack: ItemStack) {
-        if(stack.count > stack.maxCount) {
-            stack.count = stack.maxCount
-        }
+//        if(stack.count > stack.maxCount) {
+//            stack.count = stack.maxCount
+//        }
+//
+//        getItems()[slot] = stack
+    }
 
-        getItems()[slot] = stack
+    override fun canTransferTo(
+        hopperInventory: Inventory,
+        slot: Int,
+        stack: ItemStack
+    ): Boolean {
+        return false
+    }
+
+    override fun isValid(slot: Int, stack: ItemStack?): Boolean {
+        return false
     }
 
     override fun clear() {
