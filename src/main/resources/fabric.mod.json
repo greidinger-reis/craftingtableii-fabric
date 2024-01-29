@@ -1,0 +1,44 @@
+{
+	"schemaVersion": 1,
+	"id": "craftingtableiifabric",
+	"version": "${version}",
+	"name": "CraftingTableIIFabric",
+	"description": "CraftingTableII-Fabric is a port of perky's Crafting Table II to Modern Minecraft",
+	"authors": [
+		"johnpgr"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "MIT",
+	"icon": "assets/craftingtableiifabric/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			{
+				"value": "net.johnpgr.craftingtableiifabric.CraftingTableIIFabric",
+				"adapter": "kotlin"
+			}
+		],
+		"client": [
+			{
+				"value": "net.johnpgr.craftingtableiifabric.CraftingTableIIFabricClient",
+				"adapter": "kotlin"
+			}
+		]
+	},
+	"mixins": [
+		"craftingtableiifabric.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.6",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*",
+		"fabric-language-kotlin": ">=1.9.22"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
