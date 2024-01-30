@@ -92,11 +92,6 @@ class CraftingTableIIBlockEntity(
         return true
     }
 
-
-//    override fun getDisplayName(): Text {
-//        return Text.translatable(cachedState.block.translationKey)
-//    }
-
     override fun readNbt(nbt: NbtCompound) {
         super.readNbt(nbt)
         Inventories.readNbt(nbt, inventory)
