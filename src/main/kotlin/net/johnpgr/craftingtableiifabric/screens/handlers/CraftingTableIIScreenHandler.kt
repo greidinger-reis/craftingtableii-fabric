@@ -1,5 +1,6 @@
 package net.johnpgr.craftingtableiifabric.screens.handlers
 
+import net.johnpgr.craftingtableiifabric.blocks.entities.CraftingTableIIBlockEntity
 import net.johnpgr.craftingtableiifabric.inventories.InventoryCraftingTableII
 import net.johnpgr.craftingtableiifabric.inventories.slots.CraftingTableIISlot
 import net.johnpgr.craftingtableiifabric.screens.ModScreens
@@ -15,28 +16,31 @@ import net.minecraft.screen.slot.SlotActionType
 class CraftingTableIIScreenHandler : ScreenHandler {
     private val inventory: Inventory
 
-    constructor(syncId: Int, playerInventory: PlayerInventory) : this(
+    constructor(
+        syncId: Int,
+        playerInventory: PlayerInventory,
+    ) : this(
         syncId,
         playerInventory,
-        SimpleInventory(InventoryCraftingTableII.inventorySize)
+        SimpleInventory(InventoryCraftingTableII.INVENTORY_SIZE),
     )
 
     constructor(
         syncId: Int,
         playerInventory: PlayerInventory,
-        inventory: Inventory
+        inventory: Inventory,
     ) : super(ModScreens.CRAFTING_TABLE_II_SCREEN_HANDLER, syncId) {
-        checkSize(inventory, InventoryCraftingTableII.inventorySize)
+        checkSize(inventory, InventoryCraftingTableII.INVENTORY_SIZE)
         this.inventory = inventory
         inventory.onOpen(playerInventory.player)
 
         // Our inventory
-        for (row in 0..<InventoryCraftingTableII.inventoryRowSize) {
-            for (col in 0..<InventoryCraftingTableII.inventoryColSize) {
+        for (row in 0..<InventoryCraftingTableII.ROWS) {
+            for (col in 0..<InventoryCraftingTableII.COLS) {
                 addSlot(
                     CraftingTableIISlot(
                         inventory,
-                        col + row * InventoryCraftingTableII.inventoryColSize,
+                        col + row * InventoryCraftingTableII.COLS,
                         8 + col * 18,
                         18 + row * 18
                     )
@@ -83,13 +87,5 @@ class CraftingTableIIScreenHandler : ScreenHandler {
         invSlot: Int
     ): ItemStack {
         return ItemStack.EMPTY
-    }
-
-    override fun canInsertIntoSlot(slot: Slot?): Boolean {
-        return false
-    }
-
-    override fun canInsertIntoSlot(stack: ItemStack?, slot: Slot?): Boolean {
-        return false
     }
 }
