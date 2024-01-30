@@ -21,5 +21,6 @@ The first version I'm targeting is 1.20.1
 
 Im currently able to access the player's recipe book and get the list of craftable recipes.
 However I'm not being able to send the list to the ScreenHandler and display them in the inventory GUI.
+Add readme
 
-[![Video demonstration]()](assets/ct2_wip.mp4)
+<video src="./assets/ct2_wip.mp4" controls></video>
