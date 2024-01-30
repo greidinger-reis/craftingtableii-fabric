@@ -1,6 +1,5 @@
 package net.johnpgr.craftingtableiifabric.screens.handlers
 
-import net.johnpgr.craftingtableiifabric.blocks.entities.CraftingTableIIBlockEntity
 import net.johnpgr.craftingtableiifabric.inventories.InventoryCraftingTableII
 import net.johnpgr.craftingtableiifabric.inventories.slots.CraftingTableIISlot
 import net.johnpgr.craftingtableiifabric.screens.ModScreens
@@ -11,7 +10,6 @@ import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.slot.Slot
-import net.minecraft.screen.slot.SlotActionType
 
 class CraftingTableIIScreenHandler : ScreenHandler {
     private val inventory: Inventory
@@ -34,7 +32,7 @@ class CraftingTableIIScreenHandler : ScreenHandler {
         this.inventory = inventory
         inventory.onOpen(playerInventory.player)
 
-        // Our inventory
+        //Our inventory
         for (row in 0..<InventoryCraftingTableII.ROWS) {
             for (col in 0..<InventoryCraftingTableII.COLS) {
                 addSlot(
@@ -47,7 +45,7 @@ class CraftingTableIIScreenHandler : ScreenHandler {
                 )
             }
         }
-        // The player inventory
+        //The player inventory
         for (row in 0..2) {
             for (col in 0..8) {
                 addSlot(
@@ -60,7 +58,7 @@ class CraftingTableIIScreenHandler : ScreenHandler {
                 )
             }
         }
-        // The player hotbar
+        //The player hotbar
         for (row in 0..8) {
             addSlot(
                 Slot(

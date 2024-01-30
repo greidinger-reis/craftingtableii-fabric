@@ -43,7 +43,7 @@ class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
     ): ActionResult {
         if (!world.isClient) {
             player.openHandledScreen(
-                state.createScreenHandlerFactory(
+                createScreenHandlerFactory(
                     world,
                     pos
                 )
@@ -54,10 +54,29 @@ class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
         val blockEntity =
             world.getBlockEntity(pos) as CraftingTableIIBlockEntity
         val clientPlayerEntity = player as ClientPlayerEntity
+        player.inventory.populateRecipeFinder(recipeMatcher)
 
-        sendCraftableItemList(world, clientPlayerEntity, blockEntity, recipeMatcher)
+        sendCraftableItemList(
+            world,
+            clientPlayerEntity,
+            blockEntity,
+            recipeMatcher
+        )
 
         return ActionResult.SUCCESS
+    }
+
+    private fun createScreenHandlerFactory(
+        world: World,
+        pos: BlockPos
+    ): SimpleNamedScreenHandlerFactory {
+        return SimpleNamedScreenHandlerFactory({ syncId, playerInventory, playerEntity ->
+            CraftingTableIIScreenHandler(
+                syncId,
+                playerInventory,
+                world.getBlockEntity(pos) as CraftingTableIIBlockEntity
+            )
+        }, Text.of("Crafting Table II"))
     }
 
     private fun sendCraftableItemList(
@@ -66,7 +85,6 @@ class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
         blockEntity: CraftingTableIIBlockEntity,
         recipeMatcher: RecipeMatcher
     ) {
-        player.inventory.populateRecipeFinder(recipeMatcher)
         val list =
             player.recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
         val list2 = Lists.newArrayList(list)

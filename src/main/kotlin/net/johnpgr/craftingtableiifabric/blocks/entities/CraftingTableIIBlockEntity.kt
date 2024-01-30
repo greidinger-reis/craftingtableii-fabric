@@ -2,19 +2,13 @@ package net.johnpgr.craftingtableiifabric.blocks.entities
 
 import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 import net.johnpgr.craftingtableiifabric.inventories.InventoryCraftingTableII
-import net.johnpgr.craftingtableiifabric.screens.handlers.CraftingTableIIScreenHandler
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.Inventories
 import net.minecraft.inventory.Inventory
-import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
-import net.minecraft.screen.NamedScreenHandlerFactory
-import net.minecraft.screen.ScreenHandler
-import net.minecraft.text.Text
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.BlockPos
 
@@ -23,23 +17,11 @@ class CraftingTableIIBlockEntity(
     state: BlockState,
 ) :
     BlockEntity(ModBlocks.CRAFTING_TABLE_II_ENTITY, pos, state),
-    NamedScreenHandlerFactory,
     InventoryCraftingTableII {
     private val inventory = DefaultedList.ofSize(
         InventoryCraftingTableII.INVENTORY_SIZE,
         ItemStack.EMPTY
     )
-    private var screenHandler: ScreenHandler? = null
-
-    override fun createMenu(
-        syncId: Int,
-        playerInventory: PlayerInventory,
-        player: PlayerEntity
-    ): ScreenHandler {
-        val screenHandler = CraftingTableIIScreenHandler(syncId, playerInventory, this)
-        this.screenHandler = screenHandler
-        return screenHandler
-    }
 
     override fun getStack(slot: Int): ItemStack {
         return inventory[slot]
@@ -58,11 +40,6 @@ class CraftingTableIIBlockEntity(
             setStack(index, itemStack)
         }
         markDirty()
-        if(screenHandler != null) {
-            println("screenHandler: $screenHandler")
-
-            screenHandler!!.sendContentUpdates()
-        }
 
         println("items inserted: $inventory")
     }
@@ -73,12 +50,12 @@ class CraftingTableIIBlockEntity(
 
     override fun isEmpty(): Boolean {
         for (i in 0 until size()) {
-            val stack = getStack(i);
+            val stack = getStack(i)
             if (!stack.isEmpty) {
-                return false;
+                return false
             }
         }
-        return true;
+        return true
     }
 
     override fun removeStack(slot: Int, count: Int): ItemStack {
@@ -116,9 +93,9 @@ class CraftingTableIIBlockEntity(
     }
 
 
-    override fun getDisplayName(): Text {
-        return Text.translatable(cachedState.block.translationKey)
-    }
+//    override fun getDisplayName(): Text {
+//        return Text.translatable(cachedState.block.translationKey)
+//    }
 
     override fun readNbt(nbt: NbtCompound) {
         super.readNbt(nbt)
