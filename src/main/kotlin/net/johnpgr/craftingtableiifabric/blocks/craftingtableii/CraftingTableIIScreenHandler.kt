@@ -3,6 +3,7 @@ package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
+import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerContext
@@ -19,8 +20,14 @@ class CraftingTableIIScreenHandler(
     ModBlocks.getContainerInfo(ModBlocks.CRAFTING_TABLE_II)?.handlerType,
     syncId
 ) {
-    var inventory: CraftingTableIIInventory =
-        object : CraftingTableIIInventory {
+    companion object{
+        const val ROWS = 5
+        const val COLS = 8
+        const val INVENTORY_SIZE = ROWS * COLS
+    }
+
+    var inventory: Inventory =
+        object : Inventory {
             override fun size(): Int {
                 return entity.size()
             }
@@ -64,16 +71,16 @@ class CraftingTableIIScreenHandler(
         }
 
     init {
-        checkSize(inventory, CraftingTableIIInventory.INVENTORY_SIZE)
+        checkSize(inventory, INVENTORY_SIZE)
         inventory.onOpen(playerInventory.player)
 
         //Our inventory
-        for (row in 0..<CraftingTableIIInventory.ROWS) {
-            for (col in 0..<CraftingTableIIInventory.COLS) {
+        for (row in 0..<ROWS) {
+            for (col in 0..<COLS) {
                 addSlot(
                     CraftingTableIISlot(
                         inventory,
-                        col + row * CraftingTableIIInventory.COLS,
+                        col + row * COLS,
                         8 + col * 18,
                         18 + row * 18
                     )

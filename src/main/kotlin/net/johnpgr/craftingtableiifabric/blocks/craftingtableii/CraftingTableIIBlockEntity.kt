@@ -17,12 +17,11 @@ class CraftingTableIIBlockEntity(
     state: BlockState,
 ) :
     SyncableBlockEntity(ModBlocks.getEntityType(craftingTableII), pos, state),
-    CraftingTableIIInventory {
-    var inventory: DefaultedList<ItemStack> = DefaultedList.ofSize(
-        CraftingTableIIInventory.INVENTORY_SIZE,
+    Inventory {
+    private var inventory: DefaultedList<ItemStack> = DefaultedList.ofSize(
+        CraftingTableIIScreenHandler.INVENTORY_SIZE,
         ItemStack.EMPTY
     )
-
 
     override fun readNbt(tag: NbtCompound) {
         super.readNbt(tag)
@@ -31,7 +30,7 @@ class CraftingTableIIBlockEntity(
 
     override fun readClientNbt(tag: NbtCompound) {
         this.inventory = DefaultedList.ofSize(
-            CraftingTableIIInventory.INVENTORY_SIZE,
+            CraftingTableIIScreenHandler.INVENTORY_SIZE,
             ItemStack.EMPTY
         )
         Inventories.readNbt(tag, this.inventory)

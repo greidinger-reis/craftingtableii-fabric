@@ -1,16 +1,11 @@
 package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
-import com.google.common.collect.Lists
 import net.johnpgr.craftingtableiifabric.utils.BlockScreenHandlerFactory
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.network.ClientPlayerEntity
-import net.minecraft.client.recipebook.RecipeBookGroup
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemPlacementContext
-import net.minecraft.item.ItemStack
-import net.minecraft.recipe.RecipeMatcher
-import net.minecraft.registry.DynamicRegistryManager
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.Properties
 import net.minecraft.util.ActionResult
@@ -83,40 +78,22 @@ class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
         hand: Hand,
         hit: BlockHitResult
     ): ActionResult {
-        player.openHandledScreen(
-            BlockScreenHandlerFactory(
-                this,
-                pos
+        if (!world.isClient) {
+            player.openHandledScreen(
+                BlockScreenHandlerFactory(
+                    this,
+                    pos
+                )
             )
-        )
+
+        } else {
+            val clientPlayerEntity = player as ClientPlayerEntity
+            val handler = CraftingTableIIHandler(
+                clientPlayerEntity,
+                world.registryManager
+            )
+        }
         return ActionResult.SUCCESS
-    }
-
-    private fun getCraftableItemsList(
-        player: ClientPlayerEntity,
-        registryManager: DynamicRegistryManager,
-    ): List<ItemStack> {
-        val recipeMatcher = RecipeMatcher()
-        player.inventory.populateRecipeFinder(recipeMatcher)
-        val list =
-            player.recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
-        val list2 = Lists.newArrayList(list)
-
-        list2.forEach {
-            it.computeCraftables(
-                recipeMatcher,
-                9,
-                9,
-                player.recipeBook
-            )
-        }
-        list2.removeIf { !it.isInitialized || !it.hasFittingRecipes() || !it.hasCraftableRecipes() }
-
-        val items = list2.flatMap { result ->
-            result.getResults(true).map { it.getOutput(registryManager) }
-        }
-
-        return items
     }
 
     override fun hasComparatorOutput(state: BlockState): Boolean {
