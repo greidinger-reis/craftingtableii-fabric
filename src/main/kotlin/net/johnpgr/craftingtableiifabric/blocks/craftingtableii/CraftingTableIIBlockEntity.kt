@@ -1,9 +1,8 @@
-package net.johnpgr.craftingtableiifabric.blocks.entities
+package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
 import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
-import net.johnpgr.craftingtableiifabric.inventories.InventoryCraftingTableII
+import net.johnpgr.craftingtableiifabric.utils.SyncableBlockEntity
 import net.minecraft.block.BlockState
-import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventories
 import net.minecraft.inventory.Inventory
@@ -13,15 +12,48 @@ import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.BlockPos
 
 class CraftingTableIIBlockEntity(
+    craftingTableII: CraftingTableIIBlock,
     pos: BlockPos,
     state: BlockState,
 ) :
-    BlockEntity(ModBlocks.CRAFTING_TABLE_II_ENTITY, pos, state),
-    InventoryCraftingTableII {
-    private val inventory = DefaultedList.ofSize(
-        InventoryCraftingTableII.INVENTORY_SIZE,
+    SyncableBlockEntity(ModBlocks.getEntityType(craftingTableII), pos, state),
+    CraftingTableIIInventory {
+    var inventory: DefaultedList<ItemStack> = DefaultedList.ofSize(
+        CraftingTableIIInventory.INVENTORY_SIZE,
         ItemStack.EMPTY
     )
+
+
+    override fun readNbt(tag: NbtCompound) {
+        super.readNbt(tag)
+        Inventories.readNbt(tag, inventory)
+    }
+
+    override fun readClientNbt(tag: NbtCompound) {
+        this.inventory = DefaultedList.ofSize(
+            CraftingTableIIInventory.INVENTORY_SIZE,
+            ItemStack.EMPTY
+        )
+        Inventories.readNbt(tag, this.inventory)
+    }
+
+    override fun writeNbt(tag: NbtCompound) {
+        super.writeNbt(tag)
+        Inventories.writeNbt(tag, this.inventory)
+    }
+
+    override fun writeClientNbt(tag: NbtCompound): NbtCompound {
+        Inventories.writeNbt(tag, this.inventory)
+        return tag
+    }
+
+    override fun size(): Int {
+        return inventory.size
+    }
+
+    override fun isEmpty(): Boolean {
+        return inventory.all { it.isEmpty }
+    }
 
     override fun getStack(slot: Int): ItemStack {
         return inventory[slot]
@@ -39,33 +71,13 @@ class CraftingTableIIBlockEntity(
         items.forEachIndexed { index, itemStack ->
             setStack(index, itemStack)
         }
-        markDirty()
 
         println("items inserted: $inventory")
     }
 
-    override fun size(): Int {
-        return inventory.size
-    }
-
-    override fun isEmpty(): Boolean {
-        for (i in 0 until size()) {
-            val stack = getStack(i)
-            if (!stack.isEmpty) {
-                return false
-            }
-        }
-        return true
-    }
 
     override fun removeStack(slot: Int, count: Int): ItemStack {
-        val result = Inventories.splitStack(inventory, slot, count)
-
-        if (!result.isEmpty) {
-            markDirty()
-        }
-
-        return result
+        return Inventories.splitStack(inventory, slot, count)
     }
 
     override fun removeStack(slot: Int): ItemStack {
@@ -88,23 +100,7 @@ class CraftingTableIIBlockEntity(
         inventory.clear()
     }
 
-    override fun canPlayerUse(player: PlayerEntity): Boolean {
+    override fun canPlayerUse(player: PlayerEntity?): Boolean {
         return true
-    }
-
-    override fun readNbt(nbt: NbtCompound) {
-        super.readNbt(nbt)
-        Inventories.readNbt(nbt, inventory)
-    }
-
-    override fun writeNbt(nbt: NbtCompound) {
-        super.writeNbt(nbt)
-        if (!this.inventory.isEmpty()) {
-            Inventories.writeNbt(nbt, inventory)
-        }
-    }
-
-    override fun onOpen(player: PlayerEntity) {
-        super.onOpen(player)
     }
 }

@@ -1,10 +1,10 @@
 package net.johnpgr.craftingtableiifabric
 
 import net.fabricmc.api.ClientModInitializer
-import net.johnpgr.craftingtableiifabric.screens.ModScreens
+import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 
 object CraftingTableIIFabricClient : ClientModInitializer {
     override fun onInitializeClient() {
-        ModScreens.clientRegisterHandledScreens()
+        ModBlocks.initBlocksClient()
     }
 }

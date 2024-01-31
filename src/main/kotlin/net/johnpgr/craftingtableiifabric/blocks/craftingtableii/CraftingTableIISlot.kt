@@ -1,4 +1,4 @@
-package net.johnpgr.craftingtableiifabric.inventories.slots
+package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
