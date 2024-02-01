@@ -1,8 +1,8 @@
 package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
 import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
-import net.johnpgr.craftingtableiifabric.utils.SyncableBlockEntity
 import net.minecraft.block.BlockState
+import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventories
 import net.minecraft.inventory.Inventory
@@ -16,7 +16,7 @@ class CraftingTableIIBlockEntity(
     pos: BlockPos,
     state: BlockState,
 ) :
-    SyncableBlockEntity(ModBlocks.getEntityType(craftingTableII), pos, state),
+    BlockEntity(ModBlocks.getEntityType(craftingTableII), pos, state),
     Inventory {
     private var inventory: DefaultedList<ItemStack> = DefaultedList.ofSize(
         CraftingTableIIScreenHandler.INVENTORY_SIZE,
@@ -28,22 +28,9 @@ class CraftingTableIIBlockEntity(
         Inventories.readNbt(tag, inventory)
     }
 
-    override fun readClientNbt(tag: NbtCompound) {
-        this.inventory = DefaultedList.ofSize(
-            CraftingTableIIScreenHandler.INVENTORY_SIZE,
-            ItemStack.EMPTY
-        )
-        Inventories.readNbt(tag, this.inventory)
-    }
-
     override fun writeNbt(tag: NbtCompound) {
         super.writeNbt(tag)
         Inventories.writeNbt(tag, this.inventory)
-    }
-
-    override fun writeClientNbt(tag: NbtCompound): NbtCompound {
-        Inventories.writeNbt(tag, this.inventory)
-        return tag
     }
 
     override fun size(): Int {
