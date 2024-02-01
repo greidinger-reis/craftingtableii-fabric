@@ -2,7 +2,6 @@
 
 package net.johnpgr.craftingtableiifabric.blocks
 
-import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings
 import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
@@ -10,7 +9,6 @@ import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.client.render.block.entity.BlockEntityRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories
 import net.minecraft.item.BlockItem
-import net.minecraft.item.Item
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.util.Identifier
@@ -44,8 +42,12 @@ class BlockInfo<T : BlockEntity>(
                     BlockItem(block, FabricItemSettings())
                 )
             }
-            if(entity != null) {
-                Registry.register(Registries.BLOCK_ENTITY_TYPE, identifier, entity)
+            if (entity != null) {
+                Registry.register(
+                    Registries.BLOCK_ENTITY_TYPE,
+                    identifier,
+                    entity
+                )
             }
             containers.forEach { it.init(identifier) }
         }
@@ -53,7 +55,7 @@ class BlockInfo<T : BlockEntity>(
 
     fun initClient() {
         containers.forEach { it.initClient() }
-        if(renderer != null) {
+        if (renderer != null) {
             BlockEntityRendererFactories.register(entity) {
                 renderer!!.java.constructors[0].newInstance(it) as BlockEntityRenderer<T>
             }

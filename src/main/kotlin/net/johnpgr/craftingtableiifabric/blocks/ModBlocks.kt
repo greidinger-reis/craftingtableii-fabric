@@ -8,6 +8,7 @@ import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIB
 import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIBlockEntity
 import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIScreen
 import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIScreenHandler
+import net.johnpgr.craftingtableiifabric.utils.CLIENT
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.Blocks
@@ -78,7 +79,7 @@ object ModBlocks {
         }
         ent?.let { apiRegistrations(it) }
         val rnd =
-            if (CraftingTableIIFabric.CLIENT) renderer?.let { it.get() as KClass<BlockEntityRenderer<T>> }
+            if (CLIENT) renderer?.let { it.get() as KClass<BlockEntityRenderer<T>> }
             else null
         val info =
             BlockInfo(

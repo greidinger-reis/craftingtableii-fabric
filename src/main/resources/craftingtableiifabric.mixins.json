@@ -3,7 +3,8 @@
   "package": "net.johnpgr.craftingtableiifabric.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ExampleMixin"
+    "ExampleMixin",
+    "ScreenHandlerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

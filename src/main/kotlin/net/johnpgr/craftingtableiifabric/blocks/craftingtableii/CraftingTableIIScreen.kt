@@ -2,6 +2,7 @@ package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
 import com.mojang.blaze3d.systems.RenderSystem
 import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.api.recipes.RecipeHandler
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.render.GameRenderer
@@ -29,6 +30,22 @@ class CraftingTableIIScreen(
         playerInventoryTitleY = backgroundHeight - 119
         x = width / 2 - backgroundWidth / 2
         y = height / 2 - backgroundHeight / 2
+
+        val player = this.client!!.player
+        val world = player!!.world
+        val recipeHandler = RecipeHandler(
+            player.inventory,
+            player.recipeBook,
+            world.registryManager
+        )
+
+        Thread {
+            Thread.sleep(120)
+
+            recipeHandler.getOutputResults().forEach {
+                screenHandler.setStack(it)
+            }
+        }.start()
     }
 
     override fun render(

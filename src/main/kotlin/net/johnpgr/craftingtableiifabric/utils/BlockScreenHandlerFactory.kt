@@ -9,7 +9,6 @@ import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
 
 class BlockScreenHandlerFactory(val block: Block, val pos: BlockPos) :

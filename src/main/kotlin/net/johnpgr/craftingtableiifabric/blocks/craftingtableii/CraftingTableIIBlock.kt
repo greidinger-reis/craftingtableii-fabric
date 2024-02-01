@@ -3,7 +3,6 @@ package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 import net.johnpgr.craftingtableiifabric.utils.BlockScreenHandlerFactory
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
-import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemPlacementContext
 import net.minecraft.state.StateManager
@@ -19,7 +18,6 @@ import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
 class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
-
     override fun appendProperties(stateManager: StateManager.Builder<Block?, BlockState?>) {
         stateManager.add(Properties.HORIZONTAL_FACING)
     }
@@ -84,13 +82,6 @@ class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
                     this,
                     pos
                 )
-            )
-
-        } else {
-            val clientPlayerEntity = player as ClientPlayerEntity
-            val handler = CraftingTableIIHandler(
-                clientPlayerEntity,
-                world.registryManager
             )
         }
         return ActionResult.SUCCESS

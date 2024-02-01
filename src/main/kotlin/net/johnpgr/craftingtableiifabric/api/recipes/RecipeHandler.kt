@@ -1,23 +1,34 @@
-package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
+package net.johnpgr.craftingtableiifabric.api.recipes
 
 import com.google.common.collect.Lists
-import net.minecraft.client.network.ClientPlayerEntity
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
+import net.minecraft.client.recipebook.ClientRecipeBook
 import net.minecraft.client.recipebook.RecipeBookGroup
+import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeMatcher
 import net.minecraft.registry.DynamicRegistryManager
+import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.collection.DefaultedList
 
-class CraftingTableIIHandler(
-    private val player: ClientPlayerEntity,
+@Environment(EnvType.CLIENT)
+class RecipeHandler(
+    private val playerInventory: PlayerInventory,
+    private val playerRecipeBook: ClientRecipeBook,
     private val registryManager: DynamicRegistryManager,
 ) {
     private val recipeMatcher = RecipeMatcher()
-    private var cachedInvChangeCount = player.inventory.changeCount
+    private var cachedInvChangeCount = playerInventory.changeCount
     private var results = listOf<Recipe<*>>()
+
+    //TODO
+    fun getDescription(stack: ItemStack): Text {
+        throw NotImplementedError()
+    }
 
     fun getOutputResults(): List<ItemStack> {
         return results.map { it.getOutput(registryManager) }
@@ -28,13 +39,9 @@ class CraftingTableIIHandler(
             ?: DefaultedList.of()
     }
 
-    fun craft(identifier: Identifier) {
-
-    }
-
     private fun refreshResults() {
         val list =
-            player.recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
+            playerRecipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
         val list2 = Lists.newArrayList(list)
 
         list2.forEach {
@@ -42,7 +49,7 @@ class CraftingTableIIHandler(
                 recipeMatcher,
                 9,
                 9,
-                player.recipeBook
+                playerRecipeBook
             )
         }
         list2.removeIf { !it.isInitialized || !it.hasFittingRecipes() || !it.hasCraftableRecipes() }
@@ -50,27 +57,17 @@ class CraftingTableIIHandler(
         results = list2.flatMap { result ->
             result.getResults(true)
         }
-
-        print("Results: ")
-        results.forEach { print( "${it.id} ") }
-        print("\n")
     }
 
     private fun refreshInputs() {
         recipeMatcher.clear()
-        player.inventory.populateRecipeFinder(recipeMatcher)
-        //maybe this is needed in the CraftingTableIIScreenHandler? let's see
-        //craftingScreenHandler.populateRecipeFinder(recipeFinder)
+        playerInventory.populateRecipeFinder(recipeMatcher)
         refreshResults()
     }
 
     //TODO: This should listen to inventory updates
-    private fun update() {
-        if (player.inventory.changeCount != cachedInvChangeCount) {
-            println("updating inputs. Prev inventory.changeCount: $cachedInvChangeCount")
-            refreshInputs()
-            cachedInvChangeCount = player.inventory.changeCount
-        }
+    fun update() {
+        throw NotImplementedError()
     }
 
     init {

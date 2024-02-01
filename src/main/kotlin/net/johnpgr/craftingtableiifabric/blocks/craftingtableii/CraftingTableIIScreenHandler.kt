@@ -20,13 +20,13 @@ class CraftingTableIIScreenHandler(
     ModBlocks.getContainerInfo(ModBlocks.CRAFTING_TABLE_II)?.handlerType,
     syncId
 ) {
-    companion object{
+    companion object {
         const val ROWS = 5
         const val COLS = 8
         const val INVENTORY_SIZE = ROWS * COLS
     }
 
-    var inventory: Inventory =
+    val inventory =
         object : Inventory {
             override fun size(): Int {
                 return entity.size()
@@ -41,15 +41,11 @@ class CraftingTableIIScreenHandler(
             }
 
             override fun removeStack(slot: Int): ItemStack {
-                val stack: ItemStack = entity.removeStack(slot)
-                onContentChanged(this)
-                return stack
+                return ItemStack.EMPTY
             }
 
             override fun removeStack(slot: Int, amount: Int): ItemStack {
-                val stack: ItemStack = entity.removeStack(slot, amount)
-                onContentChanged(this)
-                return stack
+                return ItemStack.EMPTY
             }
 
             override fun setStack(slot: Int, stack: ItemStack) {
@@ -77,10 +73,12 @@ class CraftingTableIIScreenHandler(
         //Our inventory
         for (row in 0..<ROWS) {
             for (col in 0..<COLS) {
+                val i = col + row * COLS
+
                 addSlot(
                     CraftingTableIISlot(
                         inventory,
-                        col + row * COLS,
+                        i,
                         8 + col * 18,
                         18 + row * 18
                     )
@@ -110,6 +108,18 @@ class CraftingTableIIScreenHandler(
                     184
                 )
             )
+        }
+    }
+
+    /**
+     * setStack will set the item stack to the first empty slot in the inventory
+     */
+    fun setStack(stack: ItemStack) {
+        for (i in 0 until inventory.size()) {
+            if (inventory.getStack(i).isEmpty) {
+                inventory.setStack(i, stack)
+                return
+            }
         }
     }
 
