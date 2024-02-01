@@ -13,14 +13,8 @@ The first version I'm targeting is 1.20.1
 - [ ] The block's inventory has a dynamic size and grows as the recipe list grows
 - [ ] The block's inventory has functional a scroll wheel 
 - [x] Have access to the current client's recipe book craftable recipe list
-- [ ] Send the recipe list to the ScreenHandler and display them in the inventory GUI
+- [x] Send the recipe list to the ScreenHandler and display them in the inventory GUI
+- [ ] Update the recipe list when the player's inventory change
 - [ ] Add the item's description and recipe overlay on hover
 - [ ] Figure out how to handle items with multiple recipes
 - [ ] Craft the item and subtract the required items from the player's inventory on slot click
-
-### Current Status
-
-Im currently able to access the player's recipe book and get the list of craftable recipes.
-However I'm not being able to send the list to the ScreenHandler and display them in the inventory GUI.
-
-![Demonstration](assets/ct2_wip.jpg)
