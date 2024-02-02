@@ -73,16 +73,15 @@ class CraftingTableIIScreenHandler(
         }
 
     init {
-        checkSize(inventory, INVENTORY_SIZE)
+        checkSize(this.inventory, INVENTORY_SIZE)
         inventory.onOpen(player)
 
-        //println("screenHandler init: $syncId $player $entity $inventory")
         //Our inventory
         for (row in 0..<ROWS) {
             for (col in 0..<COLS) {
                 val i = col + row * COLS
 
-                addSlot(
+                this.addSlot(
                     CraftingTableIISlot(
                         inventory,
                         i,
@@ -95,7 +94,7 @@ class CraftingTableIIScreenHandler(
         //The player inventory
         for (row in 0..2) {
             for (col in 0..8) {
-                addSlot(
+                this.addSlot(
                     Slot(
                         player.inventory,
                         col + row * 9 + 9,
@@ -107,7 +106,7 @@ class CraftingTableIIScreenHandler(
         }
         //The player hotbar
         for (row in 0..8) {
-            addSlot(
+            this.addSlot(
                 Slot(
                     player.inventory,
                     row,
@@ -118,12 +117,26 @@ class CraftingTableIIScreenHandler(
         }
 
         if (player.world.isClient) {
-            val inventory = player.inventory
+            val playerInventory = player.inventory
             val recipeBook = (player as ClientPlayerEntity).recipeBook
-            recipeHandler =
-                RecipeHandler(inventory, recipeBook)
+            this.recipeHandler =
+                RecipeHandler(playerInventory, recipeBook)
 
-            updateRecipes()
+            this.updateRecipes()
+
+            //TODO: This is a temporary solution, we need to find a better way to update the recipes when the player inventory change
+            //Maybe we will need to create a Inventory wrapper that will notify the RecipeHandler when the inventory change
+            //Or maybe we will need a mixin for this
+            Thread{
+                var previousChangeCount = playerInventory.changeCount
+                while (true) {
+                    Thread.sleep(1)
+                    if (previousChangeCount != playerInventory.changeCount) {
+                        previousChangeCount = playerInventory.changeCount
+                        this.updateRecipes()
+                    }
+                }
+            }.start()
         }
     }
 
@@ -133,13 +146,12 @@ class CraftingTableIIScreenHandler(
         actionType: SlotActionType,
         player: PlayerEntity
     ) {
-        println("onSlotClick: $slotIndex $button $actionType")
         super.onSlotClick(slotIndex, button, actionType, player)
         if (player.world.isClient) {
             //check if the slot is our inventory
             if (slotIndex in 0..39) {
-                val item = inventory.getStack(slotIndex)
-                val recipe = recipeHandler.getRecipe(item)
+                val item = this.inventory.getStack(slotIndex)
+                val recipe = this.recipeHandler.getRecipe(item)
                 val buf = PacketByteBufs.create()
 
                 if (recipe != null && buf != null) {
@@ -149,16 +161,14 @@ class CraftingTableIIScreenHandler(
                         buf
                     )
                 }
-
-                updateRecipes()
             }
         }
     }
 
     private fun updateRecipes() {
-        inventory.clear()
+        this.inventory.clear()
 
-        recipeHandler.getCraftableItemStacks().forEach { stack ->
+        this.recipeHandler.getCraftableItemStacks().forEach { stack ->
             addStack(stack)
         }
     }
@@ -168,9 +178,9 @@ class CraftingTableIIScreenHandler(
      * addStack will set the item stack to the first empty slot in the inventory
      */
     private fun addStack(stack: ItemStack) {
-        for (i in 0 until inventory.size()) {
-            if (inventory.getStack(i).isEmpty) {
-                inventory.setStack(i, stack)
+        for (i in 0 until this.inventory.size()) {
+            if (this.inventory.getStack(i).isEmpty) {
+                this.inventory.setStack(i, stack)
                 return
             }
         }

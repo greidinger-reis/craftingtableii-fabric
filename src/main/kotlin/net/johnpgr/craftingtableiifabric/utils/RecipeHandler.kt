@@ -13,11 +13,10 @@ class RecipeHandler(
     private val playerRecipeBook: ClientRecipeBook,
 ) {
     private val recipeMatcher = RecipeMatcher()
-//    private var cachedInvChangeCount = playerInventory.changeCount
 
     fun getRecipe(stack: ItemStack): Recipe<*>? {
         val recipeList =
-            playerRecipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
+            this.playerRecipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
                 .mapNotNull { result ->
                     result.getResults(false).firstOrNull { recipe ->
                         recipe.getOutput(result.registryManager).item == stack.item
@@ -32,24 +31,26 @@ class RecipeHandler(
     }
 
     fun getCraftableItemStacks(): List<ItemStack> {
-        refreshInputs()
+        this.refreshInputs()
 
-        val list =
+        val recipeResultListRaw =
             playerRecipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
-        list.forEach {
-            it.computeCraftables(
-                recipeMatcher,
+        recipeResultListRaw.forEach { result ->
+            result.computeCraftables(
+                this.recipeMatcher,
                 9,
                 9,
-                playerRecipeBook
+                this.playerRecipeBook
             )
         }
 
-        val list2 = Lists.newArrayList(list)
+        val recipeResultList = Lists.newArrayList(recipeResultListRaw)
 
-        list2.removeIf { !it.isInitialized || !it.hasFittingRecipes() || !it.hasCraftableRecipes() }
+        recipeResultList.removeIf { result ->
+            !result.isInitialized || !result.hasFittingRecipes() || !result.hasCraftableRecipes()
+        }
 
-        return list2.flatMap { result ->
+        return recipeResultList.flatMap { result ->
             result.getRecipes(true).map { recipe ->
                 recipe.getOutput(result.registryManager).copy()
             }
@@ -57,7 +58,7 @@ class RecipeHandler(
     }
 
     private fun refreshInputs() {
-        recipeMatcher.clear()
-        playerInventory.populateRecipeFinder(recipeMatcher)
+        this.recipeMatcher.clear()
+        this.playerInventory.populateRecipeFinder(recipeMatcher)
     }
 }

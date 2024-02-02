@@ -18,10 +18,11 @@ object CraftingTableIIHandlerC2S : ServerPlayNetworking.PlayChannelHandler {
         responseSender: PacketSender
     ) {
         val packet = CraftingPacket.read(buf, server.recipeManager) ?: return
-        val inventory = playerEntity.inventory
+        val playerInventory = playerEntity.inventory
+
         server.execute {
             val recipe = packet.recipe
-            val items = recipe.getOutput(server.registryManager).copy()
+            val itemStack = recipe.getOutput(server.registryManager).copy()
 
             var toConsume = recipe.ingredients.size
 
@@ -29,10 +30,10 @@ object CraftingTableIIHandlerC2S : ServerPlayNetworking.PlayChannelHandler {
                 if (toConsume == 0) break
                 val stacks = ingredient.matchingStacks
                 for(stack in stacks){
-                    val index = inventory.indexOf(stack)
+                    val index = playerInventory.indexOf(stack)
                     if (index != -1) {
                         val amt = stack.count
-                        inventory.removeStack(index, amt)
+                        playerInventory.removeStack(index, amt)
                         toConsume -= amt
                     }
                 }
@@ -40,15 +41,15 @@ object CraftingTableIIHandlerC2S : ServerPlayNetworking.PlayChannelHandler {
 
             val cursorStack = playerEntity.currentScreenHandler.cursorStack
             if (cursorStack.isEmpty) {
-                playerEntity.currentScreenHandler.cursorStack = items
-            } else if (cursorStack.item == items.item
+                playerEntity.currentScreenHandler.cursorStack = itemStack
+            } else if (cursorStack.item == itemStack.item
                 && cursorStack.isStackable
-                && cursorStack.count + items.count <= cursorStack.maxCount) {
+                && cursorStack.count + itemStack.count <= cursorStack.maxCount) {
                 cursorStack.increment(
-                    items.count
+                    itemStack.count
                 )
             } else {
-                playerEntity.inventory.offerOrDrop(items)
+                playerEntity.inventory.offerOrDrop(itemStack)
             }
         }
     }
