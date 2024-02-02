@@ -4,11 +4,9 @@ import com.google.common.collect.Lists
 import net.minecraft.client.recipebook.ClientRecipeBook
 import net.minecraft.client.recipebook.RecipeBookGroup
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeMatcher
-import net.minecraft.registry.Registries
 
 class RecipeHandler(
     private val playerInventory: PlayerInventory,
@@ -33,7 +31,7 @@ class RecipeHandler(
         return recipeList.first()
     }
 
-    fun getCraftableItems(): List<ItemStack> {
+    fun getCraftableItemStacks(): List<ItemStack> {
         refreshInputs()
 
         val list =
@@ -53,7 +51,7 @@ class RecipeHandler(
 
         return list2.flatMap { result ->
             result.getRecipes(true).map { recipe ->
-                recipe.getOutput(result.registryManager)
+                recipe.getOutput(result.registryManager).copy()
             }
         }
     }

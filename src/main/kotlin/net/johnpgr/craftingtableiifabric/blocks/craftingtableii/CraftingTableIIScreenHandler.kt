@@ -133,6 +133,7 @@ class CraftingTableIIScreenHandler(
         actionType: SlotActionType,
         player: PlayerEntity
     ) {
+        println("onSlotClick: $slotIndex $button $actionType")
         super.onSlotClick(slotIndex, button, actionType, player)
         if (player.world.isClient) {
             //check if the slot is our inventory
@@ -157,8 +158,8 @@ class CraftingTableIIScreenHandler(
     private fun updateRecipes() {
         inventory.clear()
 
-        recipeHandler.getCraftableItems().forEach { recipe ->
-            addStack(recipe)
+        recipeHandler.getCraftableItemStacks().forEach { stack ->
+            addStack(stack)
         }
     }
 
