@@ -21,7 +21,7 @@ object CraftingTableIIHandlerC2S : ServerPlayNetworking.PlayChannelHandler {
         val inventory = playerEntity.inventory
         server.execute {
             val recipe = packet.recipe
-            val items = recipe.getOutput(server.registryManager)
+            val items = recipe.getOutput(server.registryManager).copy()
 
             var toConsume = recipe.ingredients.size
 
