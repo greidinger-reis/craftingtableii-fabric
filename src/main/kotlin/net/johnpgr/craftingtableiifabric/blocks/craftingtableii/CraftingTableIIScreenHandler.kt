@@ -28,9 +28,9 @@ class CraftingTableIIScreenHandler(
         const val INVENTORY_SIZE = ROWS * COLS
     }
 
-    lateinit var recipeHandler: RecipeHandler
+    private lateinit var recipeHandler: RecipeHandler
 
-    val inventory =
+    private val inventory =
         object : Inventory {
             override fun size(): Int {
                 return entity.size()
@@ -49,23 +49,12 @@ class CraftingTableIIScreenHandler(
             }
 
             override fun removeStack(slot: Int, amount: Int): ItemStack {
-                if(player.world.isClient) {
-                    val item = getStack(slot)
-                    val recipe = recipeHandler.getRecipe(item)
-                    val buf = PacketByteBufs.create()
-
-                    if (recipe != null && buf != null) {
-                        CraftingPacket(recipe).write(buf)
-                        ClientPlayNetworking.send(
-                            ModMessages.CTII_CRAFT_RECIPE,
-                            buf
-                        )
-                    }
-                }
                 return ItemStack.EMPTY
             }
 
             override fun setStack(slot: Int, stack: ItemStack) {
+                if(stack.isEmpty) return
+
                 entity.setStack(slot, stack)
                 onContentChanged(this)
             }
@@ -84,10 +73,10 @@ class CraftingTableIIScreenHandler(
         }
 
     init {
-
         checkSize(inventory, INVENTORY_SIZE)
         inventory.onOpen(player)
 
+        //println("screenHandler init: $syncId $player $entity $inventory")
         //Our inventory
         for (row in 0..<ROWS) {
             for (col in 0..<COLS) {
@@ -139,20 +128,48 @@ class CraftingTableIIScreenHandler(
         }
     }
 
-    private fun updateRecipes() {
-        Thread {
-            Thread.sleep(64)
-            recipeHandler.getOutputResults().forEach { recipe ->
-                setStack(recipe)
+    override fun onSlotClick(
+        slotIndex: Int,
+        button: Int,
+        actionType: SlotActionType,
+        player: PlayerEntity
+    ) {
+        super.onSlotClick(slotIndex, button, actionType, player)
+//        println("slotIndex: $slotIndex button: $button")
+        if (player.world.isClient) {
+            //check if the slot is our inventory
+            if (slotIndex in 0..39) {
+                val item = inventory.getStack(slotIndex)
+                val recipe = recipeHandler.getRecipe(item)
+                val buf = PacketByteBufs.create()
+                println("recipe: ${recipe?.id?.path} item: ${item.count}")
+
+                if (recipe != null && buf != null) {
+                    CraftingPacket(recipe).write(buf)
+                    ClientPlayNetworking.send(
+                        ModMessages.CTII_CRAFT_RECIPE,
+                        buf
+                    )
+                }
+
+                updateRecipes()
             }
-        }.start()
+        }
+    }
+
+    private fun updateRecipes() {
+        inventory.clear()
+
+        recipeHandler.getOutputResults().forEach { recipe ->
+            addStack(recipe)
+        }
     }
 
 
     /**
-     * setStack will set the item stack to the first empty slot in the inventory
+     * addStack will set the item stack to the first empty slot in the inventory
      */
-    fun setStack(stack: ItemStack) {
+    private fun addStack(stack: ItemStack) {
         for (i in 0 until inventory.size()) {
             if (inventory.getStack(i).isEmpty) {
                 inventory.setStack(i, stack)

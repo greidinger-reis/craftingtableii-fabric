@@ -3,7 +3,7 @@ package net.johnpgr.craftingtableiifabric.api.network
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
-import net.johnpgr.craftingtableiifabric.api.network.packet.CraftingTableIIC2SPacket
+import net.johnpgr.craftingtableiifabric.api.network.packet.CraftingTableIIHandlerC2S
 import net.minecraft.util.Identifier
 
 object ModMessages {
@@ -59,6 +59,6 @@ object ModMessages {
     val CTII_CRAFT_RECIPE = register(
         CraftingTableIIFabric.id("ctii_craft_recipe_packet"),
         MessageType.C2S,
-        CraftingTableIIC2SPacket
+        CraftingTableIIHandlerC2S
     )
 }

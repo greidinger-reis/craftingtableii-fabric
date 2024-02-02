@@ -5,11 +5,9 @@ import net.minecraft.client.recipebook.ClientRecipeBook
 import net.minecraft.client.recipebook.RecipeBookGroup
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
-import net.minecraft.recipe.Ingredient
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeMatcher
 import net.minecraft.registry.DynamicRegistryManager
-import net.minecraft.util.collection.DefaultedList
 
 class RecipeHandler(
     private val playerInventory: PlayerInventory,
@@ -18,23 +16,21 @@ class RecipeHandler(
 ) {
     private val recipeMatcher = RecipeMatcher()
     private var cachedInvChangeCount = playerInventory.changeCount
-    private var results = listOf<Recipe<*>>()
 
     fun getRecipe(item: ItemStack): Recipe<*>? {
-        val recipeList = playerRecipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH).flatMap{ it.getResults(false) }
+        val recipeList =
+            playerRecipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
+                .flatMap { it.getResults(false) }
         return recipeList.firstOrNull { it.getOutput(registryManager).item == item.item }
     }
 
     fun getOutputResults(): List<ItemStack> {
-        return results.map { it.getOutput(registryManager) }
+        refreshInputs()
+        val recipes = getCraftableRecipes()
+        return recipes.map { it.getOutput(registryManager) }
     }
 
-    fun getIngredients(recipe: Recipe<*>): DefaultedList<Ingredient> {
-        return results.first { it == recipe }.ingredients
-            ?: DefaultedList.of()
-    }
-
-    private fun refreshResults() {
+    private fun getCraftableRecipes(): List<Recipe<*>> {
         val list =
             playerRecipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
         val list2 = Lists.newArrayList(list)
@@ -49,15 +45,20 @@ class RecipeHandler(
         }
         list2.removeIf { !it.isInitialized || !it.hasFittingRecipes() || !it.hasCraftableRecipes() }
 
-        results = list2.flatMap { result ->
-            result.getResults(true)
+        val recipes = list2.flatMap {
+            it.getResults(true)
         }
+        return recipes
+//        print("results: ")
+//        results.forEach {
+//            val output = it.getOutput(registryManager)
+//            print("${output.count} ${it.id.path} ") }
+//        print("\n")
     }
 
     private fun refreshInputs() {
         recipeMatcher.clear()
         playerInventory.populateRecipeFinder(recipeMatcher)
-        refreshResults()
     }
 
     //TODO: This should listen to inventory updates
