@@ -119,10 +119,9 @@ class CraftingTableIIScreenHandler(
 
         if (player.world.isClient) {
             val inventory = player.inventory
-            val registryManager = player.world.registryManager
             val recipeBook = (player as ClientPlayerEntity).recipeBook
             recipeHandler =
-                RecipeHandler(inventory, recipeBook, registryManager)
+                RecipeHandler(inventory, recipeBook)
 
             updateRecipes()
         }
@@ -158,7 +157,7 @@ class CraftingTableIIScreenHandler(
     private fun updateRecipes() {
         inventory.clear()
 
-        recipeHandler.getOutputResults().forEach { recipe ->
+        recipeHandler.getCraftableItems().forEach { recipe ->
             addStack(recipe)
         }
     }
