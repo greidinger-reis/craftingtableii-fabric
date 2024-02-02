@@ -28,7 +28,7 @@ class CraftingTableIIScreenHandler(
         const val INVENTORY_SIZE = ROWS * COLS
     }
 
-    private lateinit var recipeHandler: RecipeHandler
+    private var recipeHandler: RecipeHandler? = null
 
     private val inventory =
         object : Inventory {
@@ -53,7 +53,7 @@ class CraftingTableIIScreenHandler(
             }
 
             override fun setStack(slot: Int, stack: ItemStack) {
-                if(stack.isEmpty) return
+                if (stack.isEmpty) return
 
                 entity.setStack(slot, stack)
                 onContentChanged(this)
@@ -121,22 +121,7 @@ class CraftingTableIIScreenHandler(
             val recipeBook = (player as ClientPlayerEntity).recipeBook
             this.recipeHandler =
                 RecipeHandler(playerInventory, recipeBook)
-
             this.updateRecipes()
-
-            //TODO: This is a temporary solution, we need to find a better way to update the recipes when the player inventory change
-            //Maybe we will need to create a Inventory wrapper that will notify the RecipeHandler when the inventory change
-            //Or maybe we will need a mixin for this
-            Thread{
-                var previousChangeCount = playerInventory.changeCount
-                while (true) {
-                    Thread.sleep(1)
-                    if (previousChangeCount != playerInventory.changeCount) {
-                        previousChangeCount = playerInventory.changeCount
-                        this.updateRecipes()
-                    }
-                }
-            }.start()
         }
     }
 
@@ -151,24 +136,21 @@ class CraftingTableIIScreenHandler(
             //check if the slot is our inventory
             if (slotIndex in 0..39) {
                 val item = this.inventory.getStack(slotIndex)
-                val recipe = this.recipeHandler.getRecipe(item)
-                val buf = PacketByteBufs.create()
+                val recipe = this.recipeHandler?.getRecipe(item) ?: return
+                val buf = PacketByteBufs.create() ?: return
 
-                if (recipe != null && buf != null) {
-                    CraftingPacket(recipe).write(buf)
-                    ClientPlayNetworking.send(
-                        ModMessages.CTII_CRAFT_RECIPE,
-                        buf
-                    )
-                }
+                CraftingPacket(recipe).write(buf)
+                ClientPlayNetworking.send(
+                    ModMessages.CTII_CRAFT_RECIPE,
+                    buf
+                )
             }
         }
     }
 
-    private fun updateRecipes() {
+    fun updateRecipes() {
         this.inventory.clear()
-
-        this.recipeHandler.getCraftableItemStacks().forEach { stack ->
+        this.recipeHandler?.getCraftableItemStacks()?.forEach { stack ->
             addStack(stack)
         }
     }
