@@ -1,6 +1,7 @@
 package net.johnpgr.craftingtableiifabric.utils
 
 import com.google.common.collect.Lists
+import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection
 import net.minecraft.client.recipebook.ClientRecipeBook
 import net.minecraft.client.recipebook.RecipeBookGroup
 import net.minecraft.entity.player.PlayerInventory
@@ -15,7 +16,7 @@ class RecipeHandler(
     private val registryManager: DynamicRegistryManager,
 ) {
     private val recipeMatcher = RecipeMatcher()
-    private var cachedInvChangeCount = playerInventory.changeCount
+//    private var cachedInvChangeCount = playerInventory.changeCount
 
     fun getRecipe(item: ItemStack): Recipe<*>? {
         val recipeList =
@@ -48,12 +49,14 @@ class RecipeHandler(
         val recipes = list2.flatMap {
             it.getResults(true)
         }
+        print("results: ")
+        recipes.forEach {
+            val output = it.getOutput(registryManager)
+            print(" $output ")
+        }
+        print("\n")
+
         return recipes
-//        print("results: ")
-//        results.forEach {
-//            val output = it.getOutput(registryManager)
-//            print("${output.count} ${it.id.path} ") }
-//        print("\n")
     }
 
     private fun refreshInputs() {

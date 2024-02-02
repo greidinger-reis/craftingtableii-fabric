@@ -135,14 +135,12 @@ class CraftingTableIIScreenHandler(
         player: PlayerEntity
     ) {
         super.onSlotClick(slotIndex, button, actionType, player)
-//        println("slotIndex: $slotIndex button: $button")
         if (player.world.isClient) {
             //check if the slot is our inventory
             if (slotIndex in 0..39) {
                 val item = inventory.getStack(slotIndex)
                 val recipe = recipeHandler.getRecipe(item)
                 val buf = PacketByteBufs.create()
-                println("recipe: ${recipe?.id?.path} item: ${item.count}")
 
                 if (recipe != null && buf != null) {
                     CraftingPacket(recipe).write(buf)
