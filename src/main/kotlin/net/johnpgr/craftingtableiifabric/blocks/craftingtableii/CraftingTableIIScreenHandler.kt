@@ -1,6 +1,8 @@
 package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
+import net.johnpgr.craftingtableiifabric.api.recipes.RecipeHandler
 import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
+import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.Inventory
@@ -13,7 +15,7 @@ import net.minecraft.world.World
 
 class CraftingTableIIScreenHandler(
     syncId: Int,
-    playerInventory: PlayerInventory,
+    val playerInventory: PlayerInventory,
     val entity: CraftingTableIIBlockEntity,
     private val blockContext: ScreenHandlerContext
 ) : ScreenHandler(
@@ -45,6 +47,18 @@ class CraftingTableIIScreenHandler(
             }
 
             override fun removeStack(slot: Int, amount: Int): ItemStack {
+                println("Remove stack slot: $slot amount: $amount")
+                if (playerInventory.player is ClientPlayerEntity) {
+                    val clientPlayerEntity =
+                        playerInventory.player as ClientPlayerEntity
+                    val recipeHandler = RecipeHandler(
+                        playerInventory,
+                        clientPlayerEntity.recipeBook,
+                        clientPlayerEntity.world.registryManager
+                    )
+                    val item = getStack(slot)
+                    val recipe = recipeHandler.getRecipe(item)
+                }
                 return ItemStack.EMPTY
             }
 

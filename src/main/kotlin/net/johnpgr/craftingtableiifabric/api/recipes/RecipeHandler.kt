@@ -6,16 +6,18 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.recipebook.ClientRecipeBook
 import net.minecraft.client.recipebook.RecipeBookGroup
 import net.minecraft.entity.player.PlayerInventory
+import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeMatcher
 import net.minecraft.registry.DynamicRegistryManager
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.collection.DefaultedList
 
-@Environment(EnvType.CLIENT)
 class RecipeHandler(
     private val playerInventory: PlayerInventory,
     private val playerRecipeBook: ClientRecipeBook,
@@ -25,17 +27,17 @@ class RecipeHandler(
     private var cachedInvChangeCount = playerInventory.changeCount
     private var results = listOf<Recipe<*>>()
 
-    //TODO
-    fun getDescription(stack: ItemStack): Text {
-        throw NotImplementedError()
+    fun getRecipe(item: ItemStack): Recipe<*>? {
+        val recipeList = playerRecipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH).flatMap{ it.getResults(false) }
+        return recipeList.firstOrNull { it.getOutput(registryManager).item == item.item }
     }
 
     fun getOutputResults(): List<ItemStack> {
         return results.map { it.getOutput(registryManager) }
     }
 
-    fun getIngredients(identifier: Identifier): DefaultedList<Ingredient> {
-        return results.first { it.id == identifier }.ingredients
+    fun getIngredients(recipe: Recipe<*>): DefaultedList<Ingredient> {
+        return results.first { it == recipe }.ingredients
             ?: DefaultedList.of()
     }
 

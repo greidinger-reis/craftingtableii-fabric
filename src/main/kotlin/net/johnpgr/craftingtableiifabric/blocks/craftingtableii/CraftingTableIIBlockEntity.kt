@@ -53,15 +53,6 @@ class CraftingTableIIBlockEntity(
         inventory[slot] = stack
     }
 
-    fun setStacks(items: List<ItemStack>) {
-        items.forEachIndexed { index, itemStack ->
-            setStack(index, itemStack)
-        }
-
-        println("items inserted: $inventory")
-    }
-
-
     override fun removeStack(slot: Int, count: Int): ItemStack {
         return Inventories.splitStack(inventory, slot, count)
     }

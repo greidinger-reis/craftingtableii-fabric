@@ -31,8 +31,12 @@ class CraftingTableIIScreen(
         x = width / 2 - backgroundWidth / 2
         y = height / 2 - backgroundHeight / 2
 
-        val player = this.client!!.player
-        val world = player!!.world
+        updateRecipes()
+    }
+
+    private fun updateRecipes() {
+        val player = client?.player ?: return
+        val world = player?.world ?: return
         val recipeHandler = RecipeHandler(
             player.inventory,
             player.recipeBook,
@@ -42,8 +46,8 @@ class CraftingTableIIScreen(
         Thread {
             Thread.sleep(120)
 
-            recipeHandler.getOutputResults().forEach {
-                screenHandler.setStack(it)
+            recipeHandler.getOutputResults().forEach { recipe ->
+                screenHandler.setStack(recipe)
             }
         }.start()
     }
