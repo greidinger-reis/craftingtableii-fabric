@@ -2,20 +2,21 @@ package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
 import com.mojang.blaze3d.systems.RenderSystem
 import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
-import net.johnpgr.craftingtableiifabric.api.recipes.RecipeHandler
+import net.johnpgr.craftingtableiifabric.utils.RecipeHandler
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.render.GameRenderer
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
 
 class CraftingTableIIScreen(
     screenHandler: CraftingTableIIScreenHandler,
-    playerInventory: PlayerInventory,
+    player: PlayerEntity,
     title: Text
 ) : HandledScreen<CraftingTableIIScreenHandler>(
     screenHandler,
-    playerInventory,
+    player.inventory,
     title
 ) {
     private val texture =
@@ -30,26 +31,6 @@ class CraftingTableIIScreen(
         playerInventoryTitleY = backgroundHeight - 119
         x = width / 2 - backgroundWidth / 2
         y = height / 2 - backgroundHeight / 2
-
-        updateRecipes()
-    }
-
-    private fun updateRecipes() {
-        val player = client?.player ?: return
-        val world = player?.world ?: return
-        val recipeHandler = RecipeHandler(
-            player.inventory,
-            player.recipeBook,
-            world.registryManager
-        )
-
-        Thread {
-            Thread.sleep(120)
-
-            recipeHandler.getOutputResults().forEach { recipe ->
-                screenHandler.setStack(recipe)
-            }
-        }.start()
     }
 
     override fun render(

@@ -56,13 +56,9 @@ object ModMessages {
         }
     }
 
-    val CTII_CLIENT_SEND_PLAYER_INFO = register(
-        CraftingTableIIFabric.id("craftingtableii_client_send_player_info"),
+    val CTII_CRAFT_RECIPE = register(
+        CraftingTableIIFabric.id("ctii_craft_recipe_packet"),
         MessageType.C2S,
         CraftingTableIIC2SPacket
     )
-//    val CTII_SERVER_RECEIVE_PLAYER_INFO = register(
-//        CraftingTableIIFabric.id("craftingtableii_server_receive_player_info"),
-//        MessageType.C2S
-//    )
 }

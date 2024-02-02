@@ -22,9 +22,8 @@ class BlockScreenHandlerFactory(val block: Block, val pos: BlockPos) :
         val blockEntity = world.getBlockEntity(pos)
         return ModBlocks.getContainerInfo(block)!!.screenHandlerClass.java.constructors[0].newInstance(
             syncId,
-            playerInventory,
+            player,
             blockEntity,
-            ScreenHandlerContext.create(world, pos)
         ) as ScreenHandler
     }
 

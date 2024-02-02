@@ -1,23 +1,23 @@
 package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
-import net.johnpgr.craftingtableiifabric.api.recipes.RecipeHandler
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
+import net.johnpgr.craftingtableiifabric.api.network.ModMessages
+import net.johnpgr.craftingtableiifabric.api.network.packet.CraftingPacket
 import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
+import net.johnpgr.craftingtableiifabric.utils.RecipeHandler
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.ScreenHandler
-import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.screen.slot.Slot
-import net.minecraft.util.math.BlockPos
-import net.minecraft.world.World
+import net.minecraft.screen.slot.SlotActionType
 
 class CraftingTableIIScreenHandler(
     syncId: Int,
-    val playerInventory: PlayerInventory,
+    player: PlayerEntity,
     val entity: CraftingTableIIBlockEntity,
-    private val blockContext: ScreenHandlerContext
 ) : ScreenHandler(
     ModBlocks.getContainerInfo(ModBlocks.CRAFTING_TABLE_II)?.handlerType,
     syncId
@@ -27,6 +27,8 @@ class CraftingTableIIScreenHandler(
         const val COLS = 8
         const val INVENTORY_SIZE = ROWS * COLS
     }
+
+    lateinit var recipeHandler: RecipeHandler
 
     val inventory =
         object : Inventory {
@@ -47,17 +49,18 @@ class CraftingTableIIScreenHandler(
             }
 
             override fun removeStack(slot: Int, amount: Int): ItemStack {
-                println("Remove stack slot: $slot amount: $amount")
-                if (playerInventory.player is ClientPlayerEntity) {
-                    val clientPlayerEntity =
-                        playerInventory.player as ClientPlayerEntity
-                    val recipeHandler = RecipeHandler(
-                        playerInventory,
-                        clientPlayerEntity.recipeBook,
-                        clientPlayerEntity.world.registryManager
-                    )
+                if(player.world.isClient) {
                     val item = getStack(slot)
                     val recipe = recipeHandler.getRecipe(item)
+                    val buf = PacketByteBufs.create()
+
+                    if (recipe != null && buf != null) {
+                        CraftingPacket(recipe).write(buf)
+                        ClientPlayNetworking.send(
+                            ModMessages.CTII_CRAFT_RECIPE,
+                            buf
+                        )
+                    }
                 }
                 return ItemStack.EMPTY
             }
@@ -81,8 +84,9 @@ class CraftingTableIIScreenHandler(
         }
 
     init {
+
         checkSize(inventory, INVENTORY_SIZE)
-        inventory.onOpen(playerInventory.player)
+        inventory.onOpen(player)
 
         //Our inventory
         for (row in 0..<ROWS) {
@@ -104,7 +108,7 @@ class CraftingTableIIScreenHandler(
             for (col in 0..8) {
                 addSlot(
                     Slot(
-                        playerInventory,
+                        player.inventory,
                         col + row * 9 + 9,
                         8 + col * 18,
                         125 + row * 18
@@ -116,14 +120,34 @@ class CraftingTableIIScreenHandler(
         for (row in 0..8) {
             addSlot(
                 Slot(
-                    playerInventory,
+                    player.inventory,
                     row,
                     8 + row * 18,
                     184
                 )
             )
         }
+
+        if (player.world.isClient) {
+            val inventory = player.inventory
+            val registryManager = player.world.registryManager
+            val recipeBook = (player as ClientPlayerEntity).recipeBook
+            recipeHandler =
+                RecipeHandler(inventory, recipeBook, registryManager)
+
+            updateRecipes()
+        }
     }
+
+    private fun updateRecipes() {
+        Thread {
+            Thread.sleep(64)
+            recipeHandler.getOutputResults().forEach { recipe ->
+                setStack(recipe)
+            }
+        }.start()
+    }
+
 
     /**
      * setStack will set the item stack to the first empty slot in the inventory
@@ -138,16 +162,7 @@ class CraftingTableIIScreenHandler(
     }
 
     override fun canUse(player: PlayerEntity): Boolean {
-        return blockContext.get({ world: World, blockPos: BlockPos ->
-            if (world.getBlockState(
-                    blockPos
-                ).block != ModBlocks.CRAFTING_TABLE_II
-            ) false else player.squaredDistanceTo(
-                blockPos.x + .5,
-                blockPos.y + .5,
-                blockPos.z + .5
-            ) < 64.0
-        }, true)
+        return true
     }
 
     override fun quickMove(

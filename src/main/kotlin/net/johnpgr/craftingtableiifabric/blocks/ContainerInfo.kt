@@ -39,9 +39,8 @@ class ContainerInfo<T : ScreenHandler>(
                 val blockEntity = world.getBlockEntity(pos)
                 handler = screenHandlerClass.java.constructors[0].newInstance(
                     i,
-                    playerInventory,
+                    player,
                     blockEntity,
-                    ScreenHandlerContext.create(world, pos)
                 ) as T
                 handler
             }
@@ -52,7 +51,7 @@ class ContainerInfo<T : ScreenHandler>(
         HandledScreens.register(handlerType) { handler, playerInventory, title ->
             screenClass.get().java.constructors[0].newInstance(
                 handler,
-                playerInventory,
+                playerInventory.player,
                 title
             ) as HandledScreen<T>
         }

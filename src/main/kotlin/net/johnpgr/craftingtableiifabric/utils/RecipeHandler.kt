@@ -1,21 +1,14 @@
-package net.johnpgr.craftingtableiifabric.api.recipes
+package net.johnpgr.craftingtableiifabric.utils
 
 import com.google.common.collect.Lists
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
 import net.minecraft.client.recipebook.ClientRecipeBook
 import net.minecraft.client.recipebook.RecipeBookGroup
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeMatcher
 import net.minecraft.registry.DynamicRegistryManager
-import net.minecraft.registry.Registries
-import net.minecraft.registry.Registry
-import net.minecraft.text.Text
-import net.minecraft.util.Identifier
 import net.minecraft.util.collection.DefaultedList
 
 class RecipeHandler(
