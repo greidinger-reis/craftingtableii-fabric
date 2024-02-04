@@ -5,30 +5,41 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.johnpgr.craftingtableiifabric.api.network.ModMessages
 import net.johnpgr.craftingtableiifabric.api.network.packet.CraftingPacket
 import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
-import net.johnpgr.craftingtableiifabric.utils.RecipeHandler
+import net.johnpgr.craftingtableiifabric.utils.RecipeManager
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.inventory.CraftingInventory
+import net.minecraft.inventory.CraftingResultInventory
 import net.minecraft.inventory.Inventory
+import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.item.ItemStack
-import net.minecraft.screen.ScreenHandler
+import net.minecraft.network.packet.c2s.play.CraftRequestC2SPacket
+import net.minecraft.recipe.Recipe
+import net.minecraft.recipe.RecipeMatcher
+import net.minecraft.recipe.book.RecipeBookCategory
+import net.minecraft.screen.AbstractRecipeScreenHandler
+import net.minecraft.screen.slot.CraftingResultSlot
 import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
 
 class CraftingTableIIScreenHandler(
     syncId: Int,
-    player: PlayerEntity,
+    private val player: PlayerEntity,
     val entity: CraftingTableIIBlockEntity,
-) : ScreenHandler(
+) : AbstractRecipeScreenHandler<RecipeInputInventory>(
     ModBlocks.getContainerInfo(ModBlocks.CRAFTING_TABLE_II)?.handlerType,
-    syncId
+    syncId,
 ) {
+    val input = CraftingInventory(this, 3, 3)
+    val result = CraftingResultInventory()
+
     companion object {
-        const val ROWS = 5
-        const val COLS = 8
-        const val INVENTORY_SIZE = ROWS * COLS
+        const val INVENTORY_COLS = 8
+        const val INVENTORY_ROWS = 5
+        const val INVENTORY_SIZE = INVENTORY_ROWS * INVENTORY_COLS
     }
 
-    private var recipeHandler: RecipeHandler? = null
+    private var recipeHandler: RecipeManager? = null
 
     private val inventory =
         object : Inventory {
@@ -41,7 +52,7 @@ class CraftingTableIIScreenHandler(
             }
 
             override fun getStack(slot: Int): ItemStack {
-                return entity.getStack(slot)
+                return entity.getStack(slot + 10)
             }
 
             override fun removeStack(slot: Int): ItemStack {
@@ -55,7 +66,7 @@ class CraftingTableIIScreenHandler(
             override fun setStack(slot: Int, stack: ItemStack) {
                 if (stack.isEmpty) return
 
-                entity.setStack(slot, stack)
+                entity.setStack(slot + 10, stack)
                 onContentChanged(this)
             }
 
@@ -73,18 +84,39 @@ class CraftingTableIIScreenHandler(
         }
 
     init {
-        checkSize(this.inventory, INVENTORY_SIZE)
         inventory.onOpen(player)
 
+        //The Crafting Result
+        this.addSlot(
+            CraftingResultSlot(
+                player,
+                this.input,
+                this.result,
+                0,
+                -999,
+                -999
+            )
+        )
+        //The Crafting Grid
+        for (row in 0..2) {
+            for (col in 0..2) {
+                this.addSlot(
+                    Slot(
+                        this.input,
+                        col + row * 3,
+                        -999,
+                        -999
+                    )
+                )
+            }
+        }
         //Our inventory
-        for (row in 0..<ROWS) {
-            for (col in 0..<COLS) {
-                val i = col + row * COLS
-
+        for (row in 0..<INVENTORY_ROWS) {
+            for (col in 0..<INVENTORY_COLS) {
                 this.addSlot(
                     CraftingTableIISlot(
                         inventory,
-                        i,
+                        col + row * INVENTORY_COLS,
                         8 + col * 18,
                         18 + row * 18
                     )
@@ -120,7 +152,7 @@ class CraftingTableIIScreenHandler(
             val playerInventory = player.inventory
             val recipeBook = (player as ClientPlayerEntity).recipeBook
             this.recipeHandler =
-                RecipeHandler(playerInventory, recipeBook)
+                RecipeManager(playerInventory, recipeBook, this)
             this.updateRecipes()
         }
     }
@@ -133,13 +165,17 @@ class CraftingTableIIScreenHandler(
     ) {
         super.onSlotClick(slotIndex, button, actionType, player)
         if (player.world.isClient) {
-            //check if the slot is our inventory
-            if (slotIndex in 0..39) {
-                val item = this.inventory.getStack(slotIndex)
+            if (slotIndex == -999) return
+            val slot = getSlot(slotIndex)
+
+            if (slot.inventory == this.inventory) {
+                val item = this.inventory.getStack(slotIndex - 10)
+                val quickCraft = actionType == SlotActionType.QUICK_MOVE
                 val recipe = this.recipeHandler?.getRecipe(item) ?: return
                 val buf = PacketByteBufs.create() ?: return
 
-                CraftingPacket(recipe).write(buf)
+                CraftingPacket(recipe.id, quickCraft).write(buf)
+
                 ClientPlayNetworking.send(
                     ModMessages.CTII_CRAFT_RECIPE,
                     buf
@@ -151,15 +187,15 @@ class CraftingTableIIScreenHandler(
     fun updateRecipes() {
         this.inventory.clear()
         this.recipeHandler?.getCraftableItemStacks()?.forEach { stack ->
-            addStack(stack)
+            addRecipeItem(stack)
         }
     }
 
+    override fun canInsertIntoSlot(index: Int): Boolean {
+        return index != this.craftingResultSlotIndex
+    }
 
-    /**
-     * addStack will set the item stack to the first empty slot in the inventory
-     */
-    private fun addStack(stack: ItemStack) {
+    private fun addRecipeItem(stack: ItemStack) {
         for (i in 0 until this.inventory.size()) {
             if (this.inventory.getStack(i).isEmpty) {
                 this.inventory.setStack(i, stack)
@@ -170,6 +206,43 @@ class CraftingTableIIScreenHandler(
 
     override fun canUse(player: PlayerEntity): Boolean {
         return true
+    }
+
+    override fun populateRecipeFinder(finder: RecipeMatcher?) {
+        this.input.provideRecipeInputs(finder)
+    }
+
+    override fun clearCraftingSlots() {
+        this.input.clear()
+        this.result.clear()
+    }
+
+    fun updateResultSlot(itemStack: ItemStack) {
+        this.result.setStack(0, itemStack)
+    }
+
+    override fun matches(recipe: Recipe<in RecipeInputInventory>): Boolean {
+        return recipe.matches(this.input, this.player.world)
+    }
+
+    override fun getCraftingResultSlotIndex(): Int {
+        return 0
+    }
+
+    override fun getCraftingWidth(): Int {
+        return this.input.width
+    }
+
+    override fun getCraftingHeight(): Int {
+        return this.input.height
+    }
+
+    override fun getCraftingSlotCount(): Int {
+        return 10
+    }
+
+    override fun getCategory(): RecipeBookCategory {
+        return RecipeBookCategory.CRAFTING
     }
 
     override fun quickMove(

@@ -1,6 +1,7 @@
 package net.johnpgr.craftingtableiifabric.utils
 
 import com.google.common.collect.Lists
+import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIScreenHandler
 import net.minecraft.client.recipebook.ClientRecipeBook
 import net.minecraft.client.recipebook.RecipeBookGroup
 import net.minecraft.entity.player.PlayerInventory
@@ -8,9 +9,10 @@ import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeMatcher
 
-class RecipeHandler(
+class RecipeManager(
     private val playerInventory: PlayerInventory,
     private val playerRecipeBook: ClientRecipeBook,
+    private val craftingScreenHandler: CraftingTableIIScreenHandler
 ) {
     private val recipeMatcher = RecipeMatcher()
 
@@ -59,6 +61,7 @@ class RecipeHandler(
 
     private fun refreshInputs() {
         this.recipeMatcher.clear()
-        this.playerInventory.populateRecipeFinder(recipeMatcher)
+        this.playerInventory.populateRecipeFinder(this.recipeMatcher)
+        this.craftingScreenHandler.populateRecipeFinder(this.recipeMatcher)
     }
 }

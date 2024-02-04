@@ -1,7 +1,10 @@
 package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
 import net.johnpgr.craftingtableiifabric.utils.BlockScreenHandlerFactory
-import net.minecraft.block.*
+import net.minecraft.block.Block
+import net.minecraft.block.BlockRenderType
+import net.minecraft.block.BlockState
+import net.minecraft.block.BlockWithEntity
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemPlacementContext
@@ -13,8 +16,6 @@ import net.minecraft.util.BlockRotation
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.shape.VoxelShape
-import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
 class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
@@ -51,16 +52,6 @@ class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
         return false
     }
 
-    //TODO: Calculate correct collision shape
-    override fun getCollisionShape(
-        state: BlockState?,
-        world: BlockView?,
-        pos: BlockPos?,
-        context: ShapeContext?
-    ): VoxelShape {
-        return super.getCollisionShape(state, world, pos, context)
-    }
-
     override fun createBlockEntity(
         pos: BlockPos,
         state: BlockState
@@ -78,10 +69,7 @@ class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
     ): ActionResult {
         if (!world.isClient) {
             player.openHandledScreen(
-                BlockScreenHandlerFactory(
-                    this,
-                    pos
-                )
+                BlockScreenHandlerFactory(this, pos)
             )
         }
         return ActionResult.SUCCESS
