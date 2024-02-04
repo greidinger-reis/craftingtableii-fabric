@@ -1,4 +1,4 @@
-package net.johnpgr.craftingtableiifabric.api.network
+package net.johnpgr.craftingtableiifabric.network
 
 import net.minecraft.util.Identifier
 

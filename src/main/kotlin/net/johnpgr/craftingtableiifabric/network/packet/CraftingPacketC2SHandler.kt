@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package net.johnpgr.craftingtableiifabric.api.network.packet
+package net.johnpgr.craftingtableiifabric.network.packet
 
 import net.fabricmc.fabric.api.networking.v1.PacketSender
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -13,7 +13,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayNetworkHandler
 import net.minecraft.server.network.ServerPlayerEntity
 
-object CraftingTableIIHandlerC2S : ServerPlayNetworking.PlayChannelHandler {
+object CraftingPacketC2SHandler : ServerPlayNetworking.PlayChannelHandler {
     override fun receive(
         server: MinecraftServer,
         player: ServerPlayerEntity,
@@ -23,9 +23,12 @@ object CraftingTableIIHandlerC2S : ServerPlayNetworking.PlayChannelHandler {
     ) {
         val packet = CraftingPacket.read(buf)
 
-        if (player.currentScreenHandler is CraftingTableIIScreenHandler) {
+        if (player.currentScreenHandler.syncId == packet.syncId
+            && player.currentScreenHandler is CraftingTableIIScreenHandler
+        ) {
             val craftingScreenHandler =
                 player.currentScreenHandler as CraftingTableIIScreenHandler
+
             server.recipeManager.get(packet.recipe)
                 .ifPresent { recipe ->
                     craftingScreenHandler.fillInputSlots(

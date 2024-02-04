@@ -2,10 +2,10 @@ package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
-import net.johnpgr.craftingtableiifabric.api.network.ModMessages
-import net.johnpgr.craftingtableiifabric.api.network.packet.CraftingPacket
+import net.johnpgr.craftingtableiifabric.network.ModMessages
+import net.johnpgr.craftingtableiifabric.network.packet.CraftingPacket
 import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
-import net.johnpgr.craftingtableiifabric.utils.RecipeManager
+import net.johnpgr.craftingtableiifabric.utils.PlayerRecipeManager
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory
@@ -13,7 +13,6 @@ import net.minecraft.inventory.CraftingResultInventory
 import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.item.ItemStack
-import net.minecraft.network.packet.c2s.play.CraftRequestC2SPacket
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeMatcher
 import net.minecraft.recipe.book.RecipeBookCategory
@@ -24,14 +23,14 @@ import net.minecraft.screen.slot.SlotActionType
 
 class CraftingTableIIScreenHandler(
     syncId: Int,
-    private val player: PlayerEntity,
+    val player: PlayerEntity,
     val entity: CraftingTableIIBlockEntity,
 ) : AbstractRecipeScreenHandler<RecipeInputInventory>(
     ModBlocks.getContainerInfo(ModBlocks.CRAFTING_TABLE_II)?.handlerType,
     syncId,
 ) {
+    private val result = CraftingResultInventory()
     val input = CraftingInventory(this, 3, 3)
-    val result = CraftingResultInventory()
 
     companion object {
         const val INVENTORY_COLS = 8
@@ -39,7 +38,7 @@ class CraftingTableIIScreenHandler(
         const val INVENTORY_SIZE = INVENTORY_ROWS * INVENTORY_COLS
     }
 
-    private var recipeHandler: RecipeManager? = null
+    private var playerRecipeManager: PlayerRecipeManager? = null
 
     private val inventory =
         object : Inventory {
@@ -151,8 +150,8 @@ class CraftingTableIIScreenHandler(
         if (player.world.isClient) {
             val playerInventory = player.inventory
             val recipeBook = (player as ClientPlayerEntity).recipeBook
-            this.recipeHandler =
-                RecipeManager(playerInventory, recipeBook, this)
+            this.playerRecipeManager =
+                PlayerRecipeManager(playerInventory, recipeBook, this)
             this.updateRecipes()
         }
     }
@@ -171,10 +170,10 @@ class CraftingTableIIScreenHandler(
             if (slot.inventory == this.inventory) {
                 val item = this.inventory.getStack(slotIndex - 10)
                 val quickCraft = actionType == SlotActionType.QUICK_MOVE
-                val recipe = this.recipeHandler?.getRecipe(item) ?: return
+                val recipe = this.playerRecipeManager?.getRecipe(item) ?: return
                 val buf = PacketByteBufs.create() ?: return
 
-                CraftingPacket(recipe.id, quickCraft).write(buf)
+                CraftingPacket(recipe.id, this.syncId, quickCraft).write(buf)
 
                 ClientPlayNetworking.send(
                     ModMessages.CTII_CRAFT_RECIPE,
@@ -186,7 +185,7 @@ class CraftingTableIIScreenHandler(
 
     fun updateRecipes() {
         this.inventory.clear()
-        this.recipeHandler?.getCraftableItemStacks()?.forEach { stack ->
+        this.playerRecipeManager?.getCraftableItemStacks()?.forEach { stack ->
             addRecipeItem(stack)
         }
     }

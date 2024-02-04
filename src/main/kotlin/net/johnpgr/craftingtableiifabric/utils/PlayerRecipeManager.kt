@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeMatcher
 
-class RecipeManager(
+class PlayerRecipeManager(
     private val playerInventory: PlayerInventory,
     private val playerRecipeBook: ClientRecipeBook,
     private val craftingScreenHandler: CraftingTableIIScreenHandler
