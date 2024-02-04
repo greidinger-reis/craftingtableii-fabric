@@ -17,6 +17,7 @@ class CraftingTableIIScreen(
     player.inventory,
     title
 ) {
+    val scrollPosition = 0.0f
     private val texture =
         CraftingTableIIFabric.id(
             "textures/gui/crafttableii.png"
@@ -51,6 +52,9 @@ class CraftingTableIIScreen(
         RenderSystem.setShader(GameRenderer::getPositionTexProgram)
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
 
-        ctx.drawTexture(texture, x, y, 0, 0, backgroundWidth, backgroundHeight)
+        //draw inventory
+        ctx.drawTexture(texture, x, y, 0, 0, backgroundWidth, backgroundHeight - 21)
+        //draw scrollbar
+        ctx.drawTexture(texture, x + 154, y + 18 + scrollPosition.toInt(), 0, 209, 15, 15)
     }
 }
