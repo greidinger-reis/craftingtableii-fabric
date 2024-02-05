@@ -48,11 +48,16 @@ class CraftingTableIIScreen(
         mouseY: Double,
         amount: Double
     ): Boolean {
+        val craftableRecipesSize = this.screenHandler.inventory.sizeNonEmpty
+        if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) {
+            return false
+        }
+
         val aX = mouseX - this.x
         val aY = mouseY - this.y
 
         if ((aX >= 0 && aY >= 0 && aX < 176) && aY < this.backgroundHeight) {
-            val j = ((this.screenHandler.inventory.sizeNonEmpty / 8 - 4) + 1).toDouble()
+            val j = ((craftableRecipesSize / 8 - 4) + 1).toDouble()
             val i = MathHelper.clamp(amount, -1.0, 1.0)
 
             this.scrollPosition -= (i / j).toFloat()
@@ -86,17 +91,16 @@ class CraftingTableIIScreen(
             backgroundHeight
         )
 
-        // from the original code
         val k1 = y + 17
         val l1 = k1 + 88 + 2
+        val craftableRecipesSize = this.screenHandler.inventory.sizeNonEmpty
 
         //draw scrollbar
         ctx.drawTexture(
             texture,
             x + 154,
-            //from the original code
             y + 17 + ((l1 - k1 - 17).toFloat() * scrollPosition).toInt(),
-            0,
+            if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) 16 else 0,
             208,
             16,
             16
