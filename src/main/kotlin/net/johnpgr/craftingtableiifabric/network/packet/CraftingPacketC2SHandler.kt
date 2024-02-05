@@ -38,14 +38,14 @@ object CraftingPacketC2SHandler : ServerPlayNetworking.PlayChannelHandler {
                     )
 
                     while ((recipe as Recipe<RecipeInputInventory>).matches(
-                            craftingScreenHandler.input,
+                            craftingScreenHandler.inputInventory,
                             player.world
                         )
                     ) {
                         val cursor = craftingScreenHandler.cursorStack
                         val output = recipe
                             .craft(
-                                craftingScreenHandler.input,
+                                craftingScreenHandler.inputInventory,
                                 server.registryManager
                             )
 

@@ -2,15 +2,14 @@ package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
+import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 import net.johnpgr.craftingtableiifabric.network.ModMessages
 import net.johnpgr.craftingtableiifabric.network.packet.CraftingPacket
-import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 import net.johnpgr.craftingtableiifabric.utils.PlayerRecipeManager
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
-import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Recipe
@@ -29,58 +28,10 @@ class CraftingTableIIScreenHandler(
     ModBlocks.getContainerInfo(ModBlocks.CRAFTING_TABLE_II)?.handlerType,
     syncId,
 ) {
-    private val result = CraftingResultInventory()
-    val input = CraftingInventory(this, 3, 3)
-
-    companion object {
-        const val INVENTORY_COLS = 8
-        const val INVENTORY_ROWS = 5
-        const val INVENTORY_SIZE = INVENTORY_ROWS * INVENTORY_COLS
-    }
-
-    private var playerRecipeManager: PlayerRecipeManager? = null
-
-    private val inventory =
-        object : Inventory {
-            override fun size(): Int {
-                return entity.size()
-            }
-
-            override fun isEmpty(): Boolean {
-                return entity.isEmpty
-            }
-
-            override fun getStack(slot: Int): ItemStack {
-                return entity.getStack(slot + 10)
-            }
-
-            override fun removeStack(slot: Int): ItemStack {
-                return ItemStack.EMPTY
-            }
-
-            override fun removeStack(slot: Int, amount: Int): ItemStack {
-                return ItemStack.EMPTY
-            }
-
-            override fun setStack(slot: Int, stack: ItemStack) {
-                if (stack.isEmpty) return
-
-                entity.setStack(slot + 10, stack)
-                onContentChanged(this)
-            }
-
-            override fun markDirty() {
-                entity.markDirty()
-            }
-
-            override fun canPlayerUse(player: PlayerEntity?): Boolean {
-                return entity.canPlayerUse(player)
-            }
-
-            override fun clear() {
-                entity.clear()
-            }
-        }
+    val inventory = CraftingTableIIInventory(entity, this)
+    val inputInventory = CraftingInventory(this, 3, 3)
+    val resultInventory = CraftingResultInventory()
+    var playerRecipeManager: PlayerRecipeManager? = null
 
     init {
         inventory.onOpen(player)
@@ -89,8 +40,8 @@ class CraftingTableIIScreenHandler(
         this.addSlot(
             CraftingResultSlot(
                 player,
-                this.input,
-                this.result,
+                this.inputInventory,
+                this.resultInventory,
                 0,
                 -999,
                 -999
@@ -101,7 +52,7 @@ class CraftingTableIIScreenHandler(
             for (col in 0..2) {
                 this.addSlot(
                     Slot(
-                        this.input,
+                        this.inputInventory,
                         col + row * 3,
                         -999,
                         -999
@@ -110,12 +61,12 @@ class CraftingTableIIScreenHandler(
             }
         }
         //Our inventory
-        for (row in 0..<INVENTORY_ROWS) {
-            for (col in 0..<INVENTORY_COLS) {
+        for (row in 0..<CraftingTableIIInventory.ROWS) {
+            for (col in 0..<CraftingTableIIInventory.COLS) {
                 this.addSlot(
                     CraftingTableIISlot(
                         inventory,
-                        col + row * INVENTORY_COLS,
+                        col + row * CraftingTableIIInventory.COLS,
                         8 + col * 18,
                         18 + row * 18
                     )
@@ -208,20 +159,20 @@ class CraftingTableIIScreenHandler(
     }
 
     override fun populateRecipeFinder(finder: RecipeMatcher?) {
-        this.input.provideRecipeInputs(finder)
+        this.inputInventory.provideRecipeInputs(finder)
     }
 
     override fun clearCraftingSlots() {
-        this.input.clear()
-        this.result.clear()
+        this.inputInventory.clear()
+        this.resultInventory.clear()
     }
 
     fun updateResultSlot(itemStack: ItemStack) {
-        this.result.setStack(0, itemStack)
+        this.resultInventory.setStack(0, itemStack)
     }
 
     override fun matches(recipe: Recipe<in RecipeInputInventory>): Boolean {
-        return recipe.matches(this.input, this.player.world)
+        return recipe.matches(this.inputInventory, this.player.world)
     }
 
     override fun getCraftingResultSlotIndex(): Int {
@@ -229,11 +180,11 @@ class CraftingTableIIScreenHandler(
     }
 
     override fun getCraftingWidth(): Int {
-        return this.input.width
+        return this.inputInventory.width
     }
 
     override fun getCraftingHeight(): Int {
-        return this.input.height
+        return this.inputInventory.height
     }
 
     override fun getCraftingSlotCount(): Int {

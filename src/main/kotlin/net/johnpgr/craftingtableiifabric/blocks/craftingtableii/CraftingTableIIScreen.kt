@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.render.GameRenderer
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.text.Text
+import net.minecraft.util.math.MathHelper
 
 class CraftingTableIIScreen(
     screenHandler: CraftingTableIIScreenHandler,
@@ -17,7 +18,7 @@ class CraftingTableIIScreen(
     player.inventory,
     title
 ) {
-    val scrollPosition = 0.0f
+    var scrollPosition = 0.0f
     private val texture =
         CraftingTableIIFabric.id(
             "textures/gui/crafttableii.png"
@@ -25,9 +26,9 @@ class CraftingTableIIScreen(
 
     override fun init() {
         super.init()
-        backgroundHeight = 230
+        backgroundHeight = 208
         titleX = (backgroundWidth - textRenderer.getWidth(title)) / 11
-        playerInventoryTitleY = backgroundHeight - 119
+        playerInventoryTitleY = backgroundHeight - 97
         x = width / 2 - backgroundWidth / 2
         y = height / 2 - backgroundHeight / 2
     }
@@ -42,6 +43,28 @@ class CraftingTableIIScreen(
         drawMouseoverTooltip(context, mouseX, mouseY)
     }
 
+    override fun mouseScrolled(
+        mouseX: Double,
+        mouseY: Double,
+        amount: Double
+    ): Boolean {
+        val aX = mouseX - this.x
+        val aY = mouseY - this.y
+
+        if ((aX >= 0 && aY >= 0 && aX < 176) && aY < this.backgroundHeight) {
+            val j = ((this.screenHandler.inventory.sizeNonEmpty / 8 - 4) + 1).toDouble()
+            val i = MathHelper.clamp(amount, -1.0, 1.0)
+
+            this.scrollPosition -= (i / j).toFloat()
+            this.scrollPosition =
+                MathHelper.clamp(this.scrollPosition, 0.0f, 1.0f)
+
+            return true
+        }
+
+        return false
+    }
+
     override fun drawBackground(
         ctx: DrawContext,
         delta: Float,
@@ -53,8 +76,30 @@ class CraftingTableIIScreen(
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
 
         //draw inventory
-        ctx.drawTexture(texture, x, y, 0, 0, backgroundWidth, backgroundHeight - 21)
+        ctx.drawTexture(
+            texture,
+            x,
+            y,
+            0,
+            0,
+            backgroundWidth,
+            backgroundHeight
+        )
+
+        // from the original code
+        val k1 = y + 17
+        val l1 = k1 + 88 + 2
+
         //draw scrollbar
-        ctx.drawTexture(texture, x + 154, y + 18 + scrollPosition.toInt(), 0, 209, 15, 15)
+        ctx.drawTexture(
+            texture,
+            x + 154,
+            //from the original code
+            y + 17 + ((l1 - k1 - 17).toFloat() * scrollPosition).toInt(),
+            0,
+            208,
+            16,
+            16
+        )
     }
 }

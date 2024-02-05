@@ -4,15 +4,10 @@ import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.Inventories
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
-import net.minecraft.screen.NamedScreenHandlerFactory
-import net.minecraft.screen.ScreenHandler
-import net.minecraft.text.Text
-import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.BlockPos
 
 class CraftingTableIIBlockEntity(
@@ -21,11 +16,9 @@ class CraftingTableIIBlockEntity(
     state: BlockState,
 ) :
     BlockEntity(ModBlocks.getEntityType(craftingTableII), pos, state),
-    Inventory {
-    private var inventory: DefaultedList<ItemStack> = DefaultedList.ofSize(
-        CraftingTableIIScreenHandler.INVENTORY_SIZE,
-        ItemStack.EMPTY
-    )
+    Inventory
+{
+    private var inventory = CraftingTableIIInventory.list()
 
     override fun readNbt(tag: NbtCompound) {
         super.readNbt(tag)
