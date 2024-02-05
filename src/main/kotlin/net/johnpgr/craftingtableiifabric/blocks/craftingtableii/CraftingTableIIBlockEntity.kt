@@ -39,7 +39,7 @@ class CraftingTableIIBlockEntity(
     }
 
     override fun getStack(slot: Int): ItemStack {
-        return inventory[slot - 10]
+        return inventory[slot]
     }
 
     override fun setStack(slot: Int, stack: ItemStack) {
@@ -47,7 +47,7 @@ class CraftingTableIIBlockEntity(
             stack.count = stack.maxCount
         }
 
-        inventory[slot - 10] = stack
+        inventory[slot] = stack
     }
 
     override fun removeStack(slot: Int, count: Int): ItemStack {

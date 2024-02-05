@@ -116,9 +116,10 @@ class CraftingTableIIScreenHandler(
         super.onSlotClick(slotIndex, button, actionType, player)
         if (player.world.isClient) {
             if (slotIndex == -999) return
-            val slot = getSlot(slotIndex)
+            val slot = this.getSlot(slotIndex)
 
             if (slot.inventory == this.inventory) {
+                // -10 offset because of the crafting + result inventory
                 val item = this.inventory.getStack(slotIndex - 10)
                 val quickCraft = actionType == SlotActionType.QUICK_MOVE
                 val recipe = this.playerRecipeManager?.getRecipe(item) ?: return
@@ -137,21 +138,12 @@ class CraftingTableIIScreenHandler(
     fun updateRecipes() {
         this.inventory.clear()
         this.playerRecipeManager?.getCraftableItemStacks()?.forEach { stack ->
-            addRecipeItem(stack)
+            this.inventory.addRecipeItem(stack)
         }
     }
 
     override fun canInsertIntoSlot(index: Int): Boolean {
         return index != this.craftingResultSlotIndex
-    }
-
-    private fun addRecipeItem(stack: ItemStack) {
-        for (i in 0 until this.inventory.size()) {
-            if (this.inventory.getStack(i).isEmpty) {
-                this.inventory.setStack(i, stack)
-                return
-            }
-        }
     }
 
     override fun canUse(player: PlayerEntity): Boolean {

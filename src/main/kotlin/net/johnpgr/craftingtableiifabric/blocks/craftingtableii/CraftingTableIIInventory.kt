@@ -25,7 +25,7 @@ class CraftingTableIIInventory(
             var size = 0
 
             for (i in 0 until entity.size()) {
-                if (!entity.getStack(i + 10).isEmpty) {
+                if (!entity.getStack(i).isEmpty) {
                     size++
                 }
             }
@@ -43,7 +43,11 @@ class CraftingTableIIInventory(
     }
 
     override fun getStack(slot: Int): ItemStack {
-        return entity.getStack(slot + 10)
+        return entity.getStack(slot)
+    }
+
+    fun getStackOptional(slot: Int): ItemStack? {
+        return if (slot in 0..this.size()) entity.getStack(slot) else null
     }
 
     override fun removeStack(slot: Int): ItemStack {
@@ -57,7 +61,7 @@ class CraftingTableIIInventory(
     override fun setStack(slot: Int, stack: ItemStack) {
         if (stack.isEmpty) return
 
-        entity.setStack(slot + 10, stack)
+        entity.setStack(slot, stack)
         handler.onContentChanged(this)
     }
 
@@ -71,5 +75,14 @@ class CraftingTableIIInventory(
 
     override fun clear() {
         entity.clear()
+    }
+
+    fun addRecipeItem(stack: ItemStack) {
+        for (i in 0 until this.size()) {
+            if (this.getStack(i).isEmpty) {
+                this.setStack(i, stack)
+                return
+            }
+        }
     }
 }
