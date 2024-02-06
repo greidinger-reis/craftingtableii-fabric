@@ -8,6 +8,7 @@ import net.minecraft.inventory.Inventories
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.BlockPos
 
 class CraftingTableIIBlockEntity(
@@ -18,7 +19,7 @@ class CraftingTableIIBlockEntity(
     BlockEntity(ModBlocks.getEntityType(craftingTableII), pos, state),
     Inventory
 {
-    private var inventory = CraftingTableIIInventory.list()
+    private var inventory = DefaultedList.ofSize(CraftingTableIIInventory.SIZE, ItemStack.EMPTY)
 
     override fun readNbt(tag: NbtCompound) {
         super.readNbt(tag)

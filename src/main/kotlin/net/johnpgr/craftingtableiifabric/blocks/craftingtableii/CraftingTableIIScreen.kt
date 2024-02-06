@@ -41,7 +41,9 @@ class CraftingTableIIScreen(
     override fun mouseScrolled(
         mouseX: Double, mouseY: Double, amount: Double
     ): Boolean {
-        val craftableRecipesSize = this.screenHandler.inventory.sizeNonEmpty
+        val craftableRecipesSize =
+            this.screenHandler.recipeManager?.recipeItemStacks?.size
+                ?: return false
         if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) {
             return false
         }
@@ -51,7 +53,7 @@ class CraftingTableIIScreen(
 
         //check if the mouse is in our inventory bounds
         if ((aX >= 0 && aY >= 0 && aX < 176) && aY < this.backgroundHeight - 100) {
-            val i = ((craftableRecipesSize / 8 - 4) + 1).toDouble()
+            val i = ((craftableRecipesSize + 8 - 1) / 8 - 5).toDouble()
             val j = MathHelper.clamp(amount, -1.0, 1.0)
 
             this.scrollPosition -= (j / i).toFloat()
@@ -66,28 +68,37 @@ class CraftingTableIIScreen(
     }
 
     private fun scrollCraftableRecipes() {
-        val craftableRecipesSize = this.screenHandler.inventory.sizeNonEmpty
-        val i = craftableRecipesSize / 8 - 4 + 1
-        var j: Int =
-            (this.scrollPosition * i.toFloat() + 0.5).toInt()
+        val craftableRecipesSize =
+            this.screenHandler.recipeManager?.recipeItemStacks?.size ?: return
+        val i = (craftableRecipesSize + 8 - 1) / 8 - 5
+        var j = ((this.scrollPosition * i.toFloat()).toDouble() + 0.5).toInt()
         if (j < 0) {
             j = 0
         }
 
+        var newCurrentFirstIndexInList = -1
+
         for (k in 0 until 5) {
             for (l in 0 until 8) {
-                val i1 = l + (k + j) * 8
-                val slot = this.screenHandler.getSlot(10 + (l + k * 8))
-                if (slot !is CraftingTableIISlot) {
-                    continue
+                val listIndex = l + (k + j) * 8
+                if (newCurrentFirstIndexInList == -1 && listIndex < craftableRecipesSize) {
+                    newCurrentFirstIndexInList = listIndex
+                    this.screenHandler.currentFirstRecipeIndexToDisplay =
+                        newCurrentFirstIndexInList
                 }
 
-                if (i1 in 0..<craftableRecipesSize) {
-                    val recipeOutput = this.screenHandler.inventory.getStack(i1)
-                    slot.stack = recipeOutput
-                } else {
-                    slot.stack = ItemStack.EMPTY
+                var itemStack = ItemStack.EMPTY
+
+                if (listIndex in 0..<craftableRecipesSize) {
+                    itemStack =
+                        this.screenHandler.recipeManager?.recipeItemStacks?.getOrElse(
+                            listIndex
+                        ) { ItemStack.EMPTY } ?: ItemStack.EMPTY
                 }
+
+                val slotIndex = l + k * 8
+                val recipeSlot = this.screenHandler.getSlot(slotIndex + 10) // +10 because of the crafting + result inventory
+                recipeSlot.stack = itemStack
             }
         }
     }
@@ -106,7 +117,7 @@ class CraftingTableIIScreen(
 
         val k1 = y + 17
         val l1 = k1 + 88 + 2
-        val craftableRecipesSize = this.screenHandler.inventory.sizeNonEmpty
+        val craftableRecipesSize = this.screenHandler.recipeManager?.recipeItemStacks?.size ?: 0
 
         //draw scrollbar
         ctx.drawTexture(

@@ -12,7 +12,7 @@ The first version I'm targeting is 1.20.1
 - [x] The block's inventory render to screen
 - [ ] The block entity has the original model, animation and sound
 - [x] The block's inventory has functional a scrollbar
-- [ ] The scrollbar function moves the recipe list up and down
+- [x] The scrollbar function moves the recipe list up and down
 - [x] Have access to the current client's recipe book craftable recipe list
 - [x] Send the recipe list to the ScreenHandler and display them in the inventory GUI
 - [x] Update the recipe list when the player's inventory change

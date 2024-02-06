@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 import net.johnpgr.craftingtableiifabric.network.ModMessages
 import net.johnpgr.craftingtableiifabric.network.packet.CraftingPacket
-import net.johnpgr.craftingtableiifabric.utils.PlayerRecipeManager
+import net.johnpgr.craftingtableiifabric.utils.RecipeManager
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory
@@ -31,7 +31,8 @@ class CraftingTableIIScreenHandler(
     val inventory = CraftingTableIIInventory(entity, this)
     val inputInventory = CraftingInventory(this, 3, 3)
     val resultInventory = CraftingResultInventory()
-    var playerRecipeManager: PlayerRecipeManager? = null
+    var recipeManager: RecipeManager? = null
+    var currentFirstRecipeIndexToDisplay = 0
 
     init {
         inventory.onOpen(player)
@@ -99,11 +100,17 @@ class CraftingTableIIScreenHandler(
         }
 
         if (player.world.isClient) {
-            val playerInventory = player.inventory
-            val recipeBook = (player as ClientPlayerEntity).recipeBook
-            this.playerRecipeManager =
-                PlayerRecipeManager(playerInventory, recipeBook, this)
-            this.updateRecipes()
+            this.recipeManager =
+                RecipeManager(this, player as ClientPlayerEntity)
+        }
+    }
+
+    private fun addRecipeItem(stack: ItemStack) {
+        for (i in 0 until this.inventory.size()) {
+            if (this.inventory.getStack(i).isEmpty) {
+                this.inventory.setStack(i, stack)
+                return
+            }
         }
     }
 
@@ -122,7 +129,7 @@ class CraftingTableIIScreenHandler(
                 // -10 offset because of the crafting + result inventory
                 val item = this.inventory.getStack(slotIndex - 10)
                 val quickCraft = actionType == SlotActionType.QUICK_MOVE
-                val recipe = this.playerRecipeManager?.getRecipe(item) ?: return
+                val recipe = this.recipeManager!!.getRecipe(item)
                 val buf = PacketByteBufs.create() ?: return
 
                 CraftingPacket(recipe.id, this.syncId, quickCraft).write(buf)
@@ -137,8 +144,12 @@ class CraftingTableIIScreenHandler(
 
     fun updateRecipes() {
         this.inventory.clear()
-        this.playerRecipeManager?.getCraftableItemStacks()?.forEach { stack ->
-            this.inventory.addRecipeItem(stack)
+
+        this.recipeManager?.refreshCraftableItems()
+        for (i in this.currentFirstRecipeIndexToDisplay until this.currentFirstRecipeIndexToDisplay + CraftingTableIIInventory.SIZE) {
+            val itemToDisplay =
+                this.recipeManager?.recipeItemStacks?.getOrNull(i) ?: break
+            this.addRecipeItem(itemToDisplay)
         }
     }
 

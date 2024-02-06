@@ -13,26 +13,7 @@ class CraftingTableIIInventory(
         const val COLS = 8
         const val ROWS = 5
         const val SIZE = ROWS * COLS
-
-        fun list(): DefaultedList<ItemStack> {
-            return DefaultedList.ofSize(SIZE * 25, ItemStack.EMPTY)
-        }
     }
-
-    //return the size of the inventory without empty slots
-    val sizeNonEmpty
-        get():Int {
-            var size = 0
-
-            for (i in 0 until entity.size()) {
-                if (!entity.getStack(i).isEmpty) {
-                    size++
-                }
-            }
-
-            return size
-        }
-
 
     override fun size(): Int {
         return entity.size()
@@ -44,10 +25,6 @@ class CraftingTableIIInventory(
 
     override fun getStack(slot: Int): ItemStack {
         return entity.getStack(slot)
-    }
-
-    fun getStackOptional(slot: Int): ItemStack? {
-        return if (slot in 0..this.size()) entity.getStack(slot) else null
     }
 
     override fun removeStack(slot: Int): ItemStack {
@@ -75,14 +52,5 @@ class CraftingTableIIInventory(
 
     override fun clear() {
         entity.clear()
-    }
-
-    fun addRecipeItem(stack: ItemStack) {
-        for (i in 0 until this.size()) {
-            if (this.getStack(i).isEmpty) {
-                this.setStack(i, stack)
-                return
-            }
-        }
     }
 }
