@@ -11,8 +11,8 @@ import net.minecraft.recipe.RecipeMatcher
 class RecipeManager(
     private val craftingScreenHandler: CraftingTableIIScreenHandler,
     private val player: ClientPlayerEntity,
-    private val recipeMatcher: RecipeMatcher = RecipeMatcher()
 ) {
+    private val recipeMatcher: RecipeMatcher = RecipeMatcher()
     private lateinit var recipes: List<RecipeResultCollection>
     lateinit var recipeItemStacks: List<ItemStack>
 
@@ -20,7 +20,25 @@ class RecipeManager(
         this.recipeMatcher.clear()
         this.player.inventory.populateRecipeFinder(this.recipeMatcher)
         this.craftingScreenHandler.populateRecipeFinder(this.recipeMatcher)
-        this.recipes = this.player.recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
+        this.recipes =
+            this.player.recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
+    }
+
+    fun scrollCraftableRecipes(scrollPos: Float) {
+        val craftableRecipesSize = this.recipeItemStacks.size
+        val i = (craftableRecipesSize + 8 - 1) / 8 - 5
+        var j = ((scrollPos * i.toFloat()).toDouble() + 0.5).toInt()
+        if (j < 0) {
+            j = 0
+        }
+
+        val listIndex = j * 8
+        if (listIndex < craftableRecipesSize) {
+            this.craftingScreenHandler.currentFirstRecipeIndexToDisplay =
+                listIndex
+        }
+
+        this.craftingScreenHandler.updateRecipes()
     }
 
     fun refreshCraftableItems() {
@@ -34,7 +52,7 @@ class RecipeManager(
             )
         }
 
-       this.recipeItemStacks = this.recipes.filter { result ->
+        this.recipeItemStacks = this.recipes.filter { result ->
             result.isInitialized && result.hasFittingRecipes() && result.hasCraftableRecipes()
         }.flatMap { result ->
             result.getRecipes(true).map { recipe ->

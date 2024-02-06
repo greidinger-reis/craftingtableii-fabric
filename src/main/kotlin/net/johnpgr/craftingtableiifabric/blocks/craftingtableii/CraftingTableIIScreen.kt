@@ -6,7 +6,6 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.render.GameRenderer
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
 import net.minecraft.util.math.MathHelper
 
@@ -59,7 +58,9 @@ class CraftingTableIIScreen(
             this.scrollPosition -= (j / i).toFloat()
             this.scrollPosition =
                 MathHelper.clamp(this.scrollPosition, 0.0f, 1.0f)
-            this.scrollCraftableRecipes()
+            this.screenHandler.recipeManager?.scrollCraftableRecipes(
+                scrollPosition
+            )
 
             return true
         }
@@ -67,41 +68,6 @@ class CraftingTableIIScreen(
         return false
     }
 
-    private fun scrollCraftableRecipes() {
-        val craftableRecipesSize =
-            this.screenHandler.recipeManager?.recipeItemStacks?.size ?: return
-        val i = (craftableRecipesSize + 8 - 1) / 8 - 5
-        var j = ((this.scrollPosition * i.toFloat()).toDouble() + 0.5).toInt()
-        if (j < 0) {
-            j = 0
-        }
-
-        var newCurrentFirstIndexInList = -1
-
-        for (k in 0 until 5) {
-            for (l in 0 until 8) {
-                val listIndex = l + (k + j) * 8
-                if (newCurrentFirstIndexInList == -1 && listIndex < craftableRecipesSize) {
-                    newCurrentFirstIndexInList = listIndex
-                    this.screenHandler.currentFirstRecipeIndexToDisplay =
-                        newCurrentFirstIndexInList
-                }
-
-                var itemStack = ItemStack.EMPTY
-
-                if (listIndex in 0..<craftableRecipesSize) {
-                    itemStack =
-                        this.screenHandler.recipeManager?.recipeItemStacks?.getOrElse(
-                            listIndex
-                        ) { ItemStack.EMPTY } ?: ItemStack.EMPTY
-                }
-
-                val slotIndex = l + k * 8
-                val recipeSlot = this.screenHandler.getSlot(slotIndex + 10) // +10 because of the crafting + result inventory
-                recipeSlot.stack = itemStack
-            }
-        }
-    }
 
     override fun drawBackground(
         ctx: DrawContext, delta: Float, mouseX: Int, mouseY: Int
@@ -117,7 +83,8 @@ class CraftingTableIIScreen(
 
         val k1 = y + 17
         val l1 = k1 + 88 + 2
-        val craftableRecipesSize = this.screenHandler.recipeManager?.recipeItemStacks?.size ?: 0
+        val craftableRecipesSize =
+            this.screenHandler.recipeManager?.recipeItemStacks?.size ?: 0
 
         //draw scrollbar
         ctx.drawTexture(
