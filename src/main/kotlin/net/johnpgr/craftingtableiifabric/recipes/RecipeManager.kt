@@ -1,4 +1,4 @@
-package net.johnpgr.craftingtableiifabric.utils
+package net.johnpgr.craftingtableiifabric.recipes
 
 import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIScreenHandler
 import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection

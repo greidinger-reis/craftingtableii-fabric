@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 import net.johnpgr.craftingtableiifabric.network.ModMessages
 import net.johnpgr.craftingtableiifabric.network.packet.CraftingPacket
-import net.johnpgr.craftingtableiifabric.utils.RecipeManager
+import net.johnpgr.craftingtableiifabric.recipes.RecipeManager
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory

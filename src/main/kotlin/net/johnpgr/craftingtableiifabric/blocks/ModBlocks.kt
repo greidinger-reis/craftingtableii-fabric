@@ -95,6 +95,14 @@ object ModBlocks {
         return block
     }
 
+    fun initBlocks() {
+        blockRegistry.forEach { it.value.init() }
+    }
+
+    fun initBlocksClient() {
+        blockRegistry.forEach { it.value.initClient() }
+    }
+
     val CRAFTING_TABLE_II = registerWithEntity<CraftingTableIIBlockEntity>(
         CraftingTableIIFabric.id("craftingtableii"),
         CraftingTableIIBlock(FabricBlockSettings.copyOf(Blocks.CRAFTING_TABLE)),
@@ -105,13 +113,5 @@ object ModBlocks {
             )
         ),
     )
-
-    fun initBlocks() {
-        blockRegistry.forEach { it.value.init() }
-    }
-
-    fun initBlocksClient() {
-        blockRegistry.forEach { it.value.initClient() }
-    }
 }
 

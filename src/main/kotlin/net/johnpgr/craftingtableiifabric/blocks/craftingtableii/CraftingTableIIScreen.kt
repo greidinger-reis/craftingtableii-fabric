@@ -142,17 +142,17 @@ class CraftingTableIIScreen(
                     recipeStacks[index].count += item.count
                 }
 
-                recipeStacks.forEachIndexed { i, stack ->
+                recipeStacks.forEachIndexed { r, stack ->
                     ctx.drawItem(
                         stack,
                         x - 25,
-                        y + 5 + i * 18
+                        y + 5 + r * 18
                     )
                     ctx.drawItemInSlot(
                         this.client!!.textRenderer,
                         stack,
                         x - 25,
-                        y + 5 + i * 18
+                        y + 5 + r * 18
                     )
                 }
 
@@ -162,8 +162,8 @@ class CraftingTableIIScreen(
                 ctx.drawText(
                     this.client!!.textRenderer,
                     output.name,
-                    x - 119,
-                    y + 5,
+                    x - 118,
+                    y + 6,
                     0xFFFFFF,
                     false,
                 )
