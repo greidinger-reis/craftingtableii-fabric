@@ -34,7 +34,7 @@ class RecipeManager(
 
         val listIndex = j * 8
         if (listIndex < craftableRecipesSize) {
-            this.craftingScreenHandler.currentFirstRecipeIndexToDisplay =
+            this.craftingScreenHandler.currentListIndex =
                 listIndex
         }
 

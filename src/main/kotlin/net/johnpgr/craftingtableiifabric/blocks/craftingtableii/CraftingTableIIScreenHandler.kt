@@ -32,7 +32,7 @@ class CraftingTableIIScreenHandler(
     val inputInventory = CraftingInventory(this, 3, 3)
     val resultInventory = CraftingResultInventory()
     var recipeManager: RecipeManager? = null
-    var currentFirstRecipeIndexToDisplay = 0
+    var currentListIndex = 0
 
     init {
         inventory.onOpen(player)
@@ -125,11 +125,9 @@ class CraftingTableIIScreenHandler(
             if (slotIndex == -999) return
             val slot = this.getSlot(slotIndex)
 
-            if (slot.inventory == this.inventory) {
-                // -10 offset because of the crafting + result inventory
-                val item = this.inventory.getStack(slotIndex - 10)
+            if (slot is CraftingTableIISlot) {
                 val quickCraft = actionType == SlotActionType.QUICK_MOVE
-                val recipe = this.recipeManager!!.getRecipe(item)
+                val recipe = this.recipeManager!!.getRecipe(slot.stack)
                 val buf = PacketByteBufs.create() ?: return
 
                 CraftingPacket(recipe.id, this.syncId, quickCraft).write(buf)
@@ -146,7 +144,7 @@ class CraftingTableIIScreenHandler(
         this.inventory.clear()
 
         this.recipeManager?.refreshCraftableItems()
-        for (i in this.currentFirstRecipeIndexToDisplay until this.currentFirstRecipeIndexToDisplay + CraftingTableIIInventory.SIZE) {
+        for (i in this.currentListIndex until this.currentListIndex + CraftingTableIIInventory.SIZE) {
             val itemToDisplay =
                 this.recipeManager?.recipeItemStacks?.getOrNull(i) ?: break
             this.addRecipeItem(itemToDisplay)

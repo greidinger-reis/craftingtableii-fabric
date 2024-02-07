@@ -6,6 +6,8 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.render.GameRenderer
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.item.ItemStack
+import net.minecraft.screen.slot.Slot
 import net.minecraft.text.Text
 import net.minecraft.util.math.MathHelper
 
@@ -19,7 +21,10 @@ class CraftingTableIIScreen(
     private val texture = CraftingTableIIFabric.id(
         "textures/gui/crafttableii.png"
     )
-    var scrollPosition = 0.0f
+    private val descriptionTexture = CraftingTableIIFabric.id(
+        "textures/gui/crafttableii_description.png"
+    )
+    private var scrollPosition = 0.0f
 
     override fun init() {
         super.init()
@@ -68,7 +73,6 @@ class CraftingTableIIScreen(
         return false
     }
 
-
     override fun drawBackground(
         ctx: DrawContext, delta: Float, mouseX: Int, mouseY: Int
     ) {
@@ -78,7 +82,7 @@ class CraftingTableIIScreen(
 
         //draw inventory
         ctx.drawTexture(
-            texture, x, y, 0, 0, backgroundWidth, backgroundHeight
+            this.texture, x, y, 0, 0, backgroundWidth, backgroundHeight
         )
 
         val k1 = y + 17
@@ -88,7 +92,7 @@ class CraftingTableIIScreen(
 
         //draw scrollbar
         ctx.drawTexture(
-            texture,
+            this.texture,
             x + 154,
             y + 17 + ((l1 - k1 - 17).toFloat() * scrollPosition).toInt(),
             if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) 16 else 0,
@@ -96,5 +100,80 @@ class CraftingTableIIScreen(
             16,
             16
         )
+
+        for (i in 10 until 50) {
+            val slot = this.screenHandler.getSlot(i)
+            if (slot is CraftingTableIISlot && isMouseOverSlot(
+                    slot,
+                    mouseX,
+                    mouseY
+                )
+            ) {
+                if (slot.stack.isEmpty) continue
+
+                //draw description overlay
+                ctx.drawTexture(
+                    this.descriptionTexture,
+                    x - 124,
+                    y,
+                    0,
+                    0,
+                    121,
+                    161
+                )
+
+                val recipe =
+                    this.screenHandler.recipeManager!!.getRecipe(slot.stack)
+
+                val recipeStacks = arrayListOf<ItemStack>()
+
+                //TODO: Find a way to draw all matching stacks. Maybe a timer that loops through the list of matching stacks
+                for (ingredient in recipe.ingredients) {
+                    if (ingredient.isEmpty) continue
+
+                    val item = ingredient.matchingStacks[0]
+                    val index =
+                        recipeStacks.indexOfFirst { it.item == item.item }
+
+                    if (index == -1) {
+                        recipeStacks.add(item.copy())
+                        continue
+                    }
+                    recipeStacks[index].count += item.count
+                }
+
+                recipeStacks.forEachIndexed { i, stack ->
+                    ctx.drawItem(
+                        stack,
+                        x - 25,
+                        y + 5 + i * 18
+                    )
+                    ctx.drawItemInSlot(
+                        this.client!!.textRenderer,
+                        stack,
+                        x - 25,
+                        y + 5 + i * 18
+                    )
+                }
+
+                val output =
+                    recipe.getOutput(this.client!!.world!!.registryManager)
+
+                ctx.drawText(
+                    this.client!!.textRenderer,
+                    output.name,
+                    x - 119,
+                    y + 5,
+                    0xFFFFFF,
+                    false,
+                )
+            }
+        }
+    }
+
+    private fun isMouseOverSlot(slot: Slot, mouseX: Int, mouseY: Int): Boolean {
+        val aX = mouseX - this.x
+        val aY = mouseY - this.y
+        return aX >= slot.x && aX < slot.x + 18 && aY >= slot.y && aY < slot.y + 18
     }
 }
