@@ -163,7 +163,7 @@ class CraftingTableIIScreen(
                     this.client!!.textRenderer,
                     output.name,
                     x - 118,
-                    y + 6,
+                    y + 9,
                     0xFFFFFF,
                     false,
                 )
