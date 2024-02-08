@@ -176,9 +176,16 @@ class CraftingTableIIScreen(
                 val titleX = x - 118
                 val titleY = y + 9
 
+                val title = if (output.name.string.length > 16) {
+                    output.name.string.substring(0, 16) + "..."
+                } else {
+                    output.name.string
+                }
+
+                //draw title
                 ctx.drawText(
                     this.client!!.textRenderer,
-                    output.name,
+                    title,
                     titleX,
                     titleY,
                     0xFFFFFF,
