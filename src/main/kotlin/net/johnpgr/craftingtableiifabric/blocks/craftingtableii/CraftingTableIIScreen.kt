@@ -1,7 +1,9 @@
 package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
+import com.google.gson.Gson
 import com.mojang.blaze3d.systems.RenderSystem
 import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.render.GameRenderer
@@ -10,6 +12,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.screen.slot.Slot
 import net.minecraft.text.Text
 import net.minecraft.util.math.MathHelper
+import kotlin.jvm.optionals.getOrNull
 
 class CraftingTableIIScreen(
     screenHandler: CraftingTableIIScreenHandler,
@@ -18,6 +21,16 @@ class CraftingTableIIScreen(
 ) : HandledScreen<CraftingTableIIScreenHandler>(
     screenHandler, player.inventory, title
 ) {
+    companion object {
+        private const val DESCRIPTIONS_BASE_PATH = "descriptions/lang"
+    }
+
+    private val currentLang: String
+        get() = this.client?.languageManager?.language ?: "en_us"
+    private val descriptionsIdentifier = CraftingTableIIFabric.id(
+        "${DESCRIPTIONS_BASE_PATH}/${currentLang}.json"
+    )
+    private var descriptionsMap: HashMap<String, String>? = null
     private val texture = CraftingTableIIFabric.id(
         "textures/gui/crafttableii.png"
     )
@@ -33,6 +46,7 @@ class CraftingTableIIScreen(
         playerInventoryTitleY = backgroundHeight - 97
         x = width / 2 - backgroundWidth / 2
         y = height / 2 - backgroundHeight / 2
+        this.loadDescriptions()
     }
 
     override fun render(
@@ -119,7 +133,7 @@ class CraftingTableIIScreen(
                     0,
                     0,
                     121,
-                    161
+                    162
                 )
 
                 val recipe =
@@ -159,14 +173,53 @@ class CraftingTableIIScreen(
                 val output =
                     recipe.getOutput(this.client!!.world!!.registryManager)
 
+                val titleX = x - 118
+                val titleY = y + 9
+
                 ctx.drawText(
                     this.client!!.textRenderer,
                     output.name,
-                    x - 118,
-                    y + 9,
+                    titleX,
+                    titleY,
                     0xFFFFFF,
                     false,
                 )
+
+                val description =
+                    descriptionsMap?.get(output.translationKey) ?: continue
+                val chunks = this.chunkDescription(description)
+                val descY = titleY + 2
+                val scalef = 0.5f
+
+                ctx.matrices.push()
+                ctx.matrices.scale(scalef, scalef, 1.0f)
+                ctx.matrices.translate(
+                    (titleX / scalef).toDouble(),
+                    (descY / scalef).toDouble(),
+                    0.0
+                )
+
+                for ((index, chunk) in chunks.withIndex()) {
+                    ctx.drawText(
+                        this.client!!.textRenderer,
+                        chunk,
+                        0,
+                        40 + 10 * index,
+                        0xFFFFFF,
+                        false
+                    )
+                }
+
+                ctx.drawText(
+                    this.client!!.textRenderer,
+                    output.translationKey,
+                    0,
+                    280,
+                    0xFFFFFF,
+                    false
+                )
+
+                ctx.matrices.pop()
             }
         }
     }
@@ -176,4 +229,45 @@ class CraftingTableIIScreen(
         val aY = mouseY - this.y
         return aX >= slot.x && aX < slot.x + 18 && aY >= slot.y && aY < slot.y + 18
     }
+
+    private fun loadDescriptions() {
+        val fallback = CraftingTableIIFabric.id(
+            "${DESCRIPTIONS_BASE_PATH}/en_us.json"
+        )
+        val resourceManager = MinecraftClient.getInstance().resourceManager
+        val resource =
+            resourceManager.getResource(this.descriptionsIdentifier).getOrNull()
+                ?: resourceManager.getResource(fallback).getOrNull() ?: return
+        val inputStream = resource.inputStream
+        val json = inputStream.bufferedReader().use { it.readText() }
+        this.descriptionsMap = Gson().fromJson(
+            json, HashMap::class.java
+        ) as HashMap<String, String>
+    }
+
+    private fun chunkDescription(description: String): List<String> {
+        val chunks = arrayListOf<String>()
+        val sentences = description.split(". ")
+        for (sentence in sentences) {
+            val words = sentence.split(" ")
+            var chunk = ""
+            for (word in words) {
+                if (chunk.length + word.length + 1 > 36) { // +1 to account for the period
+                    chunks.add(chunk)
+                    chunk = ""
+                }
+                chunk += "$word "
+            }
+            if (chunk.isNotBlank()) {
+                chunks.add(chunk.trim() + ".") // add the period at the end of each chunk
+            }
+        }
+        val last = chunks[chunks.size - 1]
+        chunks[chunks.size - 1] = last.substring(
+            0,
+            last.length - 1
+        ) // remove the period from the last chunk
+        return chunks
+    }
 }
+

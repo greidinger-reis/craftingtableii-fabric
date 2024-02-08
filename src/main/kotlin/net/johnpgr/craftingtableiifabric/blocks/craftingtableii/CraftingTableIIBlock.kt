@@ -1,5 +1,6 @@
 package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
+import com.google.gson.JsonObject
 import net.johnpgr.craftingtableiifabric.utils.BlockScreenHandlerFactory
 import net.minecraft.block.Block
 import net.minecraft.block.BlockRenderType
@@ -8,6 +9,7 @@ import net.minecraft.block.BlockWithEntity
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemPlacementContext
+import net.minecraft.recipe.RecipeType
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.Properties
 import net.minecraft.util.ActionResult
@@ -17,6 +19,7 @@ import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import java.io.File
 
 class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
     override fun appendProperties(stateManager: StateManager.Builder<Block?, BlockState?>) {
@@ -72,6 +75,7 @@ class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
                 BlockScreenHandlerFactory(this, pos)
             )
         }
+
         return ActionResult.SUCCESS
     }
 
