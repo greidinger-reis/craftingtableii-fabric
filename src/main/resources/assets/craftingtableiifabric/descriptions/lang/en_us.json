@@ -713,5 +713,6 @@
   "block.minecraft.cut_red_sandstone_slab": "A slab made from cut red sandstone. It can be used for building and decoration purposes.",
   "block.minecraft.purple_wool": "A block made from purple wool. It can be used for building and decoration purposes.",
   "block.minecraft.polished_andesite": "A block made from polished andesite, a decorative stone. It can be used for building and decoration purposes.",
-  "block.minecraft.black_stained_glass": "A block made from black stained glass. It has a dark color and can be used for building and decoration purposes."
+  "block.minecraft.black_stained_glass": "A block made from black stained glass. It has a dark color and can be used for building and decoration purposes.",
+  "block.craftingtableiifabric.craftingtableii": "An upgraded version of the crafting table. It automatically lists all possible crafting recipes and allows for quick crafting of items."
 }
