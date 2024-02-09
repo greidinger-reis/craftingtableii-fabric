@@ -10,6 +10,7 @@ import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
+import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Recipe
@@ -23,7 +24,7 @@ import net.minecraft.screen.slot.SlotActionType
 class CraftingTableIIScreenHandler(
     syncId: Int,
     val player: PlayerEntity,
-    val entity: CraftingTableIIBlockEntity,
+    val entity: CraftingTableIIEntity,
 ) : AbstractRecipeScreenHandler<RecipeInputInventory>(
     ModBlocks.getContainerInfo(ModBlocks.CRAFTING_TABLE_II)?.handlerType,
     syncId,
@@ -201,5 +202,20 @@ class CraftingTableIIScreenHandler(
         invSlot: Int
     ): ItemStack {
         return ItemStack.EMPTY
+    }
+
+    class CraftingTableIISlot(
+        inventory: Inventory,
+        index: Int,
+        x: Int,
+        y: Int
+    ) :
+        Slot(
+            inventory,
+            index, x, y
+        ) {
+        override fun canInsert(stack: ItemStack): Boolean {
+            return false
+        }
     }
 }

@@ -1,15 +1,14 @@
 package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
-import com.google.gson.JsonObject
+import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
+import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 import net.johnpgr.craftingtableiifabric.utils.BlockScreenHandlerFactory
-import net.minecraft.block.Block
-import net.minecraft.block.BlockRenderType
-import net.minecraft.block.BlockState
-import net.minecraft.block.BlockWithEntity
+import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
+import net.minecraft.block.entity.BlockEntityTicker
+import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemPlacementContext
-import net.minecraft.recipe.RecipeType
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.Properties
 import net.minecraft.util.ActionResult
@@ -18,10 +17,11 @@ import net.minecraft.util.BlockRotation
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.shape.VoxelShape
+import net.minecraft.world.BlockView
 import net.minecraft.world.World
-import java.io.File
 
-class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
+class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTING_TABLE)) {
     override fun appendProperties(stateManager: StateManager.Builder<Block?, BlockState?>) {
         stateManager.add(Properties.HORIZONTAL_FACING)
     }
@@ -48,18 +48,38 @@ class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
     }
 
     override fun getRenderType(state: BlockState): BlockRenderType {
-        return BlockRenderType.MODEL
+        return BlockRenderType.ENTITYBLOCK_ANIMATED
     }
 
     override fun hasSidedTransparency(state: BlockState?): Boolean {
-        return false
+        return true
+    }
+
+    //TODO
+    override fun getCollisionShape(
+        state: BlockState?,
+        world: BlockView?,
+        pos: BlockPos?,
+        context: ShapeContext?
+    ): VoxelShape {
+        return super.getCollisionShape(state, world, pos, context)
+    }
+
+    //TODO
+    override fun getOutlineShape(
+        state: BlockState?,
+        world: BlockView?,
+        pos: BlockPos?,
+        context: ShapeContext?
+    ): VoxelShape {
+        return super.getOutlineShape(state, world, pos, context)
     }
 
     override fun createBlockEntity(
         pos: BlockPos,
         state: BlockState
     ): BlockEntity {
-        return CraftingTableIIBlockEntity(this, pos, state)
+        return CraftingTableIIEntity(this, pos, state)
     }
 
     override fun onUse(
@@ -77,6 +97,21 @@ class CraftingTableIIBlock(settings: Settings) : BlockWithEntity(settings) {
         }
 
         return ActionResult.SUCCESS
+    }
+
+    override fun <T : BlockEntity?> getTicker(
+        world: World?,
+        state: BlockState?,
+        type: BlockEntityType<T>?
+    ): BlockEntityTicker<T>? {
+        return checkType(
+            type,
+            ModBlocks.getEntityType(this)
+        ) { world, pos, state, entity ->
+            CraftingTableIIEntity.tick(
+                world, pos, state, entity as CraftingTableIIEntity
+            )
+        }
     }
 
     override fun hasComparatorOutput(state: BlockState): Boolean {

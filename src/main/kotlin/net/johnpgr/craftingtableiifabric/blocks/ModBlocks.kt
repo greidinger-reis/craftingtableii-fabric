@@ -4,10 +4,7 @@ package net.johnpgr.craftingtableiifabric.blocks
 
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
-import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIBlock
-import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIBlockEntity
-import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIScreen
-import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIScreenHandler
+import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.*
 import net.johnpgr.craftingtableiifabric.utils.FabricLoader
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
@@ -103,15 +100,16 @@ object ModBlocks {
         blockRegistry.forEach { it.value.initClient() }
     }
 
-    val CRAFTING_TABLE_II = registerWithEntity<CraftingTableIIBlockEntity>(
+    val CRAFTING_TABLE_II = registerWithEntity<CraftingTableIIEntity>(
         CraftingTableIIFabric.id("craftingtableii"),
-        CraftingTableIIBlock(FabricBlockSettings.copyOf(Blocks.CRAFTING_TABLE)),
+        CraftingTableII(),
         containers = listOf(
             ContainerInfo<CraftingTableIIScreenHandler>(
                 CraftingTableIIScreenHandler::class,
                 { CraftingTableIIScreen::class }
             )
         ),
+        renderer = { CraftingTableIIEntityRenderer::class }
     )
 }
 

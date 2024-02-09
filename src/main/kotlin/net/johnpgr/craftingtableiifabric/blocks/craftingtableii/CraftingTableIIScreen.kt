@@ -117,7 +117,7 @@ class CraftingTableIIScreen(
 
         for (i in 10 until 50) {
             val slot = this.screenHandler.getSlot(i)
-            if (slot is CraftingTableIISlot && isMouseOverSlot(
+            if (slot is CraftingTableIIScreenHandler.CraftingTableIISlot && isMouseOverSlot(
                     slot,
                     mouseX,
                     mouseY
