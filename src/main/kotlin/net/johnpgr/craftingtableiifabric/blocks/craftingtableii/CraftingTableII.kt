@@ -19,6 +19,7 @@ import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
+import net.minecraft.world.BlockRenderView
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
@@ -57,24 +58,26 @@ class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTI
         return BlockRenderType.ENTITYBLOCK_ANIMATED
     }
 
-    //TODO
-    override fun getCollisionShape(
-        state: BlockState?,
-        world: BlockView?,
-        pos: BlockPos?,
-        context: ShapeContext?
-    ): VoxelShape {
-        return super.getCollisionShape(state, world, pos, context)
+    override fun hasSidedTransparency(state: BlockState?): Boolean {
+        return true
     }
 
-    //TODO
+    override fun getCollisionShape(
+        state: BlockState,
+        view: BlockView,
+        pos: BlockPos,
+        context: ShapeContext
+    ): VoxelShape {
+        return createCuboidShape(1.0, 0.0, 2.0, 15.0, 16.0, 15.0)
+    }
+
     override fun getOutlineShape(
         state: BlockState?,
         world: BlockView?,
         pos: BlockPos?,
         context: ShapeContext?
     ): VoxelShape {
-        return super.getOutlineShape(state, world, pos, context)
+        return createCuboidShape(1.0, 0.0, 2.0, 15.0, 16.0, 15.0)
     }
 
     override fun createBlockEntity(

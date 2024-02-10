@@ -1,3 +1,7 @@
 {
-  "parent": "minecraft:block/crafting_table"
+  "parent": "builtin/entity",
+  "texture_size": [128, 64],
+  "textures": {
+    "particle": "minecraft:block/crafting_table"
+  }
 }

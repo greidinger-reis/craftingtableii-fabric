@@ -1,7 +1,5 @@
 {
   "variants": {
-    "": {
-      "model": "minecraft:block/crafting_table"
-    }
+    "": { "model": "craftingtableiifabric:block/craftingtableii" }
   }
 }
