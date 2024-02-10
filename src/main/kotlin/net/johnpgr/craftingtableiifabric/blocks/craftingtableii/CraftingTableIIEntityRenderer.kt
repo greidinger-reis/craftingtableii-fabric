@@ -16,6 +16,10 @@ import net.minecraft.util.math.RotationAxis
 
 class CraftingTableIIEntityRenderer(private val arg: BlockEntityRendererFactory.Context) :
     BlockEntityRenderer<CraftingTableIIEntity> {
+    private val texture = SpriteIdentifier(
+        PlayerScreenHandler.BLOCK_ATLAS_TEXTURE,
+        Identifier(CraftingTableIIFabric.MOD_ID + ":block/craftingtableii")
+    )
     private val table = arg.getLayerModelPart(CraftingTableIIEntityModel.tableModelLayer)
     private val door = arg.getLayerModelPart(CraftingTableIIEntityModel.doorModelLayer)
     private val doorSide = arg.getLayerModelPart(CraftingTableIIEntityModel.doorSideModelLayer)
@@ -32,11 +36,7 @@ class CraftingTableIIEntityRenderer(private val arg: BlockEntityRendererFactory.
         light: Int,
         overlay: Int
     ) {
-        val spriteId = SpriteIdentifier(
-            PlayerScreenHandler.BLOCK_ATLAS_TEXTURE,
-            Identifier(CraftingTableIIFabric.MOD_ID + ":block/craftingtableii")
-        )
-        val consumer = spriteId.getVertexConsumer(vertexConsumers, RenderLayer::getEntityCutout)
+        val consumer = texture.getVertexConsumer(vertexConsumers, RenderLayer::getEntityCutout)
         val rotation = entity.cachedState.get(Properties.HORIZONTAL_FACING).asRotation() * 89f
         val lightAbove = WorldRenderer.getLightmapCoordinates(entity.world, entity.cachedState, entity.pos.up())
 
