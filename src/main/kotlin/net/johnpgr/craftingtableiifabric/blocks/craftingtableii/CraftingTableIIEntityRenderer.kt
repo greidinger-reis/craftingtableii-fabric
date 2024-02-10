@@ -1,6 +1,7 @@
 package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
 import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.VertexConsumer
 import net.minecraft.client.render.VertexConsumerProvider
@@ -12,13 +13,13 @@ import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.screen.PlayerScreenHandler
 import net.minecraft.state.property.Properties
 import net.minecraft.util.Identifier
+import net.minecraft.util.math.Direction
 import net.minecraft.util.math.RotationAxis
 
 class CraftingTableIIEntityRenderer(private val arg: BlockEntityRendererFactory.Context) :
     BlockEntityRenderer<CraftingTableIIEntity> {
     private val texture = SpriteIdentifier(
-        PlayerScreenHandler.BLOCK_ATLAS_TEXTURE,
-        Identifier(CraftingTableIIFabric.MOD_ID + ":block/craftingtableii")
+        PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, Identifier(CraftingTableIIFabric.MOD_ID + ":block/craftingtableii")
     )
     private val table = arg.getLayerModelPart(CraftingTableIIEntityModel.tableModelLayer)
     private val door = arg.getLayerModelPart(CraftingTableIIEntityModel.doorModelLayer)
@@ -37,8 +38,19 @@ class CraftingTableIIEntityRenderer(private val arg: BlockEntityRendererFactory.
         overlay: Int
     ) {
         val consumer = texture.getVertexConsumer(vertexConsumers, RenderLayer::getEntityCutout)
-        val rotation = entity.cachedState.get(Properties.HORIZONTAL_FACING).asRotation() * 89f
-        val lightAbove = WorldRenderer.getLightmapCoordinates(entity.world, entity.cachedState, entity.pos.up())
+        val blockState =
+            if (entity.hasWorld()) entity.cachedState
+            else (ModBlocks.CRAFTING_TABLE_II.defaultState.with(
+                Properties.HORIZONTAL_FACING, Direction.SOUTH
+            ))
+        val lightAbove =
+            if (entity.hasWorld()) WorldRenderer.getLightmapCoordinates(
+                entity.world,
+                entity.cachedState,
+                entity.pos.up()
+            )
+            else light
+        val rotation = blockState.get(Properties.HORIZONTAL_FACING).asRotation() * 89f
 
         matrices.push()
         matrices.translate(0.5, 1.0, 0.5)
@@ -51,11 +63,7 @@ class CraftingTableIIEntityRenderer(private val arg: BlockEntityRendererFactory.
     }
 
     private fun renderModels(
-        rotation: Float,
-        matrices: MatrixStack,
-        consumer: VertexConsumer,
-        light: Int,
-        overlay: Int
+        rotation: Float, matrices: MatrixStack, consumer: VertexConsumer, light: Int, overlay: Int
     ) {
         this.door.getChild("door").setAngles(0f, rotation, 0f)
         this.table.render(matrices, consumer, light, overlay)
