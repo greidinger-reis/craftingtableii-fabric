@@ -50,7 +50,8 @@ class CraftingTableIIEntity(
             )
 
             if (playerDistance < 7.0) {
-                if(entity.doorAngle < 1.8f) entity.doorAngle += OPEN_SPEED
+                entity.doorAngle += OPEN_SPEED
+                if(entity.doorAngle > 1.8f) entity.doorAngle = 1.8f
 
                 //TODO: run the block animation
                 if (entity.doorState != DoorState.OPEN) {
@@ -67,7 +68,8 @@ class CraftingTableIIEntity(
                     )
                 }
             } else if (playerDistance > 7.0) {
-                if(entity.doorAngle > 0.0f) entity.doorAngle -= OPEN_SPEED
+                entity.doorAngle -= OPEN_SPEED
+                if(entity.doorAngle < 0f) entity.doorAngle = 0f
 
                 //TODO: run the block animation
                 if (entity.doorState != DoorState.CLOSED) {
@@ -84,7 +86,6 @@ class CraftingTableIIEntity(
                     )
                 }
             }
-
         }
     }
 

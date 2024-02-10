@@ -51,10 +51,6 @@ class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTI
         return BlockRenderType.ENTITYBLOCK_ANIMATED
     }
 
-    override fun hasSidedTransparency(state: BlockState?): Boolean {
-        return true
-    }
-
     //TODO
     override fun getCollisionShape(
         state: BlockState?,

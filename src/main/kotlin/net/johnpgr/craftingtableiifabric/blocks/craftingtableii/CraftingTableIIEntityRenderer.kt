@@ -5,7 +5,6 @@ import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.VertexConsumer
 import net.minecraft.client.render.VertexConsumerProvider
-import net.minecraft.client.render.WorldRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
 import net.minecraft.client.util.SpriteIdentifier
@@ -41,6 +40,15 @@ class CraftingTableIIEntityRenderer(private val arg: BlockEntityRendererFactory.
         light: Int,
         overlay: Int
     ) {
+        val spriteId = SpriteIdentifier(
+            PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, Identifier(
+                CraftingTableIIFabric.MOD_ID + ":block/craftingtableii"
+            )
+        )
+        val consumer = spriteId.getVertexConsumer(
+            vertexConsumers,
+            RenderLayer::getEntityCutout
+        )
         val doorRotation = entity.doorAngle
         val blockState =
             if (entity.hasWorld()) entity.cachedState
@@ -48,31 +56,24 @@ class CraftingTableIIEntityRenderer(private val arg: BlockEntityRendererFactory.
                 Properties.HORIZONTAL_FACING,
                 Direction.SOUTH
             )
-        val blockRotation = blockState.get(Properties.HORIZONTAL_FACING)
-            .asRotation() * 90f
+        val facing = blockState.get(Properties.HORIZONTAL_FACING)
+        val rotation = facing.asRotation() * 90f
+        val lightAbove = entity.world?.getLightLevel(entity.pos)
 
         matrices.push()
         matrices.translate(0.5, 1.0, 0.5)
-        matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(-blockRotation))
+        matrices.multiply(
+            RotationAxis.NEGATIVE_Y.rotationDegrees(-rotation),
+            0f,
+            1f,
+            0f
+        )
         matrices.scale(-1f, -1f, 1f)
-
-        val tableIdentifier = SpriteIdentifier(
-            PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, Identifier(
-                CraftingTableIIFabric.MOD_ID + ":block/craftingtableii"
-            )
-        )
-        val tableConsumer = tableIdentifier.getVertexConsumer(
-            vertexConsumers,
-            RenderLayer::getEntityCutout
-        )
-        val lightAbove = entity.world.let { world ->
-            WorldRenderer.getLightmapCoordinates(world, blockState, entity.pos)
-        }
 
         this.renderModels(
             doorRotation,
             matrices,
-            tableConsumer,
+            consumer,
             255,
             overlay
         )
@@ -80,70 +81,60 @@ class CraftingTableIIEntityRenderer(private val arg: BlockEntityRendererFactory.
         matrices.pop()
     }
 
-    private fun resetModelAngles() {
-        this.door.setAngles(0.0f, 0.0f, 0.0f)
-        this.doorSide.setAngles(0.0f, 0.0f, 0.0f)
-        this.doorSide1.setAngles(0.0f, 0.0f, 0.0f)
-        this.doorTopSide.setAngles(0.0f, 0.0f, 0.0f)
-        this.doorTopSide1.setAngles(0.0f, 0.0f, 0.0f)
-        this.book.setAngles(0.0f, 0.0f, 0.0f)
-    }
-
     private fun renderModels(
         rotation: Float,
         matrices: MatrixStack,
-        tableConsumer: VertexConsumer,
+        consumer: VertexConsumer,
         lightAbove: Int,
         overlay: Int
     ) {
-        this.resetModelAngles()
+        this.door.setAngles(0.0f, rotation, 0.0f)
 
         this.table.render(
             matrices,
-            tableConsumer,
+            consumer,
             lightAbove,
             overlay
         )
 
-        this.door.setAngles(0.0f, rotation, 0.0f)
         this.door.render(
             matrices,
-            tableConsumer,
+            consumer,
             lightAbove,
             overlay
         )
 
         this.doorSide.render(
             matrices,
-            tableConsumer,
+            consumer,
             lightAbove,
             overlay
         )
 
         this.doorSide1.render(
             matrices,
-            tableConsumer,
+            consumer,
             lightAbove,
             overlay
         )
 
         this.doorTopSide.render(
             matrices,
-            tableConsumer,
+            consumer,
             lightAbove,
             overlay
         )
 
         this.doorTopSide1.render(
             matrices,
-            tableConsumer,
+            consumer,
             lightAbove,
             overlay
         )
 
         this.book.render(
             matrices,
-            tableConsumer,
+            consumer,
             lightAbove,
             overlay
         )

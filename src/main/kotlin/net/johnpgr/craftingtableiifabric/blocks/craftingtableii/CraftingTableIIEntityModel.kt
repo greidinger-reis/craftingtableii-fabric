@@ -65,7 +65,7 @@ object CraftingTableIIEntityModel {
                 .uv(96, 0)
                 .cuboid(0f, 0f, 0f, 1f, 16f, 13f)
                 .mirrored(true),
-            ModelTransform.pivot(0f, 0f, 0f)
+            ModelTransform.of(6f, 0f, -6f, 0f, 0f, 0f)
         )
         return TexturedModelData.of(md, TEXTURE_WIDTH, TEXTURE_HEIGHT)
     }
@@ -80,7 +80,7 @@ object CraftingTableIIEntityModel {
                 .uv(61, 0)
                 .cuboid(0f, 0f, 0f, 4f, 16f, 1f)
                 .mirrored(true),
-            ModelTransform.pivot(2f, 0f, -7f)
+            ModelTransform.of(2f, 0f, -7f, 0f, 0f, 0f)
         )
         return TexturedModelData.of(md, TEXTURE_WIDTH, TEXTURE_HEIGHT)
     }
@@ -95,7 +95,7 @@ object CraftingTableIIEntityModel {
                 .uv(71, 0)
                 .cuboid(0f, 0f, 0f, 4f, 16f, 1f)
                 .mirrored(true),
-            ModelTransform.pivot(2f, 0f, 6f)
+            ModelTransform.of(2f, 0f, 6f, 0f, 0f, 0f)
         )
         return TexturedModelData.of(md, TEXTURE_WIDTH, TEXTURE_HEIGHT)
     }
@@ -110,7 +110,7 @@ object CraftingTableIIEntityModel {
                 .uv(0, 46)
                 .cuboid(0f, 0f, 0f, 4f, 1f, 12f)
                 .mirrored(true),
-            ModelTransform.pivot(2f, 0f, -6f)
+            ModelTransform.of(2f, 0f, -6f, 0f, 0f, 0f)
         )
         return TexturedModelData.of(md, TEXTURE_WIDTH, TEXTURE_HEIGHT)
     }
@@ -125,7 +125,7 @@ object CraftingTableIIEntityModel {
                 .uv(0, 33)
                 .cuboid(0f, 0f, 0f, 4f, 1f, 12f)
                 .mirrored(true),
-            ModelTransform.pivot(2f, 15f, -5.8f)
+            ModelTransform.of(2f, 15f, -5.8f, 0f, 0f, 0f)
         )
         return TexturedModelData.of(md, TEXTURE_WIDTH, TEXTURE_HEIGHT)
     }
@@ -140,7 +140,7 @@ object CraftingTableIIEntityModel {
                 .uv(61, 23)
                 .cuboid(0f, 0f, 0f, 5f, 1f, 3f)
                 .mirrored(true),
-            ModelTransform.rotation(-2f, -1f, 3.5f)
+            ModelTransform.of(-2f, -1f, 3.5f, 0f, 0.4833219f, 0f)
         )
         return TexturedModelData.of(md, TEXTURE_WIDTH, TEXTURE_HEIGHT)
     }
