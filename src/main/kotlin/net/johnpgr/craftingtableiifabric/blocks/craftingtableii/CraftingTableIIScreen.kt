@@ -246,6 +246,7 @@ class CraftingTableIIScreen(
         return aX >= slot.x && aX < slot.x + 18 && aY >= slot.y && aY < slot.y + 18
     }
 
+    //TODO: Move this to load the descriptions once on the mod initialization or world load
     private fun loadDescriptions() {
         val fallback = CraftingTableIIFabric.id(
             "${DESCRIPTIONS_BASE_PATH}/en_us.json"

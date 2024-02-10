@@ -111,9 +111,9 @@ class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTI
         return checkType(
             type,
             ModBlocks.getEntityType(this)
-        ) { world, pos, state, entity ->
+        ) { world1, pos, state1, entity ->
             CraftingTableIIEntity.tick(
-                world, pos, state, entity as CraftingTableIIEntity
+                world1, pos, state1, entity as CraftingTableIIEntity
             )
         }
     }
