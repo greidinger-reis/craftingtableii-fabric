@@ -57,7 +57,7 @@ class CraftingTableIIEntityRenderer(private val arg: BlockEntityRendererFactory.
         light: Int,
         overlay: Int
     ) {
-        this.door.setAngles(0f, rotation, 0f)
+        this.door.getChild("door").setAngles(0f, rotation, 0f)
         this.table.render(matrices, consumer, light, overlay)
         this.door.render(matrices, consumer, light, overlay)
         this.doorSide.render(matrices, consumer, light, overlay)
