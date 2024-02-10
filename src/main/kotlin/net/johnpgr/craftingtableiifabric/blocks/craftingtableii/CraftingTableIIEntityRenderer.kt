@@ -5,6 +5,7 @@ import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.VertexConsumer
 import net.minecraft.client.render.VertexConsumerProvider
+import net.minecraft.client.render.WorldRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
 import net.minecraft.client.util.SpriteIdentifier
@@ -56,19 +57,25 @@ class CraftingTableIIEntityRenderer(private val arg: BlockEntityRendererFactory.
                 Properties.HORIZONTAL_FACING,
                 Direction.SOUTH
             )
-        val facing = blockState.get(Properties.HORIZONTAL_FACING)
-        val rotation = facing.asRotation() * 90f
-        val lightAbove = entity.world?.getLightLevel(entity.pos)
+        val facing = blockState.get(Properties.HORIZONTAL_FACING).asRotation() * 90
 
         matrices.push()
         matrices.translate(0.5, 1.0, 0.5)
         matrices.multiply(
-            RotationAxis.NEGATIVE_Y.rotationDegrees(-rotation),
+            RotationAxis.NEGATIVE_Y.rotationDegrees(-facing),
             0f,
             1f,
             0f
         )
         matrices.scale(-1f, -1f, 1f)
+
+        //TODO: Fix lightAbove
+        val lightAbove = entity.world?.let {
+            WorldRenderer.getLightmapCoordinates(
+                it,
+                entity.pos
+            )
+        } ?: light
 
         this.renderModels(
             doorRotation,
