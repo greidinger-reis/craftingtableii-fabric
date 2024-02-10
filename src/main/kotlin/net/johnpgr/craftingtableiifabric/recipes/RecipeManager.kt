@@ -70,6 +70,7 @@ class RecipeManager(
                         recipe.getOutput(result.registryManager).item == stack.item
                     }
                 }
+
         return recipeList.first()
     }
 }

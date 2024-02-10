@@ -2,13 +2,11 @@
 
 package net.johnpgr.craftingtableiifabric.blocks
 
-import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
 import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.*
 import net.johnpgr.craftingtableiifabric.utils.FabricLoader
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
-import net.minecraft.block.Blocks
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.client.render.block.entity.BlockEntityRenderer

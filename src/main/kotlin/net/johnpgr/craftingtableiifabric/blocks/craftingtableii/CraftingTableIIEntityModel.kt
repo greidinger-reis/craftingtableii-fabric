@@ -125,7 +125,7 @@ object CraftingTableIIEntityModel {
                 .uv(0, 33)
                 .cuboid(0f, 0f, 0f, 4f, 1f, 12f)
                 .mirrored(true),
-            ModelTransform.of(2f, 15f, -5.8f, 0f, 0f, 0f)
+            ModelTransform.of(2f, 15f, -6f, 0f, 0f, 0f)
         )
         return TexturedModelData.of(md, TEXTURE_WIDTH, TEXTURE_HEIGHT)
     }

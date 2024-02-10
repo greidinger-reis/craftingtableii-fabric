@@ -9,7 +9,6 @@ import net.minecraft.client.gui.screen.ingame.HandledScreens
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.screen.ScreenHandler
-import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier

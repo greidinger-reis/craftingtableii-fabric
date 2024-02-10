@@ -125,6 +125,7 @@ class CraftingTableIIScreenHandler(
         if (player.world.isClient) {
             if (slotIndex == -999) return
             val slot = this.getSlot(slotIndex)
+            if (!slot.hasStack()) return
 
             if (slot is CraftingTableIISlot) {
                 val quickCraft = actionType == SlotActionType.QUICK_MOVE

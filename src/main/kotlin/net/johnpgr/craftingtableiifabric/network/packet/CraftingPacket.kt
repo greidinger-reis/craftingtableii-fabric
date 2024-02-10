@@ -16,7 +16,7 @@ class CraftingPacket(
             val syncId = buf.readInt()
             val quickCraft = buf.readBoolean()
 
-            return CraftingPacket(recipe,syncId, quickCraft)
+            return CraftingPacket(recipe, syncId, quickCraft)
         }
     }
 

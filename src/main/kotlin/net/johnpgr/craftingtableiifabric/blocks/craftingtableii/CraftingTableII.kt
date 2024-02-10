@@ -17,6 +17,7 @@ import net.minecraft.util.BlockRotation
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
@@ -26,10 +27,15 @@ class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTI
         stateManager.add(Properties.HORIZONTAL_FACING)
     }
 
-    override fun getPlacementState(ctx: ItemPlacementContext): BlockState? {
+    override fun getPlacementState(ctx: ItemPlacementContext): BlockState {
         return defaultState.with(
             Properties.HORIZONTAL_FACING,
-            ctx.horizontalPlayerFacing
+            if (ctx.horizontalPlayerFacing.rotateYCounterclockwise() == Direction.NORTH ||
+                ctx.horizontalPlayerFacing.rotateYCounterclockwise() == Direction.SOUTH
+            )
+                ctx.horizontalPlayerFacing.rotateYCounterclockwise().opposite
+            else
+                ctx.horizontalPlayerFacing.rotateYCounterclockwise()
         )
     }
 
