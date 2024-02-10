@@ -11,6 +11,15 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.math.BlockPos
 
 class CraftingTableIIItemDynamicRenderer : BuiltinItemRendererRegistry.DynamicItemRenderer {
+    companion object {
+        fun initClient() {
+            BuiltinItemRendererRegistry.INSTANCE.register(
+                ModBlocks.CRAFTING_TABLE_II,
+                CraftingTableIIItemDynamicRenderer()
+            )
+        }
+    }
+
     override fun render(
         stack: ItemStack,
         mode: ModelTransformationMode,

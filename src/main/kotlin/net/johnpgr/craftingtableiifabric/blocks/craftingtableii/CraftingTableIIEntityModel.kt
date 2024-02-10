@@ -1,5 +1,6 @@
 package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
+import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry
 import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
 import net.minecraft.client.model.ModelData
 import net.minecraft.client.model.ModelPartBuilder
@@ -10,6 +11,13 @@ import net.minecraft.client.render.entity.model.EntityModelLayer
 object CraftingTableIIEntityModel {
     private const val TEXTURE_WIDTH = 128
     private const val TEXTURE_HEIGHT = 64
+
+    fun initClient() {
+        getEntries()
+            .forEach { (entityLayer, textureModelData) ->
+                EntityModelLayerRegistry.registerModelLayer(entityLayer) { textureModelData }
+            }
+    }
 
     val tableModelLayer = EntityModelLayer(
         CraftingTableIIFabric.id("craftingtableii"),
@@ -145,7 +153,7 @@ object CraftingTableIIEntityModel {
         return TexturedModelData.of(md, TEXTURE_WIDTH, TEXTURE_HEIGHT)
     }
 
-    fun getEntries(): LinkedHashMap<EntityModelLayer, TexturedModelData> {
+    private fun getEntries(): LinkedHashMap<EntityModelLayer, TexturedModelData> {
         val map = linkedMapOf<EntityModelLayer, TexturedModelData>()
         map[tableModelLayer] = setupTable()
         map[doorModelLayer] = setupDoor()
