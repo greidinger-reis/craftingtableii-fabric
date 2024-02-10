@@ -37,22 +37,15 @@ class CraftingTableIIEntityRenderer(private val arg: BlockEntityRendererFactory.
             Identifier(CraftingTableIIFabric.MOD_ID + ":block/craftingtableii")
         )
         val consumer = spriteId.getVertexConsumer(vertexConsumers, RenderLayer::getEntityCutout)
-        val doorRotation = entity.doorAngle
-        val blockState = entity.cachedState
-        val facing = blockState.get(Properties.HORIZONTAL_FACING)
-        val rotation = facing.asRotation() * 89f
+        val rotation = entity.cachedState.get(Properties.HORIZONTAL_FACING).asRotation() * 89f
+        val lightAbove = WorldRenderer.getLightmapCoordinates(entity.world, entity.cachedState, entity.pos.up())
 
         matrices.push()
         matrices.translate(0.5, 1.0, 0.5)
-        matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(-rotation), 0f, 1f, 0f)
+        matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(-rotation))
         matrices.scale(-1f, -1f, 1f)
 
-        //TODO: Fix light
-        val lightAbove = entity.world?.let {
-            WorldRenderer.getLightmapCoordinates(it, entity.pos)
-        }
-
-        this.renderModels(doorRotation, matrices, consumer, 255, overlay)
+        this.renderModels(entity.doorAngle, matrices, consumer, lightAbove, overlay)
 
         matrices.pop()
     }
