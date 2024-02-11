@@ -20,8 +20,7 @@ class RecipeManager(
         this.recipeMatcher.clear()
         this.player.inventory.populateRecipeFinder(this.recipeMatcher)
         this.craftingScreenHandler.populateRecipeFinder(this.recipeMatcher)
-        this.recipes =
-            this.player.recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
+        this.recipes = this.player.recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
     }
 
     fun scrollCraftableRecipes(scrollPos: Float) {
@@ -34,8 +33,7 @@ class RecipeManager(
 
         val listIndex = j * 8
         if (listIndex < craftableRecipesSize) {
-            this.craftingScreenHandler.currentListIndex =
-                listIndex
+            this.craftingScreenHandler.currentListIndex = listIndex
         }
 
         this.craftingScreenHandler.updateRecipes()
@@ -43,21 +41,12 @@ class RecipeManager(
 
     fun refreshCraftableItems() {
         this.refreshInputs()
-        this.recipes.forEach { result ->
-            result.computeCraftables(
-                this.recipeMatcher,
-                9,
-                9,
-                this.player.recipeBook
-            )
-        }
+        this.recipes.forEach { result -> result.computeCraftables(this.recipeMatcher, 9, 9, this.player.recipeBook) }
 
         this.recipeItemStacks = this.recipes.filter { result ->
             result.isInitialized && result.hasFittingRecipes() && result.hasCraftableRecipes()
         }.flatMap { result ->
-            result.getRecipes(true).map { recipe ->
-                recipe.getOutput(result.registryManager).copy()
-            }
+            result.getRecipes(true).map { recipe -> recipe.getOutput(result.registryManager).copy() }
         }
     }
 

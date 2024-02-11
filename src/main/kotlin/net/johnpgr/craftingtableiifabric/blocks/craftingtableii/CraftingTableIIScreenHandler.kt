@@ -40,17 +40,15 @@ class CraftingTableIIScreenHandler(
         inventory.onOpen(player)
 
         //The Crafting Result
-        this.addSlot(
-            CraftingResultSlot(
-                player, this.inputInventory, this.resultInventory, 0, -999, -999
-            )
-        )
+        this.addSlot(CraftingResultSlot(player, this.inputInventory, this.resultInventory, 0, -999, -999))
+
         //The Crafting Grid
         for (row in 0..2) {
             for (col in 0..2) {
                 this.addSlot(Slot(this.inputInventory, col + row * 3, -999, -999))
             }
         }
+
         //Our inventory
         for (row in 0..<CraftingTableIIInventory.ROWS) {
             for (col in 0..<CraftingTableIIInventory.COLS) {
@@ -64,12 +62,14 @@ class CraftingTableIIScreenHandler(
                 )
             }
         }
+
         //The player inventory
         for (row in 0..2) {
             for (col in 0..8) {
                 this.addSlot(Slot(player.inventory, col + row * 9 + 9, 8 + col * 18, 125 + row * 18))
             }
         }
+
         //The player hotbar
         for (row in 0..8) {
             this.addSlot(Slot(player.inventory, row, 8 + row * 18, 184))
