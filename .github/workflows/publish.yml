@@ -5,11 +5,8 @@ jobs:
   release:
     strategy:
       matrix:
-        java: [
-          17,
-          21
-        ]
-        os: [ubuntu-22.04]
+        java: [ 17 ]
+        os: [ ubuntu-22.04 ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: checkout repository
