@@ -1,7 +1,18 @@
+import org.ajoberstar.grgit.Grgit
+import org.kohsuke.github.GitHub
+import org.kohsuke.github.GHReleaseBuilder
+
+buildscript {
+	dependencies {
+		classpath("org.kohsuke:github-api:${project.property("github_api_version") as String}")
+	}
+}
+
 plugins {
 	id("maven-publish")
 	id("fabric-loom")
 	id("org.jetbrains.kotlin.jvm")
+	id("org.ajoberstar.grgit")
 	id("com.modrinth.minotaur")
 }
 
@@ -10,7 +21,20 @@ operator fun Project.get(property: String): String {
 }
 
 fun getChangeLog(): String {
-	return "A changelog can be found at https://github.com/johnpgr/$name/commits/"
+	return "https://github.com/johnpgr/$name/commits/"
+}
+
+fun getBranch(): String {
+	environment["GITHUB_REF"]?.let { branch ->
+		return branch.substring(branch.lastIndexOf("/") + 1)
+	}
+	val grgit = try {
+		extensions.getByName("grgit") as Grgit
+	}catch (ignored: Exception) {
+		return "unknown"
+	}
+	val branch = grgit.branch.current().name
+	return branch.substring(branch.lastIndexOf("/") + 1)
 }
 
 val environment: Map<String, String> = System.getenv()
@@ -81,6 +105,27 @@ java {
 tasks.jar {
 	from("LICENSE") {
 		rename { "${it}_${project.base.archivesName.get()}"}
+	}
+}
+
+//Github publishing
+task("github") {
+	dependsOn(tasks.remapJar)
+	group = "upload"
+
+	onlyIf { environment.containsKey("GITHUB_TOKEN") }
+
+	doLast {
+		val github = GitHub.connectUsingOAuth(environment["GITHUB_TOKEN"])
+		val repository = github.getRepository(environment["GITHUB_REPOSITORY"])
+
+		val releaseBuilder = GHReleaseBuilder(repository, version as String)
+		releaseBuilder.name(releaseName)
+		releaseBuilder.body(getChangeLog())
+		releaseBuilder.commitish(getBranch())
+
+		val ghRelease = releaseBuilder.create()
+		ghRelease.uploadAsset(file(releaseFile), "application/java-archive")
 	}
 }
 
