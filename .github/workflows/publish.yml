@@ -24,5 +24,6 @@ jobs:
       - name: build
         run: ./gradlew build modrinth github --stacktrace
         env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GH_API_KEY }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
