@@ -20,6 +20,9 @@ operator fun Project.get(property: String): String {
 	return property(property) as String
 }
 
+version = project["mod_version"]
+group = project["maven_group"]
+
 fun getChangeLog(): String {
 	return "https://github.com/johnpgr/$name/commits/"
 }
@@ -53,8 +56,6 @@ tasks.compileKotlin{
 	}
 }
 
-version = project["mod_version"]
-group = project["maven_group"]
 
 base {
 	archivesName = project["archives_base_name"]
