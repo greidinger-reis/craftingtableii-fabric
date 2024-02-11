@@ -39,14 +39,8 @@ class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTI
         )
     }
 
-    override fun rotate(
-        state: BlockState,
-        rotation: BlockRotation
-    ): BlockState {
-        return state.with(
-            Properties.HORIZONTAL_FACING,
-            rotation.rotate(state[Properties.HORIZONTAL_FACING])
-        )
+    override fun rotate(state: BlockState, rotation: BlockRotation): BlockState {
+        return state.with(Properties.HORIZONTAL_FACING, rotation.rotate(state[Properties.HORIZONTAL_FACING]))
     }
 
     override fun mirror(state: BlockState, mirror: BlockMirror): BlockState? {
@@ -79,10 +73,7 @@ class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTI
         return createCuboidShape(1.0, 0.0, 2.0, 15.0, 16.0, 15.0)
     }
 
-    override fun createBlockEntity(
-        pos: BlockPos,
-        state: BlockState
-    ): BlockEntity {
+    override fun createBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {
         return CraftingTableIIEntity(this, pos, state)
     }
 
