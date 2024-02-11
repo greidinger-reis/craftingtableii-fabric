@@ -43,11 +43,7 @@ object CraftingPacketC2SHandler : ServerPlayNetworking.PlayChannelHandler {
                         )
                     ) {
                         val cursor = craftingScreenHandler.cursorStack
-                        val output = recipe
-                            .craft(
-                                craftingScreenHandler.inputInventory,
-                                server.registryManager
-                            )
+                        val output = recipe.craft(craftingScreenHandler.inputInventory, server.registryManager)
 
                         craftingScreenHandler.updateResultSlot(output)
 

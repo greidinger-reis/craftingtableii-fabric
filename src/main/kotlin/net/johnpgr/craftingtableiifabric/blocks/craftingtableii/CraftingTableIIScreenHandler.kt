@@ -34,6 +34,7 @@ class CraftingTableIIScreenHandler(
     val resultInventory = CraftingResultInventory()
     var recipeManager: RecipeManager? = null
     var currentListIndex = 0
+    var lastCraftedItem = ItemStack.EMPTY
 
     init {
         inventory.onOpen(player)
@@ -41,25 +42,13 @@ class CraftingTableIIScreenHandler(
         //The Crafting Result
         this.addSlot(
             CraftingResultSlot(
-                player,
-                this.inputInventory,
-                this.resultInventory,
-                0,
-                -999,
-                -999
+                player, this.inputInventory, this.resultInventory, 0, -999, -999
             )
         )
         //The Crafting Grid
         for (row in 0..2) {
             for (col in 0..2) {
-                this.addSlot(
-                    Slot(
-                        this.inputInventory,
-                        col + row * 3,
-                        -999,
-                        -999
-                    )
-                )
+                this.addSlot(Slot(this.inputInventory, col + row * 3, -999, -999))
             }
         }
         //Our inventory
@@ -78,31 +67,16 @@ class CraftingTableIIScreenHandler(
         //The player inventory
         for (row in 0..2) {
             for (col in 0..8) {
-                this.addSlot(
-                    Slot(
-                        player.inventory,
-                        col + row * 9 + 9,
-                        8 + col * 18,
-                        125 + row * 18
-                    )
-                )
+                this.addSlot(Slot(player.inventory, col + row * 9 + 9, 8 + col * 18, 125 + row * 18))
             }
         }
         //The player hotbar
         for (row in 0..8) {
-            this.addSlot(
-                Slot(
-                    player.inventory,
-                    row,
-                    8 + row * 18,
-                    184
-                )
-            )
+            this.addSlot(Slot(player.inventory, row, 8 + row * 18, 184))
         }
 
         if (player.world.isClient) {
-            this.recipeManager =
-                RecipeManager(this, player as ClientPlayerEntity)
+            this.recipeManager = RecipeManager(this, player as ClientPlayerEntity)
         }
     }
 
@@ -116,12 +90,10 @@ class CraftingTableIIScreenHandler(
     }
 
     override fun onSlotClick(
-        slotIndex: Int,
-        button: Int,
-        actionType: SlotActionType,
-        player: PlayerEntity
+        slotIndex: Int, button: Int, actionType: SlotActionType, player: PlayerEntity
     ) {
         super.onSlotClick(slotIndex, button, actionType, player)
+
         if (player.world.isClient) {
             if (slotIndex == -999) return
             val slot = this.getSlot(slotIndex)
@@ -133,22 +105,25 @@ class CraftingTableIIScreenHandler(
                 val buf = PacketByteBufs.create() ?: return
 
                 CraftingPacket(recipe.id, this.syncId, quickCraft).write(buf)
+                ClientPlayNetworking.send(ModMessages.CTII_CRAFT_RECIPE, buf)
 
-                ClientPlayNetworking.send(
-                    ModMessages.CTII_CRAFT_RECIPE,
-                    buf
-                )
+                this.lastCraftedItem = slot.stack
             }
         }
     }
 
     fun updateRecipes() {
         this.inventory.clear()
-
         this.recipeManager?.refreshCraftableItems()
-        for (i in this.currentListIndex until this.currentListIndex + CraftingTableIIInventory.SIZE) {
-            val itemToDisplay =
-                this.recipeManager?.recipeItemStacks?.getOrNull(i) ?: break
+
+        var j = CraftingTableIIInventory.SIZE
+        if (!this.lastCraftedItem.isEmpty) {
+            this.addRecipeItem(this.lastCraftedItem)
+            j--
+        }
+
+        for (i in this.currentListIndex until this.currentListIndex + j) {
+            val itemToDisplay = this.recipeManager?.recipeItemStacks?.getOrNull(i) ?: break
             this.addRecipeItem(itemToDisplay)
         }
     }
@@ -199,22 +174,16 @@ class CraftingTableIIScreenHandler(
     }
 
     override fun quickMove(
-        playerEntity: PlayerEntity,
-        invSlot: Int
+        playerEntity: PlayerEntity, invSlot: Int
     ): ItemStack {
         return ItemStack.EMPTY
     }
 
     class CraftingTableIISlot(
-        inventory: Inventory,
-        index: Int,
-        x: Int,
-        y: Int
-    ) :
-        Slot(
-            inventory,
-            index, x, y
-        ) {
+        inventory: Inventory, index: Int, x: Int, y: Int
+    ) : Slot(
+        inventory, index, x, y
+    ) {
         override fun canInsert(stack: ItemStack): Boolean {
             return false
         }
