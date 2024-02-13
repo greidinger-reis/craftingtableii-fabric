@@ -15,9 +15,7 @@ import net.minecraft.util.math.MathHelper
 import kotlin.jvm.optionals.getOrNull
 
 class CraftingTableIIScreen(
-    screenHandler: CraftingTableIIScreenHandler,
-    player: PlayerEntity,
-    title: Text
+    screenHandler: CraftingTableIIScreenHandler, player: PlayerEntity, title: Text
 ) : HandledScreen<CraftingTableIIScreenHandler>(
     screenHandler, player.inventory, title
 ) {
@@ -37,7 +35,34 @@ class CraftingTableIIScreen(
     private val descriptionTexture = CraftingTableIIFabric.id(
         "textures/gui/crafttableii_description.png"
     )
+    private var scrolling = false
     private var scrollPosition = 0.0f
+    private val scrollBarY: Pair<Int, Int>
+        get() {
+            val k1 = this.y + 17
+            val l1 = k1 + 88 + 2
+            return Pair(k1, l1)
+        }
+    private val scrollButtonY: Int
+        get() {
+            val start = this.scrollBarY.first
+            val end = this.scrollBarY.second
+
+            return this.y + 17 + ((end - start - 17).toFloat() * scrollPosition).toInt()
+        }
+    private val scrollButtonX: Int
+        get() = this.x + 154
+
+    private fun hasScrollbar(): Boolean {
+        val craftableRecipesSize = this.screenHandler.recipeManager?.recipeItemStacks?.size ?: return false
+        return craftableRecipesSize > CraftingTableIIInventory.SIZE
+    }
+
+    private fun isClickInScrollbar(mouseX: Double, mouseY: Double): Boolean {
+
+        return (mouseX in (this.scrollButtonX.toDouble()..(this.scrollButtonX + 16).toDouble()))
+            && (mouseY in (this.scrollBarY.first.toDouble()..this.scrollBarY.second.toDouble()))
+    }
 
     override fun init() {
         super.init()
@@ -56,12 +81,45 @@ class CraftingTableIIScreen(
         drawMouseoverTooltip(context, mouseX, mouseY)
     }
 
+    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        if (button == 0) {
+            this.scrolling = false
+        }
+        return super.mouseReleased(mouseX, mouseY, button)
+    }
+
+    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
+        if (!this.scrolling) {
+            return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)
+        }
+
+        val start = this.scrollBarY.first
+        val end = this.scrollBarY.second
+        this.scrollPosition = (mouseY.toFloat() - start.toFloat() - 7.5f) / ((end - start).toFloat() - 15.0f)
+        this.scrollPosition = MathHelper.clamp(this.scrollPosition, 0f, 1f)
+        this.screenHandler.recipeManager?.scrollCraftableRecipes(
+            scrollPosition
+        )
+        return true
+    }
+
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        if (this.screenHandler.recipeManager == null || this.scrolling || button != 0 || !this.isClickInScrollbar(
+                mouseX,
+                mouseY
+            )
+        ) {
+            return super.mouseClicked(mouseX, mouseY, button)
+        }
+
+        this.scrolling = this.hasScrollbar()
+        return true
+    }
+
     override fun mouseScrolled(
         mouseX: Double, mouseY: Double, amount: Double
     ): Boolean {
-        val craftableRecipesSize =
-            this.screenHandler.recipeManager?.recipeItemStacks?.size
-                ?: return false
+        val craftableRecipesSize = this.screenHandler.recipeManager?.recipeItemStacks?.size ?: return false
         if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) {
             return false
         }
@@ -75,8 +133,7 @@ class CraftingTableIIScreen(
             val j = MathHelper.clamp(amount, -1.0, 1.0)
 
             this.scrollPosition -= (j / i).toFloat()
-            this.scrollPosition =
-                MathHelper.clamp(this.scrollPosition, 0.0f, 1.0f)
+            this.scrollPosition = MathHelper.clamp(this.scrollPosition, 0f, 1f)
             this.screenHandler.recipeManager?.scrollCraftableRecipes(
                 scrollPosition
             )
@@ -99,16 +156,13 @@ class CraftingTableIIScreen(
             this.texture, x, y, 0, 0, backgroundWidth, backgroundHeight
         )
 
-        val k1 = y + 17
-        val l1 = k1 + 88 + 2
-        val craftableRecipesSize =
-            this.screenHandler.recipeManager?.recipeItemStacks?.size ?: 0
+        val craftableRecipesSize = this.screenHandler.recipeManager?.recipeItemStacks?.size ?: 0
 
         //draw scrollbar
         ctx.drawTexture(
             this.texture,
-            x + 154,
-            y + 17 + ((l1 - k1 - 17).toFloat() * scrollPosition).toInt(),
+            this.scrollButtonX,
+            this.scrollButtonY,
             if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) 16 else 0,
             208,
             16,
@@ -118,26 +172,17 @@ class CraftingTableIIScreen(
         for (i in 10 until 50) {
             val slot = this.screenHandler.getSlot(i)
             if (slot is CraftingTableIIScreenHandler.CraftingTableIISlot && isMouseOverSlot(
-                    slot,
-                    mouseX,
-                    mouseY
+                    slot, mouseX, mouseY
                 )
             ) {
                 if (slot.stack.isEmpty) continue
 
                 //draw description overlay
                 ctx.drawTexture(
-                    this.descriptionTexture,
-                    x - 124,
-                    y,
-                    0,
-                    0,
-                    121,
-                    162
+                    this.descriptionTexture, x - 124, y, 0, 0, 121, 162
                 )
 
-                val recipe =
-                    this.screenHandler.recipeManager!!.getRecipe(slot.stack)
+                val recipe = this.screenHandler.recipeManager!!.getRecipe(slot.stack)
 
                 val recipeStacks = arrayListOf<ItemStack>()
 
@@ -146,8 +191,7 @@ class CraftingTableIIScreen(
                     if (ingredient.isEmpty) continue
 
                     val item = ingredient.matchingStacks[0]
-                    val index =
-                        recipeStacks.indexOfFirst { it.item == item.item }
+                    val index = recipeStacks.indexOfFirst { it.item == item.item }
 
                     if (index == -1) {
                         recipeStacks.add(item.copy())
@@ -158,20 +202,14 @@ class CraftingTableIIScreen(
 
                 recipeStacks.forEachIndexed { r, stack ->
                     ctx.drawItem(
-                        stack,
-                        x - 25,
-                        y + 5 + r * 18
+                        stack, x - 25, y + 5 + r * 18
                     )
                     ctx.drawItemInSlot(
-                        this.client!!.textRenderer,
-                        stack,
-                        x - 25,
-                        y + 5 + r * 18
+                        this.client!!.textRenderer, stack, x - 25, y + 5 + r * 18
                     )
                 }
 
-                val output =
-                    recipe.getOutput(this.client!!.world!!.registryManager)
+                val output = recipe.getOutput(this.client!!.world!!.registryManager)
 
                 val titleX = x - 118
                 val titleY = y + 9
@@ -192,8 +230,7 @@ class CraftingTableIIScreen(
                     false,
                 )
 
-                val description =
-                    descriptionsMap?.get(output.translationKey) ?: ""
+                val description = descriptionsMap?.get(output.translationKey) ?: ""
                 val chunks = this.chunkDescription(description)
                 val descY = titleY + 2
                 val scalef = 0.5f
@@ -201,38 +238,21 @@ class CraftingTableIIScreen(
                 ctx.matrices.push()
                 ctx.matrices.scale(scalef, scalef, 1.0f)
                 ctx.matrices.translate(
-                    (titleX / scalef).toDouble(),
-                    (descY / scalef).toDouble(),
-                    0.0
+                    (titleX / scalef).toDouble(), (descY / scalef).toDouble(), 0.0
                 )
 
                 for ((index, chunk) in chunks.withIndex()) {
                     ctx.drawText(
-                        this.client!!.textRenderer,
-                        chunk,
-                        0,
-                        40 + 10 * index,
-                        0xFFFFFF,
-                        false
+                        this.client!!.textRenderer, chunk, 0, 40 + 10 * index, 0xFFFFFF, false
                     )
                 }
 
                 ctx.drawText(
-                    this.client!!.textRenderer,
-                    "Code name: ",
-                    0,
-                    268,
-                    0xFFFFFF,
-                    false
+                    this.client!!.textRenderer, "Code name: ", 0, 268, 0xFFFFFF, false
                 )
 
                 ctx.drawText(
-                    this.client!!.textRenderer,
-                    output.item.toString(),
-                    0,
-                    280,
-                    0xFFFFFF,
-                    false
+                    this.client!!.textRenderer, output.item.toString(), 0, 280, 0xFFFFFF, false
                 )
 
                 ctx.matrices.pop()
@@ -252,9 +272,8 @@ class CraftingTableIIScreen(
             "${DESCRIPTIONS_BASE_PATH}/en_us.json"
         )
         val resourceManager = MinecraftClient.getInstance().resourceManager
-        val resource =
-            resourceManager.getResource(this.descriptionsIdentifier).getOrNull()
-                ?: resourceManager.getResource(fallback).getOrNull() ?: return
+        val resource = resourceManager.getResource(this.descriptionsIdentifier).getOrNull()
+            ?: resourceManager.getResource(fallback).getOrNull() ?: return
         val inputStream = resource.inputStream
         val json = inputStream.bufferedReader().use { it.readText() }
         this.descriptionsMap = Gson().fromJson(
@@ -287,8 +306,7 @@ class CraftingTableIIScreen(
 
         val last = chunks[chunks.size - 1]
         chunks[chunks.size - 1] = last.substring(
-            0,
-            last.length - 1
+            0, last.length - 1
         ) // remove the period from the last chunk
 
         return chunks
