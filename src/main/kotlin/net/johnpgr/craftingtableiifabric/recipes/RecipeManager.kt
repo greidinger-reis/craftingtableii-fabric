@@ -13,8 +13,8 @@ class RecipeManager(
     private val player: ClientPlayerEntity,
 ) {
     private val recipeMatcher: RecipeMatcher = RecipeMatcher()
-    private lateinit var recipes: List<RecipeResultCollection>
-    lateinit var recipeItemStacks: List<ItemStack>
+    private var recipes: List<RecipeResultCollection> = listOf()
+    var recipeItemStacks: List<ItemStack> = listOf()
 
     private fun refreshInputs() {
         this.recipeMatcher.clear()
