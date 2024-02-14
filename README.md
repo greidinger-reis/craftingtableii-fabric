@@ -3,10 +3,6 @@ This is an attempt at porting the Crafting Table II mod from [perky](https://git
 
 This is my first minecraft mod, so this is a learning experience for me.
 
-The usage of Kotlin here is purely from my own preference and disliking of Java's verboseness. It could be removed later if the additional dependency of kotlin is too much.
-
-The first version I'm targeting is 1.20.1
-
 ### Requirements
 
 - [x] The block's inventory render to screen
@@ -19,3 +15,7 @@ The first version I'm targeting is 1.20.1
 - [x] Recipe item name & description and ingredient list on hover
 - [x] Figure out how to handle items with multiple recipes (the craft is going to pick the first one)
 - [x] Craft the item and subtract the required items from the player's inventory on slot click
+
+### TODO
+- [ ] Update crafting recipes on player recipe unlock
+- [ ] Refactor the list display, to remove layout shifts when the crafing item list is changed
