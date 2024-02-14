@@ -17,6 +17,6 @@ This is my first minecraft mod, so this is a learning experience for me.
 - [x] Craft the item and subtract the required items from the player's inventory on slot click
 
 ### TODO
-- [ ] Update crafting recipes on player recipe unlock
+- [x] Update crafting recipes on player recipe unlock
 - [ ] Refactor the list display, to remove layout shifts when the crafing item list is changed
 - [ ] Fix MouseTweaks/MouseWheelie on player's inventory item scrolling moving items to the crafting table inventory
