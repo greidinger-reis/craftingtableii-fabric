@@ -94,6 +94,9 @@ class CraftingTableIIScreenHandler(
     ) {
         super.onSlotClick(slotIndex, button, actionType, player)
 
+        //Only allow left clicks
+        if(button != 0) return
+
         if (player.world.isClient) {
             if (slotIndex == -999) return
             val slot = this.getSlot(slotIndex)
@@ -124,7 +127,26 @@ class CraftingTableIIScreenHandler(
 
         for (i in this.currentListIndex until this.currentListIndex + j) {
             val itemToDisplay = this.recipeManager?.recipeItemStacks?.getOrNull(i) ?: break
+
             this.addRecipeItem(itemToDisplay)
+        }
+
+        if(this.lastCraftedItem.isEmpty) {
+            return
+        }
+
+        var isLastCraftedItemStillValid = false
+        //check if the last crafted item is still in the craftable items list
+        for (stack in this.recipeManager?.recipeItemStacks ?: listOf()) {
+            if (stack.item == this.lastCraftedItem.item) {
+                isLastCraftedItemStillValid = true
+                break
+            }
+        }
+
+        if(!isLastCraftedItemStillValid) {
+            this.lastCraftedItem = ItemStack.EMPTY
+            this.updateRecipes()
         }
     }
 
