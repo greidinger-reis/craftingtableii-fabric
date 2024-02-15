@@ -1,25 +1,31 @@
-## Crafting Table II
-This is an attempt at porting the Crafting Table II mod from [perky](https://github.com/perky/CraftingTableII) to modern Minecraft versions using Fabric.
-This is my first minecraft mod, so this is a learning experience for me.
+<p align="center">
+<img src="https://raw.githubusercontent.com/johnpgr/craftingtable-ii-refabricated/1.20.1/src/main/resources/assets/craftingtableiifabric/icon.png"/>
+</p>
 
-![recipe.png](assets%2Frecipe.png) 
+<h3 align="center">CraftingTable II</h3>
 
-![ctii.png](assets%2Fctii.png)
+<p align="center">CraftingTable II Refabricated is a port of perky's CraftingTableII mod from back in the 1.0.0 - 1.2.3 era that got continued by CraftingTable III and CraftingTable IV, but stopped updating on 1.15.2</p>
 
-### Requirements
+<p align="center">
+<a title="Fabric API" href="https://github.com/FabricMC/fabric">
+    <img src="https://i.imgur.com/Ol1Tcf8.png" width="151" height="50" />
+  </a>
+  <a title="Fabric Language Kotlin" href="https://github.com/FabricMC/fabric-language-kotlin" target="_blank" rel="noopener noreferrer">
+    <img src="https://i.imgur.com/c1DH9VL.png" width="171" height="50" />
+  </a>
+</p>
 
-- [x] The block's inventory render to screen
-- [x] The block entity has the original model, animation and sound
-- [x] The block's inventory has functional a scrollbar
-- [x] The scrollbar function moves the recipe list up and down
-- [x] Have access to the current client's recipe book craftable recipe list
-- [x] Send the recipe list to the ScreenHandler and display them in the inventory GUI
-- [x] Update the recipe list when the player's inventory change
-- [x] Recipe item name & description and ingredient list on hover
-- [x] Figure out how to handle items with multiple recipes (the craft is going to pick the first one)
-- [x] Craft the item and subtract the required items from the player's inventory on slot click
+<p align="center">
+<img src="https://raw.githubusercontent.com/johnpgr/craftingtable-ii-refabricated/1.20.1/assets/recipe.png"/>
+</p>
 
-### TODO
-- [x] Update crafting recipes on player recipe unlock
-- [ ] Refactor the list display, to remove layout shifts when the crafing item list is changed
-- [ ] Fix MouseTweaks/MouseWheelie on player's inventory item scrolling moving items to the crafting table inventory
+<p align="center">The Crafting Table II Block displays a list with everything you can currently craft with the items in your inventory.</p>
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/johnpgr/craftingtable-ii-refabricated/1.20.1/assets/ctii.png"/>
+</p>
+
+
+<p align="center">Click on the item and the Crafting Table II will automatically craft it for you. Shift + click will craft the maximum amount possible.</p>
+
+<p align="center">As you add and remove items from your inventory the list of available items updates. Works with <em>any</em> recipe, that is <b>unlockable</b> by the player, including mods.</p>
