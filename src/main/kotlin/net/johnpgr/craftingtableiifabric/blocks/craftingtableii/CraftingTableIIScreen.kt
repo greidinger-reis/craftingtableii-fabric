@@ -19,16 +19,6 @@ class CraftingTableIIScreen(
 ) : HandledScreen<CraftingTableIIScreenHandler>(
     screenHandler, player.inventory, title
 ) {
-    companion object {
-        private const val DESCRIPTIONS_BASE_PATH = "descriptions/lang"
-    }
-
-    private val currentLang: String
-        get() = this.client?.languageManager?.language ?: "en_us"
-    private val descriptionsIdentifier = CraftingTableIIFabric.id(
-        "${DESCRIPTIONS_BASE_PATH}/${currentLang}.json"
-    )
-    private var descriptionsMap: HashMap<String, String>? = null
     private val texture = CraftingTableIIFabric.id(
         "textures/gui/crafttableii.png"
     )
@@ -71,7 +61,6 @@ class CraftingTableIIScreen(
         playerInventoryTitleY = backgroundHeight - 97
         x = width / 2 - backgroundWidth / 2
         y = height / 2 - backgroundHeight / 2
-        this.loadDescriptions()
     }
 
     override fun render(
@@ -230,7 +219,7 @@ class CraftingTableIIScreen(
                     false,
                 )
 
-                val description = descriptionsMap?.get(output.translationKey) ?: ""
+                val description = CraftingTableIIDescriptions.map[output.translationKey] ?: ""
                 val chunks = this.chunkDescription(description)
                 val descY = titleY + 2
                 val scalef = 0.5f
@@ -264,21 +253,6 @@ class CraftingTableIIScreen(
         val aX = mouseX - this.x
         val aY = mouseY - this.y
         return aX >= slot.x && aX < slot.x + 18 && aY >= slot.y && aY < slot.y + 18
-    }
-
-    //TODO: Move this to load the descriptions once on the mod initialization or world load
-    private fun loadDescriptions() {
-        val fallback = CraftingTableIIFabric.id(
-            "${DESCRIPTIONS_BASE_PATH}/en_us.json"
-        )
-        val resourceManager = MinecraftClient.getInstance().resourceManager
-        val resource = resourceManager.getResource(this.descriptionsIdentifier).getOrNull()
-            ?: resourceManager.getResource(fallback).getOrNull() ?: return
-        val inputStream = resource.inputStream
-        val json = inputStream.bufferedReader().use { it.readText() }
-        this.descriptionsMap = Gson().fromJson(
-            json, HashMap::class.java
-        ) as HashMap<String, String>
     }
 
     private fun chunkDescription(description: String): List<String> {
