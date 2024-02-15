@@ -1,7 +1,10 @@
 ## Crafting Table II
 This is an attempt at porting the Crafting Table II mod from [perky](https://github.com/perky/CraftingTableII) to modern Minecraft versions using Fabric.
-
 This is my first minecraft mod, so this is a learning experience for me.
+
+![recipe.png](assets%2Frecipe.png) 
+
+![ctii.png](assets%2Fctii.png)
 
 ### Requirements
 
