@@ -1,5 +1,6 @@
 package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
+import com.mojang.serialization.MapCodec
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
 import net.johnpgr.craftingtableiifabric.utils.BlockScreenHandlerFactory
@@ -23,6 +24,8 @@ import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
 class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTING_TABLE)) {
+    private val codec = createCodec { CraftingTableII() }
+
     override fun appendProperties(stateManager: StateManager.Builder<Block?, BlockState?>) {
         stateManager.add(Properties.HORIZONTAL_FACING)
     }
@@ -75,6 +78,10 @@ class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTI
 
     override fun createBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {
         return CraftingTableIIEntity(this, pos, state)
+    }
+
+    override fun getCodec(): MapCodec<out BlockWithEntity> {
+        return codec
     }
 
     override fun onUse(
