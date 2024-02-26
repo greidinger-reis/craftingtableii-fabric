@@ -14,6 +14,7 @@ import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Recipe
+import net.minecraft.recipe.RecipeEntry
 import net.minecraft.recipe.RecipeMatcher
 import net.minecraft.recipe.book.RecipeBookCategory
 import net.minecraft.screen.AbstractRecipeScreenHandler
@@ -104,7 +105,7 @@ class CraftingTableIIScreenHandler(
 
             if (slot is CraftingTableIISlot) {
                 val quickCraft = actionType == SlotActionType.QUICK_MOVE
-                val recipe = this.recipeManager!!.getRecipe(slot.stack)
+                val recipe = this.recipeManager!!.getRecipeEntry(slot.stack)
                 val buf = PacketByteBufs.create() ?: return
 
                 CraftingPacket(recipe.id, this.syncId, quickCraft).write(buf)
@@ -171,8 +172,8 @@ class CraftingTableIIScreenHandler(
         this.resultInventory.setStack(0, itemStack)
     }
 
-    override fun matches(recipe: Recipe<in RecipeInputInventory>): Boolean {
-        return recipe.matches(this.inputInventory, this.player.world)
+    override fun matches(recipe: RecipeEntry<out Recipe<RecipeInputInventory>>): Boolean {
+        return recipe.value.matches(this.inputInventory, this.player.world)
     }
 
     override fun getCraftingResultSlotIndex(): Int {

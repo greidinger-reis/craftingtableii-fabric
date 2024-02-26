@@ -99,7 +99,7 @@ class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTI
         state: BlockState?,
         type: BlockEntityType<T>?
     ): BlockEntityTicker<T>? {
-        return checkType(
+        return BlockWithEntity.validateTicker(
             type,
             ModBlocks.getEntityType(this)
         ) { world1, pos, state1, entity ->

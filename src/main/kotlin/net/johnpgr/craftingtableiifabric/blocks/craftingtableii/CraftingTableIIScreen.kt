@@ -1,9 +1,7 @@
 package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
 
-import com.google.gson.Gson
 import com.mojang.blaze3d.systems.RenderSystem
 import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
-import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.render.GameRenderer
@@ -12,7 +10,6 @@ import net.minecraft.item.ItemStack
 import net.minecraft.screen.slot.Slot
 import net.minecraft.text.Text
 import net.minecraft.util.math.MathHelper
-import kotlin.jvm.optionals.getOrNull
 
 class CraftingTableIIScreen(
     screenHandler: CraftingTableIIScreenHandler, player: PlayerEntity, title: Text
@@ -106,7 +103,10 @@ class CraftingTableIIScreen(
     }
 
     override fun mouseScrolled(
-        mouseX: Double, mouseY: Double, amount: Double
+        mouseX: Double,
+        mouseY: Double,
+        horizontalAmount: Double,
+        amount: Double
     ): Boolean {
         val craftableRecipesSize = this.screenHandler.recipeManager?.recipeItemStacks?.size ?: return false
         if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) {
@@ -136,7 +136,6 @@ class CraftingTableIIScreen(
     override fun drawBackground(
         ctx: DrawContext, delta: Float, mouseX: Int, mouseY: Int
     ) {
-        renderBackground(ctx)
         RenderSystem.setShader(GameRenderer::getPositionTexProgram)
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
 
@@ -171,12 +170,12 @@ class CraftingTableIIScreen(
                     this.descriptionTexture, x - 124, y, 0, 0, 121, 162
                 )
 
-                val recipe = this.screenHandler.recipeManager!!.getRecipe(slot.stack)
+                val recipe = this.screenHandler.recipeManager!!.getRecipeEntry(slot.stack)
 
                 val recipeStacks = arrayListOf<ItemStack>()
 
                 //TODO: Find a way to draw all matching stacks. Maybe a timer that loops through the list of matching stacks
-                for (ingredient in recipe.ingredients) {
+                for (ingredient in recipe.value.ingredients) {
                     if (ingredient.isEmpty) continue
 
                     val item = ingredient.matchingStacks[0]
@@ -198,7 +197,7 @@ class CraftingTableIIScreen(
                     )
                 }
 
-                val output = recipe.getOutput(this.client!!.world!!.registryManager)
+                val output = recipe.value.getResult(this.client!!.world!!.registryManager)
 
                 val titleX = x - 118
                 val titleY = y + 9

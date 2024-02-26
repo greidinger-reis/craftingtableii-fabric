@@ -8,6 +8,7 @@ import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIS
 import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.recipe.Recipe
+import net.minecraft.recipe.RecipeEntry
 import net.minecraft.screen.slot.CraftingResultSlot
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayNetworkHandler
@@ -37,13 +38,13 @@ object CraftingPacketC2SHandler : ServerPlayNetworking.PlayChannelHandler {
                         player
                     )
 
-                    while ((recipe as Recipe<RecipeInputInventory>).matches(
+                    while ((recipe as RecipeEntry<Recipe<RecipeInputInventory>>).value.matches(
                             craftingScreenHandler.inputInventory,
                             player.world
                         )
                     ) {
                         val cursor = craftingScreenHandler.cursorStack
-                        val output = recipe.craft(craftingScreenHandler.inputInventory, server.registryManager)
+                        val output = recipe.value.craft(craftingScreenHandler.inputInventory, server.registryManager)
 
                         craftingScreenHandler.updateResultSlot(output)
 

@@ -5,7 +5,7 @@ import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.client.recipebook.RecipeBookGroup
 import net.minecraft.item.ItemStack
-import net.minecraft.recipe.Recipe
+import net.minecraft.recipe.RecipeEntry
 import net.minecraft.recipe.RecipeMatcher
 
 class RecipeManager(
@@ -46,17 +46,17 @@ class RecipeManager(
         this.recipeItemStacks = this.recipes.filter { result ->
             result.isInitialized && result.hasFittingRecipes() && result.hasCraftableRecipes()
         }.flatMap { result ->
-            result.getRecipes(true).map { recipe -> recipe.getOutput(result.registryManager).copy() }
+            result.getRecipes(true).map { recipe -> recipe.value.getResult(result.registryManager).copy() }
         }
     }
 
-    fun getRecipe(stack: ItemStack): Recipe<*> {
+    fun getRecipeEntry(stack: ItemStack): RecipeEntry<*> {
         this.refreshInputs()
         val recipeList =
             recipes
                 .mapNotNull { result ->
                     result.getResults(false).firstOrNull { recipe ->
-                        recipe.getOutput(result.registryManager).item == stack.item
+                        recipe.value.getResult(result.registryManager).item == stack.item
                     }
                 }
 
