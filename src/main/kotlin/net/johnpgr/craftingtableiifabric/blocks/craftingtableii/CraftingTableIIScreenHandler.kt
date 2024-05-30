@@ -90,6 +90,10 @@ class CraftingTableIIScreenHandler(
         }
     }
 
+    override fun isValid(slot: Int): Boolean {
+        return slot >= 0 && slot < this.slots.size
+    }
+
     override fun onSlotClick(
         slotIndex: Int, button: Int, actionType: SlotActionType, player: PlayerEntity
     ) {
@@ -99,7 +103,7 @@ class CraftingTableIIScreenHandler(
         if(button != 0) return
 
         if (player.world.isClient) {
-            if (slotIndex == -999) return
+            if (!this.isValid(slotIndex)) return
             val slot = this.getSlot(slotIndex)
             if (!slot.hasStack()) return
 
