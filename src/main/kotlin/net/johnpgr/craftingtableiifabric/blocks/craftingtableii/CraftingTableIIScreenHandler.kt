@@ -32,7 +32,7 @@ class CraftingTableIIScreenHandler(
     val inventory = CraftingTableIIInventory(entity, this)
     val inputInventory = CraftingInventory(this, 3, 3)
     val resultInventory = CraftingResultInventory()
-    var recipeManager: RecipeManager? = null
+    lateinit var recipeManager: RecipeManager
     var currentListIndex = 0
     var lastCraftedItem = ItemStack.EMPTY
 
@@ -108,7 +108,7 @@ class CraftingTableIIScreenHandler(
 
             if (slot is CraftingTableIISlot) {
                 val quickCraft = actionType == SlotActionType.QUICK_MOVE
-                val recipe = this.recipeManager!!.getRecipe(slot.stack)
+                val recipe = this.recipeManager.getRecipe(slot.stack)
                 val buf = PacketByteBufs.create() ?: return
 
                 CraftingPacket(recipe.id, this.syncId, quickCraft).write(buf)
@@ -120,8 +120,11 @@ class CraftingTableIIScreenHandler(
     }
 
     fun updateRecipes() {
+        //Because the recipeManager only lives in the client
+        if (!this.player.world.isClient) return
+
         this.inventory.clear()
-        this.recipeManager?.refreshCraftableItems()
+        this.recipeManager.refreshCraftableItems()
 
         var j = CraftingTableIIInventory.SIZE
         if (!this.lastCraftedItem.isEmpty) {
@@ -130,7 +133,7 @@ class CraftingTableIIScreenHandler(
         }
 
         for (i in this.currentListIndex until this.currentListIndex + j) {
-            val itemToDisplay = this.recipeManager?.recipeItemStacks?.getOrNull(i) ?: break
+            val itemToDisplay = this.recipeManager.recipeItemStacks.getOrNull(i) ?: break
 
             this.addRecipeItem(itemToDisplay)
         }
@@ -141,7 +144,7 @@ class CraftingTableIIScreenHandler(
 
         var isLastCraftedItemStillValid = false
         //check if the last crafted item is still in the craftable items list
-        for (stack in this.recipeManager?.recipeItemStacks ?: listOf()) {
+        for (stack in this.recipeManager.recipeItemStacks) {
             if (stack.item == this.lastCraftedItem.item) {
                 isLastCraftedItemStillValid = true
                 break
