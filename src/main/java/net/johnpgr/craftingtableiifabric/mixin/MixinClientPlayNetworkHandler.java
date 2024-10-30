@@ -19,7 +19,7 @@ public class MixinClientPlayNetworkHandler {
     @Inject(at = @At("RETURN"), method = "onUnlockRecipes")
     private void onUnlockRecipes(UnlockRecipesS2CPacket packet, CallbackInfo ci){
         if(this.client.player.currentScreenHandler instanceof CraftingTableIIScreenHandler){
-            ((CraftingTableIIScreenHandler)this.client.player.currentScreenHandler).updateRecipes();
+            ((CraftingTableIIScreenHandler)this.client.player.currentScreenHandler).updateRecipes(true);
         }
     }
 }

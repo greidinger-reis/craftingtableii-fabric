@@ -120,12 +120,13 @@ class CraftingTableIIScreenHandler(
         }
     }
 
-    fun updateRecipes() {
+    fun updateRecipes(shouldRefreshInputs: Boolean) {
         //Because the recipeManager only lives in the client
         if (!player.world.isClient) return
 
+        //TODO: Maybe we don't need to clear the inventory
         inventory.clear()
-        recipeManager.refreshCraftableItems()
+        if(shouldRefreshInputs) recipeManager.refreshCraftableItems()
 
         var max = CraftingTableIIInventory.SIZE
         var isLastCraftedItemStillValid = false

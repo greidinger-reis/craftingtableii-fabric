@@ -1,5 +1,7 @@
 package net.johnpgr.craftingtableiifabric.recipes
 
+import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableII
 import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIScreenHandler
 import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection
 import net.minecraft.client.network.ClientPlayerEntity
@@ -15,6 +17,7 @@ class RecipeManager(
     private val recipeMatcher: RecipeMatcher = RecipeMatcher()
     private var recipes: List<RecipeResultCollection> = listOf()
     var recipeItemStacks: List<ItemStack> = listOf()
+    var refreshes = 0
 
     private fun refreshInputs() {
         this.recipeMatcher.clear()
@@ -36,10 +39,16 @@ class RecipeManager(
             this.craftingScreenHandler.currentListIndex = listIndex
         }
 
-        this.craftingScreenHandler.updateRecipes()
+        this.craftingScreenHandler.updateRecipes(false)
     }
 
+    //TODO: This is the performance bottleneck in this mod.
+    // This is being triggered 36 times on item craft and screen open
+    // 2 times on a item move
+    // with many mods installed, this lags the game a whole lot
     fun refreshCraftableItems() {
+        ++refreshes
+        val start = System.nanoTime()
         this.refreshInputs()
         this.recipes.forEach { result -> result.computeCraftables(this.recipeMatcher, 9, 9, this.player.recipeBook) }
 
@@ -48,6 +57,8 @@ class RecipeManager(
         }.flatMap { result ->
             result.getRecipes(true).map { recipe -> recipe.getOutput(result.registryManager).copy() }
         }
+        val end = System.nanoTime()
+        CraftingTableIIFabric.LOGGER.info("Refreshed craftable items in ${(end - start) / 1_000}μs #${refreshes}")
     }
 
     fun getRecipe(stack: ItemStack): Recipe<*> {

@@ -19,7 +19,7 @@ public class MixinPlayerInventory {
     @Inject(at = @At("RETURN"), method = "markDirty")
     public void markDirty(CallbackInfo ci) {
         if (this.player.currentScreenHandler instanceof CraftingTableIIScreenHandler) {
-            ((CraftingTableIIScreenHandler) this.player.currentScreenHandler).updateRecipes();
+            ((CraftingTableIIScreenHandler) this.player.currentScreenHandler).updateRecipes(true);
         }
     }
 }
