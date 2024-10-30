@@ -20,8 +20,10 @@ import net.minecraft.screen.AbstractRecipeScreenHandler
 import net.minecraft.screen.slot.CraftingResultSlot
 import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
-import java.util.Collections
+import java.util.*
 
+//FIXME: Scrolling mouse on a resultInventory's slot when mouse wheel tweaks from mods are enabled cause ConcurrentModificationException
+//FIXME: Inventory Profiles Next functions to this screen's inventory cause ConcurrentModificationException also
 class CraftingTableIIScreenHandler(
     syncId: Int,
     val player: PlayerEntity,
@@ -30,18 +32,28 @@ class CraftingTableIIScreenHandler(
     ModBlocks.getContainerInfo(ModBlocks.CRAFTING_TABLE_II)?.handlerType,
     syncId,
 ) {
-    val inventory = CraftingTableIIInventory(entity, this)
     val inputInventory = CraftingInventory(this, 3, 3)
-    val resultInventory = CraftingResultInventory()
+    private val resultInventory = CraftingResultInventory()
+    private val inventory = CraftingTableIIInventory(entity, this)
     lateinit var recipeManager: RecipeManager
+    private var lastCraftedItem = ItemStack.EMPTY
+    private var lastPlayerInventoryHash = 0
     var currentListIndex = 0
-    var lastCraftedItem = ItemStack.EMPTY
 
     init {
         inventory.onOpen(player)
 
         //The Crafting Result
-        addSlot(CraftingResultSlot(player, inputInventory, resultInventory, 0, -999, -999))
+        addSlot(
+            CraftingResultSlot(
+                player,
+                inputInventory,
+                resultInventory,
+                0,
+                -999,
+                -999
+            )
+        )
 
         //The Crafting Grid
         for (row in 0..2) {
@@ -67,7 +79,14 @@ class CraftingTableIIScreenHandler(
         //The player inventory
         for (row in 0..2) {
             for (col in 0..8) {
-                addSlot(Slot(player.inventory, col + row * 9 + 9, 8 + col * 18, 125 + row * 18))
+                addSlot(
+                    Slot(
+                        player.inventory,
+                        col + row * 9 + 9,
+                        8 + col * 18,
+                        125 + row * 18
+                    )
+                )
             }
         }
 
@@ -78,6 +97,23 @@ class CraftingTableIIScreenHandler(
 
         if (player.world.isClient) {
             recipeManager = RecipeManager(this, player as ClientPlayerEntity)
+        }
+    }
+
+    fun tick() {
+        val currentHash = calculatePlayerInventoryHash()
+        if (lastPlayerInventoryHash != currentHash) {
+            updateRecipes(true)
+        }
+        lastPlayerInventoryHash = currentHash
+    }
+
+    private fun calculatePlayerInventoryHash(): Int {
+        return player.inventory.main.fold(1) { hash, stack ->
+            val stackHash =
+                if (stack.isEmpty) 0 else Objects.hash(stack.item, stack.count)
+
+            31 * hash + stackHash
         }
     }
 
@@ -94,29 +130,35 @@ class CraftingTableIIScreenHandler(
         return slot >= 0 && slot < slots.size
     }
 
+    override fun getSlot(index: Int): Slot? {
+        if (!isValid(index)) return null
+        return super.getSlot(index)
+    }
+
     override fun onSlotClick(
-        slotIndex: Int, button: Int, actionType: SlotActionType, player: PlayerEntity
+        slotIndex: Int,
+        button: Int,
+        actionType: SlotActionType,
+        player: PlayerEntity
     ) {
         super.onSlotClick(slotIndex, button, actionType, player)
 
-        //Only allow left clicks
-        if(button != 0) return
+        val slot = getSlot(slotIndex) ?: return
+        if (slot is CraftingTableIISlot && button == 0) {
+            if (!slot.hasStack()) {
+                return
+            }
 
-        if (player.world.isClient) {
-            if (!isValid(slotIndex)) return
-            val slot = getSlot(slotIndex)
-            if (!slot.hasStack()) return
-
-            if (slot is CraftingTableIISlot) {
+            if (player.world.isClient) {
                 val quickCraft = actionType == SlotActionType.QUICK_MOVE
                 val recipe = recipeManager.getRecipe(slot.stack)
                 val buf = PacketByteBufs.create() ?: return
-
                 CraftingPacket(recipe.id, syncId, quickCraft).write(buf)
                 ClientPlayNetworking.send(ModMessages.CTII_CRAFT_RECIPE, buf)
-
                 lastCraftedItem = slot.stack
             }
+
+            return
         }
     }
 
@@ -124,9 +166,8 @@ class CraftingTableIIScreenHandler(
         //Because the recipeManager only lives in the client
         if (!player.world.isClient) return
 
-        //TODO: Maybe we don't need to clear the inventory
         inventory.clear()
-        if(shouldRefreshInputs) recipeManager.refreshCraftableItems()
+        if (shouldRefreshInputs) recipeManager.refreshCraftableItems()
 
         var max = CraftingTableIIInventory.SIZE
         var isLastCraftedItemStillValid = false
@@ -135,7 +176,7 @@ class CraftingTableIIScreenHandler(
         for (i in currentListIndex until currentListIndex + max) {
             val itemStack = recipeManager.recipeItemStacks.getOrNull(i) ?: break
 
-            if(itemStack.item == lastCraftedItem.item) {
+            if (itemStack.item == lastCraftedItem.item) {
                 isLastCraftedItemStillValid = true
                 newList.add(i)
                 newList.add(0, i)
@@ -149,7 +190,7 @@ class CraftingTableIIScreenHandler(
             addRecipeItem(recipeManager.recipeItemStacks[i])
         }
 
-        if(!isLastCraftedItemStillValid) {
+        if (!isLastCraftedItemStillValid) {
             lastCraftedItem = ItemStack.EMPTY
         }
     }

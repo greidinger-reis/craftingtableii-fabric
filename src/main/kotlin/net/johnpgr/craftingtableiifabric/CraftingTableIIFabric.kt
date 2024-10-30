@@ -7,8 +7,10 @@ import net.johnpgr.craftingtableiifabric.utils.CreativeTab
 import net.minecraft.util.Identifier
 import org.slf4j.LoggerFactory
 
+
 object CraftingTableIIFabric : ModInitializer {
     const val MOD_ID = "craftingtableiifabric"
+
     val LOGGER = LoggerFactory.getLogger(MOD_ID)
 
     fun id(name: String) = Identifier(MOD_ID, name)
@@ -18,5 +20,6 @@ object CraftingTableIIFabric : ModInitializer {
         ModBlocks.initBlocks()
         CreativeTab.initCreativeTab()
     }
+
 }
 

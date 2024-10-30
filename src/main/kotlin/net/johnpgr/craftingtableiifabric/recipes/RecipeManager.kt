@@ -1,7 +1,5 @@
 package net.johnpgr.craftingtableiifabric.recipes
 
-import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
-import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableII
 import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIScreenHandler
 import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection
 import net.minecraft.client.network.ClientPlayerEntity
@@ -17,17 +15,17 @@ class RecipeManager(
     private val recipeMatcher: RecipeMatcher = RecipeMatcher()
     private var recipes: List<RecipeResultCollection> = listOf()
     var recipeItemStacks: List<ItemStack> = listOf()
-    var refreshes = 0
 
     private fun refreshInputs() {
-        this.recipeMatcher.clear()
-        this.player.inventory.populateRecipeFinder(this.recipeMatcher)
-        this.craftingScreenHandler.populateRecipeFinder(this.recipeMatcher)
-        this.recipes = this.player.recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
+        recipeMatcher.clear()
+        player.inventory.populateRecipeFinder(recipeMatcher)
+        craftingScreenHandler.populateRecipeFinder(recipeMatcher)
+        recipes =
+            player.recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
     }
 
     fun scrollCraftableRecipes(scrollPos: Float) {
-        val craftableRecipesSize = this.recipeItemStacks.size
+        val craftableRecipesSize = recipeItemStacks.size
         val i = (craftableRecipesSize + 8 - 1) / 8 - 5
         var j = ((scrollPos * i.toFloat()).toDouble() + 0.5).toInt()
         if (j < 0) {
@@ -36,33 +34,36 @@ class RecipeManager(
 
         val listIndex = j * 8
         if (listIndex < craftableRecipesSize) {
-            this.craftingScreenHandler.currentListIndex = listIndex
+            craftingScreenHandler.currentListIndex = listIndex
         }
 
-        this.craftingScreenHandler.updateRecipes(false)
+        craftingScreenHandler.updateRecipes(false)
     }
 
-    //TODO: This is the performance bottleneck in this mod.
-    // This is being triggered 36 times on item craft and screen open
-    // 2 times on a item move
-    // with many mods installed, this lags the game a whole lot
-    fun refreshCraftableItems() {
-        ++refreshes
-        val start = System.nanoTime()
-        this.refreshInputs()
-        this.recipes.forEach { result -> result.computeCraftables(this.recipeMatcher, 9, 9, this.player.recipeBook) }
 
-        this.recipeItemStacks = this.recipes.filter { result ->
-            result.isInitialized && result.hasFittingRecipes() && result.hasCraftableRecipes()
-        }.flatMap { result ->
-            result.getRecipes(true).map { recipe -> recipe.getOutput(result.registryManager).copy() }
+    /**
+     * Refreshes the list of craftable items based on the current state of the player's inventory and recipe book.
+     * This method updates the `recipeItemStacks` property with the new list of craftable item stacks.
+     */
+    fun refreshCraftableItems() {
+        refreshInputs()
+        val newRecipeItemStacks = mutableListOf<ItemStack>()
+
+        recipes.forEach { result ->
+            result.computeCraftables(recipeMatcher, 9, 9, player.recipeBook)
+            if (result.isInitialized && result.hasFittingRecipes() && result.hasCraftableRecipes()) {
+                newRecipeItemStacks.addAll(
+                    result.getRecipes(true).map { recipe ->
+                        recipe.getOutput(result.registryManager).copy()
+                    })
+            }
         }
-        val end = System.nanoTime()
-        CraftingTableIIFabric.LOGGER.info("Refreshed craftable items in ${(end - start) / 1_000}μs #${refreshes}")
+
+        recipeItemStacks = newRecipeItemStacks
     }
 
     fun getRecipe(stack: ItemStack): Recipe<*> {
-        this.refreshInputs()
+        refreshInputs()
         val recipeList =
             recipes
                 .mapNotNull { result ->
