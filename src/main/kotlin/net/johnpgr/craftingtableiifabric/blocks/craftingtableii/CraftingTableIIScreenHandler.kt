@@ -56,15 +56,15 @@ class CraftingTableIIScreenHandler(
         )
 
         //The Crafting Grid
-        for (row in 0..2) {
-            for (col in 0..2) {
+        for (row in 0 until 3) {
+            for (col in 0 until 3) {
                 addSlot(Slot(inputInventory, col + row * 3, -999, -999))
             }
         }
 
         //Our inventory
-        for (row in 0..<CraftingTableIIInventory.ROWS) {
-            for (col in 0..<CraftingTableIIInventory.COLS) {
+        for (row in 0 until CraftingTableIIInventory.ROWS) {
+            for (col in 0 until CraftingTableIIInventory.COLS) {
                 addSlot(
                     CraftingTableIISlot(
                         inventory,
@@ -77,8 +77,8 @@ class CraftingTableIIScreenHandler(
         }
 
         //The player inventory
-        for (row in 0..2) {
-            for (col in 0..8) {
+        for (row in 0 until 3) {
+            for (col in 0 until 9) {
                 addSlot(
                     Slot(
                         player.inventory,
@@ -91,7 +91,7 @@ class CraftingTableIIScreenHandler(
         }
 
         //The player hotbar
-        for (row in 0..8) {
+        for (row in 0 until 9) {
             addSlot(Slot(player.inventory, row, 8 + row * 18, 184))
         }
 
@@ -149,16 +149,16 @@ class CraftingTableIIScreenHandler(
                 return
             }
 
-            if (player.world.isClient) {
-                val quickCraft = actionType == SlotActionType.QUICK_MOVE
-                val recipe = recipeManager.getRecipe(slot.stack)
-                val buf = PacketByteBufs.create() ?: return
-                CraftingPacket(recipe.id, syncId, quickCraft).write(buf)
-                ClientPlayNetworking.send(ModMessages.CTII_CRAFT_RECIPE, buf)
-                lastCraftedItem = slot.stack
+            if (!player.world.isClient) {
+                return
             }
 
-            return
+            val quickCraft = actionType == SlotActionType.QUICK_MOVE
+            val recipe = recipeManager.getRecipe(slot.stack)
+            val buf = PacketByteBufs.create() ?: return
+            CraftingPacket(recipe.id, syncId, quickCraft).write(buf)
+            ClientPlayNetworking.send(ModMessages.CTII_CRAFT_RECIPE, buf)
+            lastCraftedItem = slot.stack
         }
     }
 
