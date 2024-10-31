@@ -36,21 +36,31 @@ class RecipeManager(
             this.craftingScreenHandler.currentListIndex = listIndex
         }
 
-        this.craftingScreenHandler.updateRecipes()
+        this.craftingScreenHandler.updateRecipes(false)
     }
 
+    /**
+     * Refreshes the list of craftable items based on the current state of the player's inventory and recipe book.
+     * This method updates the `recipeItemStacks` property with the new list of craftable item stacks.
+     */
     fun refreshCraftableItems() {
-        this.refreshInputs()
-        this.recipes.forEach { result -> result.computeCraftables(this.recipeMatcher, 9, 9, this.player.recipeBook) }
+        refreshInputs()
+        val newRecipeItemStacks = mutableListOf<ItemStack>()
 
-        this.recipeItemStacks = this.recipes.filter { result ->
-            result.isInitialized && result.hasFittingRecipes() && result.hasCraftableRecipes()
-        }.flatMap { result ->
-            result.getRecipes(true).map { recipe -> recipe.value.getResult(result.registryManager).copy() }
+        recipes.forEach { result ->
+            result.computeCraftables(recipeMatcher, 9, 9, player.recipeBook)
+            if (result.isInitialized && result.hasFittingRecipes() && result.hasCraftableRecipes()) {
+                newRecipeItemStacks.addAll(
+                    result.getRecipes(true).map { recipe ->
+                        recipe.value.getResult(result.registryManager).copy()
+                    })
+            }
         }
+
+        recipeItemStacks = newRecipeItemStacks
     }
 
-    fun getRecipeEntry(stack: ItemStack): RecipeEntry<*> {
+    fun getRecipe(stack: ItemStack): RecipeEntry<*> {
         this.refreshInputs()
         val recipeList =
             recipes

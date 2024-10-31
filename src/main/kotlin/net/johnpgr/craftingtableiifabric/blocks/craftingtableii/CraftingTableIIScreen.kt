@@ -41,7 +41,7 @@ class CraftingTableIIScreen(
         get() = this.x + 154
 
     private fun hasScrollbar(): Boolean {
-        val craftableRecipesSize = this.screenHandler.recipeManager?.recipeItemStacks?.size ?: return false
+        val craftableRecipesSize = this.screenHandler.recipeManager.recipeItemStacks.size
         return craftableRecipesSize > CraftingTableIIInventory.SIZE
     }
 
@@ -83,14 +83,14 @@ class CraftingTableIIScreen(
         val end = this.scrollBarY.second
         this.scrollPosition = (mouseY.toFloat() - start.toFloat() - 7.5f) / ((end - start).toFloat() - 15.0f)
         this.scrollPosition = MathHelper.clamp(this.scrollPosition, 0f, 1f)
-        this.screenHandler.recipeManager?.scrollCraftableRecipes(
+        this.screenHandler.recipeManager.scrollCraftableRecipes(
             scrollPosition
         )
         return true
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        if (this.screenHandler.recipeManager == null || this.scrolling || button != 0 || !this.isClickInScrollbar(
+        if (this.scrolling || button != 0 || !this.isClickInScrollbar(
                 mouseX,
                 mouseY
             )
@@ -108,7 +108,7 @@ class CraftingTableIIScreen(
         horizontalAmount: Double,
         amount: Double
     ): Boolean {
-        val craftableRecipesSize = this.screenHandler.recipeManager?.recipeItemStacks?.size ?: return false
+        val craftableRecipesSize = this.screenHandler.recipeManager.recipeItemStacks.size
         if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) {
             return false
         }
@@ -123,7 +123,7 @@ class CraftingTableIIScreen(
 
             this.scrollPosition -= (j / i).toFloat()
             this.scrollPosition = MathHelper.clamp(this.scrollPosition, 0f, 1f)
-            this.screenHandler.recipeManager?.scrollCraftableRecipes(
+            this.screenHandler.recipeManager.scrollCraftableRecipes(
                 scrollPosition
             )
 
@@ -144,7 +144,7 @@ class CraftingTableIIScreen(
             this.texture, x, y, 0, 0, backgroundWidth, backgroundHeight
         )
 
-        val craftableRecipesSize = this.screenHandler.recipeManager?.recipeItemStacks?.size ?: 0
+        val craftableRecipesSize = this.screenHandler.recipeManager.recipeItemStacks.size
 
         //draw scrollbar
         ctx.drawTexture(
@@ -170,7 +170,7 @@ class CraftingTableIIScreen(
                     this.descriptionTexture, x - 124, y, 0, 0, 121, 162
                 )
 
-                val recipe = this.screenHandler.recipeManager!!.getRecipeEntry(slot.stack)
+                val recipe = this.screenHandler.recipeManager.getRecipe(slot.stack)
 
                 val recipeStacks = arrayListOf<ItemStack>()
 

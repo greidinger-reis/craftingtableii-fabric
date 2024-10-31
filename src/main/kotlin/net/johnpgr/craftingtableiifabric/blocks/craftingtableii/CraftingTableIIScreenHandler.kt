@@ -21,7 +21,10 @@ import net.minecraft.screen.AbstractRecipeScreenHandler
 import net.minecraft.screen.slot.CraftingResultSlot
 import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
+import java.util.*
 
+//FIXME: Scrolling mouse on a resultInventory's slot when mouse wheel tweaks from mods are enabled cause ConcurrentModificationException
+//FIXME: Inventory Profiles Next functions to this screen's inventory cause ConcurrentModificationException also
 class CraftingTableIIScreenHandler(
     syncId: Int,
     val player: PlayerEntity,
@@ -30,30 +33,40 @@ class CraftingTableIIScreenHandler(
     ModBlocks.getContainerInfo(ModBlocks.CRAFTING_TABLE_II)?.handlerType,
     syncId,
 ) {
-    val inventory = CraftingTableIIInventory(entity, this)
     val inputInventory = CraftingInventory(this, 3, 3)
-    val resultInventory = CraftingResultInventory()
-    var recipeManager: RecipeManager? = null
+    private val resultInventory = CraftingResultInventory()
+    private val inventory = CraftingTableIIInventory(entity, this)
+    lateinit var recipeManager: RecipeManager
+    private var lastCraftedItem = ItemStack.EMPTY
+    private var lastPlayerInventoryHash = 0
     var currentListIndex = 0
-    var lastCraftedItem = ItemStack.EMPTY
 
     init {
         inventory.onOpen(player)
 
         //The Crafting Result
-        this.addSlot(CraftingResultSlot(player, this.inputInventory, this.resultInventory, 0, -999, -999))
+        addSlot(
+            CraftingResultSlot(
+                player,
+                inputInventory,
+                resultInventory,
+                0,
+                -999,
+                -999
+            )
+        )
 
         //The Crafting Grid
-        for (row in 0..2) {
-            for (col in 0..2) {
-                this.addSlot(Slot(this.inputInventory, col + row * 3, -999, -999))
+        for (row in 0 until 3) {
+            for (col in 0 until 3) {
+                addSlot(Slot(inputInventory, col + row * 3, -999, -999))
             }
         }
 
         //Our inventory
-        for (row in 0..<CraftingTableIIInventory.ROWS) {
-            for (col in 0..<CraftingTableIIInventory.COLS) {
-                this.addSlot(
+        for (row in 0 until CraftingTableIIInventory.ROWS) {
+            for (col in 0 until CraftingTableIIInventory.COLS) {
+                addSlot(
                     CraftingTableIISlot(
                         inventory,
                         col + row * CraftingTableIIInventory.COLS,
@@ -65,98 +78,126 @@ class CraftingTableIIScreenHandler(
         }
 
         //The player inventory
-        for (row in 0..2) {
-            for (col in 0..8) {
-                this.addSlot(Slot(player.inventory, col + row * 9 + 9, 8 + col * 18, 125 + row * 18))
+        for (row in 0 until 3) {
+            for (col in 0 until 9) {
+                addSlot(
+                    Slot(
+                        player.inventory,
+                        col + row * 9 + 9,
+                        8 + col * 18,
+                        125 + row * 18
+                    )
+                )
             }
         }
 
         //The player hotbar
-        for (row in 0..8) {
-            this.addSlot(Slot(player.inventory, row, 8 + row * 18, 184))
+        for (row in 0 until 9) {
+            addSlot(Slot(player.inventory, row, 8 + row * 18, 184))
         }
 
         if (player.world.isClient) {
-            this.recipeManager = RecipeManager(this, player as ClientPlayerEntity)
+            recipeManager = RecipeManager(this, player as ClientPlayerEntity)
+        }
+    }
+
+    fun tick() {
+        val currentHash = calculatePlayerInventoryHash()
+        if (lastPlayerInventoryHash != currentHash) {
+            updateRecipes(true)
+        }
+        lastPlayerInventoryHash = currentHash
+    }
+
+    private fun calculatePlayerInventoryHash(): Int {
+        return player.inventory.main.fold(1) { hash, stack ->
+            val stackHash =
+                if (stack.isEmpty) 0 else Objects.hash(stack.item, stack.count)
+
+            31 * hash + stackHash
         }
     }
 
     private fun addRecipeItem(stack: ItemStack) {
-        for (i in 0 until this.inventory.size()) {
-            if (this.inventory.getStack(i).isEmpty) {
-                this.inventory.setStack(i, stack)
+        for (i in 0 until inventory.size()) {
+            if (inventory.getStack(i).isEmpty) {
+                inventory.setStack(i, stack)
                 return
             }
         }
     }
 
     override fun isValid(slot: Int): Boolean {
-        return slot >= 0 && slot < this.slots.size
+        return slot >= 0 && slot < slots.size
+    }
+
+    override fun getSlot(index: Int): Slot? {
+        if (!isValid(index)) return null
+        return super.getSlot(index)
     }
 
     override fun onSlotClick(
-        slotIndex: Int, button: Int, actionType: SlotActionType, player: PlayerEntity
+        slotIndex: Int,
+        button: Int,
+        actionType: SlotActionType,
+        player: PlayerEntity
     ) {
         super.onSlotClick(slotIndex, button, actionType, player)
 
-        //Only allow left clicks
-        if(button != 0) return
-
-        if (player.world.isClient) {
-            if (!this.isValid(slotIndex)) return
-            val slot = this.getSlot(slotIndex)
-            if (!slot.hasStack()) return
-
-            if (slot is CraftingTableIISlot) {
-                val quickCraft = actionType == SlotActionType.QUICK_MOVE
-                val recipe = this.recipeManager!!.getRecipeEntry(slot.stack)
-                val buf = PacketByteBufs.create() ?: return
-
-                CraftingPacket(recipe.id, this.syncId, quickCraft).write(buf)
-                ClientPlayNetworking.send(ModMessages.CTII_CRAFT_RECIPE, buf)
-
-                this.lastCraftedItem = slot.stack
+        val slot = getSlot(slotIndex) ?: return
+        if (slot is CraftingTableIISlot && button == 0) {
+            if (!slot.hasStack()) {
+                return
             }
+
+            if (!player.world.isClient) {
+                return
+            }
+
+            val quickCraft = actionType == SlotActionType.QUICK_MOVE
+            val recipe = recipeManager.getRecipe(slot.stack)
+            val buf = PacketByteBufs.create() ?: return
+            CraftingPacket(recipe.id, syncId, quickCraft).write(buf)
+            ClientPlayNetworking.send(ModMessages.CTII_CRAFT_RECIPE, buf)
+            lastCraftedItem = slot.stack
         }
     }
 
-    fun updateRecipes() {
-        this.inventory.clear()
-        this.recipeManager?.refreshCraftableItems()
+    fun updateRecipes(shouldRefreshInputs: Boolean) {
+        //Because the recipeManager only lives in the client
+        if (!player.world.isClient) return
 
-        var j = CraftingTableIIInventory.SIZE
-        if (!this.lastCraftedItem.isEmpty) {
-            this.addRecipeItem(this.lastCraftedItem)
-            j--
-        }
+        inventory.clear()
+        if (shouldRefreshInputs) recipeManager.refreshCraftableItems()
 
-        for (i in this.currentListIndex until this.currentListIndex + j) {
-            val itemToDisplay = this.recipeManager?.recipeItemStacks?.getOrNull(i) ?: break
-
-            this.addRecipeItem(itemToDisplay)
-        }
-
-        if(this.lastCraftedItem.isEmpty) {
-            return
-        }
-
+        var max = CraftingTableIIInventory.SIZE
         var isLastCraftedItemStillValid = false
-        //check if the last crafted item is still in the craftable items list
-        for (stack in this.recipeManager?.recipeItemStacks ?: listOf()) {
-            if (stack.item == this.lastCraftedItem.item) {
+        val newList: MutableList<Int> = mutableListOf()
+
+        for (i in currentListIndex until currentListIndex + max) {
+            val itemStack = recipeManager.recipeItemStacks.getOrNull(i) ?: break
+
+            if (itemStack.item == lastCraftedItem.item) {
                 isLastCraftedItemStillValid = true
-                break
+                newList.add(i)
+                newList.add(0, i)
+                --max
+                continue
             }
+            newList.add(i)
         }
 
-        if(!isLastCraftedItemStillValid) {
-            this.lastCraftedItem = ItemStack.EMPTY
-            this.updateRecipes()
+        newList.forEach { i ->
+            addRecipeItem(recipeManager.recipeItemStacks[i])
+        }
+
+        if (!isLastCraftedItemStillValid) {
+            lastCraftedItem = ItemStack.EMPTY
         }
     }
 
     override fun canInsertIntoSlot(index: Int): Boolean {
-        return index != this.craftingResultSlotIndex
+        return index != craftingResultSlotIndex
     }
 
     override fun canUse(player: PlayerEntity): Boolean {
@@ -164,20 +205,20 @@ class CraftingTableIIScreenHandler(
     }
 
     override fun populateRecipeFinder(finder: RecipeMatcher?) {
-        this.inputInventory.provideRecipeInputs(finder)
+        inputInventory.provideRecipeInputs(finder)
     }
 
     override fun clearCraftingSlots() {
-        this.inputInventory.clear()
-        this.resultInventory.clear()
-    }
-
-    fun updateResultSlot(itemStack: ItemStack) {
-        this.resultInventory.setStack(0, itemStack)
+        inputInventory.clear()
+        resultInventory.clear()
     }
 
     override fun matches(recipe: RecipeEntry<out Recipe<RecipeInputInventory>>): Boolean {
-        return recipe.value.matches(this.inputInventory, this.player.world)
+        return recipe.value.matches(inputInventory, player.world)
+    }
+
+    fun updateResultSlot(itemStack: ItemStack) {
+        resultInventory.setStack(0, itemStack)
     }
 
     override fun getCraftingResultSlotIndex(): Int {
@@ -185,11 +226,11 @@ class CraftingTableIIScreenHandler(
     }
 
     override fun getCraftingWidth(): Int {
-        return this.inputInventory.width
+        return inputInventory.width
     }
 
     override fun getCraftingHeight(): Int {
-        return this.inputInventory.height
+        return inputInventory.height
     }
 
     override fun getCraftingSlotCount(): Int {
