@@ -1,5 +1,7 @@
-package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
+package net.johnpgr.craftingtableiifabric.inventory
 
+import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
+import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack

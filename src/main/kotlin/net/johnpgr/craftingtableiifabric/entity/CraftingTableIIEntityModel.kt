@@ -1,4 +1,4 @@
-package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
+package net.johnpgr.craftingtableiifabric.entity
 
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry
 import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
@@ -12,7 +12,7 @@ object CraftingTableIIEntityModel {
     private const val TEXTURE_WIDTH = 128
     private const val TEXTURE_HEIGHT = 64
 
-    fun initClient() {
+    fun register() {
         getEntries()
             .forEach { (entityLayer, textureModelData) ->
                 EntityModelLayerRegistry.registerModelLayer(entityLayer) { textureModelData }

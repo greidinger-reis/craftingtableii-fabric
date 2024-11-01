@@ -1,13 +1,15 @@
-package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
+package net.johnpgr.craftingtableiifabric.screen
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
-import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
-import net.johnpgr.craftingtableiifabric.network.ModMessages
-import net.johnpgr.craftingtableiifabric.network.packet.CraftingPacket
-import net.johnpgr.craftingtableiifabric.recipes.RecipeManager
+import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.block.CraftingTableIIBlock
+import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
+import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIIInventory
+import net.johnpgr.craftingtableiifabric.network.CraftingTableIIPacket
+import net.johnpgr.craftingtableiifabric.recipe.CraftingTableIIRecipeManager
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
 import net.minecraft.inventory.Inventory
@@ -17,26 +19,43 @@ import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeEntry
 import net.minecraft.recipe.RecipeMatcher
 import net.minecraft.recipe.book.RecipeBookCategory
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
 import net.minecraft.screen.AbstractRecipeScreenHandler
+import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.screen.slot.CraftingResultSlot
 import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
+import net.minecraft.util.math.BlockPos
+import net.minecraft.world.World
 import java.util.*
 
 //FIXME: Scrolling mouse on a resultInventory's slot when mouse wheel tweaks from mods are enabled cause ConcurrentModificationException
 //FIXME: Inventory Profiles Next functions to this screen's inventory cause ConcurrentModificationException also
 class CraftingTableIIScreenHandler(
     syncId: Int,
-    val player: PlayerEntity,
+    playerInventory: PlayerInventory,
     val entity: CraftingTableIIEntity,
+    private val blockContext: ScreenHandlerContext,
 ) : AbstractRecipeScreenHandler<RecipeInputInventory>(
-    ModBlocks.getContainerInfo(ModBlocks.CRAFTING_TABLE_II)?.handlerType,
+    CraftingTableIIFabric.SCREEN_HANDLER,
     syncId,
 ) {
+    companion object {
+        fun register() {
+            Registry.register(
+                Registries.SCREEN_HANDLER,
+                CraftingTableIIBlock.ID,
+                CraftingTableIIFabric.SCREEN_HANDLER
+            )
+        }
+    }
+
+    private val player = playerInventory.player
     val inputInventory = CraftingInventory(this, 3, 3)
     private val resultInventory = CraftingResultInventory()
     private val inventory = CraftingTableIIInventory(entity, this)
-    lateinit var recipeManager: RecipeManager
+    lateinit var recipeManager: CraftingTableIIRecipeManager
     private var lastCraftedItem = ItemStack.EMPTY
     private var lastPlayerInventoryHash = 0
     var currentListIndex = 0
@@ -82,7 +101,7 @@ class CraftingTableIIScreenHandler(
             for (col in 0 until 9) {
                 addSlot(
                     Slot(
-                        player.inventory,
+                        playerInventory,
                         col + row * 9 + 9,
                         8 + col * 18,
                         125 + row * 18
@@ -93,11 +112,11 @@ class CraftingTableIIScreenHandler(
 
         //The player hotbar
         for (row in 0 until 9) {
-            addSlot(Slot(player.inventory, row, 8 + row * 18, 184))
+            addSlot(Slot(playerInventory, row, 8 + row * 18, 184))
         }
 
         if (player.world.isClient) {
-            recipeManager = RecipeManager(this, player as ClientPlayerEntity)
+            recipeManager = CraftingTableIIRecipeManager(this, player as ClientPlayerEntity)
         }
     }
 
@@ -156,9 +175,12 @@ class CraftingTableIIScreenHandler(
 
             val quickCraft = actionType == SlotActionType.QUICK_MOVE
             val recipe = recipeManager.getRecipe(slot.stack)
-            val buf = PacketByteBufs.create() ?: return
-            CraftingPacket(recipe.id, syncId, quickCraft).write(buf)
-            ClientPlayNetworking.send(ModMessages.CTII_CRAFT_RECIPE, buf)
+            val payload = CraftingTableIIPacket(
+                recipe.id,
+                syncId,
+                quickCraft
+            )
+            ClientPlayNetworking.send(payload)
             lastCraftedItem = slot.stack
         }
     }
@@ -201,7 +223,16 @@ class CraftingTableIIScreenHandler(
     }
 
     override fun canUse(player: PlayerEntity): Boolean {
-        return true
+        return blockContext.get({ world: World, blockPos: BlockPos ->
+            if (world.getBlockState(
+                    blockPos
+                ).block != CraftingTableIIFabric.BLOCK
+            ) false else player.squaredDistanceTo(
+                blockPos.x + .5,
+                blockPos.y + .5,
+                blockPos.z + .5
+            ) < 64.0
+        }, true)
     }
 
     override fun populateRecipeFinder(finder: RecipeMatcher?) {

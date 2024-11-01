@@ -1,4 +1,4 @@
-package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
+package net.johnpgr.craftingtableiifabric.description
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
@@ -10,7 +10,7 @@ object CraftingTableIIDescriptions {
     private const val FALLBACK_LANG = "en_us"
     var map: HashMap<String, String> = hashMapOf()
 
-    fun initClient() {
+    fun register() {
         var run = false
 
         ClientTickEvents.START_WORLD_TICK.register(ClientTickEvents.StartWorldTick { world ->
@@ -23,7 +23,7 @@ object CraftingTableIIDescriptions {
                         CraftingTableIIFabric.id("descriptions/${currentLang}.json")
                     )
                         .getOrNull() ?: resourceManager.getResource(
-                        CraftingTableIIFabric.id("descriptions/${FALLBACK_LANG}.json")
+                        CraftingTableIIFabric.id("descriptions/$FALLBACK_LANG.json")
                     )
                         .getOrNull() ?: run {
                         CraftingTableIIFabric.LOGGER.error("Failed to load descriptions")

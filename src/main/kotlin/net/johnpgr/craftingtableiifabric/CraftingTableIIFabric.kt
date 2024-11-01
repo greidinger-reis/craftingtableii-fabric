@@ -1,22 +1,30 @@
 package net.johnpgr.craftingtableiifabric
 
 import net.fabricmc.api.ModInitializer
-import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
-import net.johnpgr.craftingtableiifabric.network.ModMessages
-import net.johnpgr.craftingtableiifabric.utils.CreativeTab
+import net.johnpgr.craftingtableiifabric.block.CraftingTableIIBlock
+import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
+import net.johnpgr.craftingtableiifabric.network.CraftingTableIIPacket
+import net.johnpgr.craftingtableiifabric.utils.BlockScreenHandlerFactory
+import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
+import net.johnpgr.craftingtableiifabric.utils.BlockEntityFactory
 import net.minecraft.util.Identifier
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 object CraftingTableIIFabric : ModInitializer {
     const val MOD_ID = "craftingtableiifabric"
-    val LOGGER = LoggerFactory.getLogger(MOD_ID)
+    val LOGGER: Logger = LoggerFactory.getLogger(MOD_ID)
+    val BLOCK = CraftingTableIIBlock()
+    val SCREEN_HANDLER = BlockScreenHandlerFactory.createHandlerType(::CraftingTableIIScreenHandler)
+    val ENTITY_TYPE = BlockEntityFactory.createEntityType<CraftingTableIIEntity>(BLOCK)
 
     fun id(name: String) = Identifier(MOD_ID, name)
 
     override fun onInitialize() {
-        ModMessages.initPackets()
-        ModBlocks.initBlocks()
-        CreativeTab.initCreativeTab()
+        CraftingTableIIBlock.register()
+        CraftingTableIIEntity.register()
+        CraftingTableIIScreenHandler.register()
+        CraftingTableIIPacket.register()
     }
 }
 

@@ -1,7 +1,9 @@
-package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
+package net.johnpgr.craftingtableiifabric.renderer
 
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry
-import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
+import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
+import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntityRenderer
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
@@ -12,9 +14,9 @@ import net.minecraft.util.math.BlockPos
 
 class CraftingTableIIItemDynamicRenderer : BuiltinItemRendererRegistry.DynamicItemRenderer {
     companion object {
-        fun initClient() {
+        fun register() {
             BuiltinItemRendererRegistry.INSTANCE.register(
-                ModBlocks.CRAFTING_TABLE_II,
+                CraftingTableIIFabric.BLOCK,
                 CraftingTableIIItemDynamicRenderer()
             )
         }
@@ -29,9 +31,9 @@ class CraftingTableIIItemDynamicRenderer : BuiltinItemRendererRegistry.DynamicIt
         overlay: Int
     ) {
         val tableEntity = CraftingTableIIEntity(
-            ModBlocks.CRAFTING_TABLE_II as CraftingTableII,
+            CraftingTableIIFabric.BLOCK,
             BlockPos.ORIGIN,
-            ModBlocks.CRAFTING_TABLE_II.defaultState
+            CraftingTableIIFabric.BLOCK.defaultState
         )
 
         val dummyRenderer = CraftingTableIIEntityRenderer(

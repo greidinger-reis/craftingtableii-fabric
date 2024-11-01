@@ -1,21 +1,32 @@
-package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
+package net.johnpgr.craftingtableiifabric.screen
 
 import com.mojang.blaze3d.systems.RenderSystem
 import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.description.CraftingTableIIDescriptions
+import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIIInventory
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
+import net.minecraft.client.gui.screen.ingame.HandledScreens
 import net.minecraft.client.render.GameRenderer
-import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.slot.Slot
 import net.minecraft.text.Text
 import net.minecraft.util.math.MathHelper
 
 class CraftingTableIIScreen(
-    screenHandler: CraftingTableIIScreenHandler, player: PlayerEntity, title: Text
+    screenHandler: CraftingTableIIScreenHandler, playerInventory: PlayerInventory, title: Text
 ) : HandledScreen<CraftingTableIIScreenHandler>(
-    screenHandler, player.inventory, title
+    screenHandler, playerInventory, title
 ) {
+    companion object {
+        fun register() {
+            HandledScreens.register(
+                CraftingTableIIFabric.SCREEN_HANDLER,
+                ::CraftingTableIIScreen
+            )
+        }
+    }
     private val texture = CraftingTableIIFabric.id(
         "textures/gui/crafttableii.png"
     )

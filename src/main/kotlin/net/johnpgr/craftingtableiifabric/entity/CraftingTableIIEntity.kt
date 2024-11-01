@@ -1,6 +1,8 @@
-package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
+package net.johnpgr.craftingtableiifabric.entity
 
-import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
+import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.block.CraftingTableIIBlock
+import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIIInventory
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -8,6 +10,9 @@ import net.minecraft.inventory.Inventories
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
+import net.minecraft.registry.RegistryWrapper
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvents
 import net.minecraft.util.collection.DefaultedList
@@ -15,11 +20,11 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
 class CraftingTableIIEntity(
-    craftingTableII: CraftingTableII,
+    block: CraftingTableIIBlock,
     pos: BlockPos,
     state: BlockState,
 ) :
-    BlockEntity(ModBlocks.getEntityType(craftingTableII), pos, state),
+    BlockEntity(CraftingTableIIFabric.ENTITY_TYPE, pos, state),
     Inventory {
     private var inventory =
         DefaultedList.ofSize(CraftingTableIIInventory.SIZE, ItemStack.EMPTY)
@@ -27,6 +32,14 @@ class CraftingTableIIEntity(
     var doorAngle = 0.0f
 
     companion object {
+        fun register() {
+            Registry.register(
+                Registries.BLOCK_ENTITY_TYPE,
+                CraftingTableIIBlock.ID,
+                CraftingTableIIFabric.ENTITY_TYPE,
+            )
+        }
+
         private const val OPEN_SPEED = 0.2f
 
         fun tick(
@@ -87,16 +100,23 @@ class CraftingTableIIEntity(
                 }
             }
         }
+
     }
 
-    override fun readNbt(tag: NbtCompound) {
-        super.readNbt(tag)
-        Inventories.readNbt(tag, inventory)
+    override fun readNbt(
+        nbt: NbtCompound?,
+        registryLookup: RegistryWrapper.WrapperLookup?
+    ) {
+        super.readNbt(nbt, registryLookup)
+        Inventories.readNbt(nbt, inventory, registryLookup)
     }
 
-    override fun writeNbt(tag: NbtCompound) {
-        super.writeNbt(tag)
-        Inventories.writeNbt(tag, this.inventory)
+    override fun writeNbt(
+        nbt: NbtCompound?,
+        registryLookup: RegistryWrapper.WrapperLookup?
+    ) {
+        super.writeNbt(nbt, registryLookup)
+        Inventories.writeNbt(nbt, inventory, registryLookup)
     }
 
     override fun size(): Int {

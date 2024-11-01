@@ -1,37 +1,68 @@
 package net.johnpgr.craftingtableiifabric.utils
 
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
-import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType
+import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
 import net.minecraft.block.Block
+import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.network.PacketByteBuf
+import net.minecraft.network.codec.PacketCodecs
+import net.minecraft.registry.Registries
 import net.minecraft.screen.ScreenHandler
+import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
 
-class BlockScreenHandlerFactory(val block: Block, val pos: BlockPos) :
-    ExtendedScreenHandlerFactory {
+class BlockScreenHandlerFactory<T : ScreenHandler, B : BlockEntity>(
+    val block: Block,
+    val pos: BlockPos,
+    val consumer: (Int, PlayerInventory, B, ScreenHandlerContext) -> T
+) : ExtendedScreenHandlerFactory<BlockPos> {
+    companion object {
+        @Suppress("UNCHECKED_CAST")
+        fun <T : ScreenHandler, B : BlockEntity> createHandlerType(consumer: (Int, PlayerInventory, B, ScreenHandlerContext) -> T): ExtendedScreenHandlerType<T, BlockPos> {
+            return ExtendedScreenHandlerType({ syncId, playerInventory, pos ->
+                val player = playerInventory.player
+                val world = player.world
+                val blockEntity = world.getBlockEntity(pos) as B
+                consumer.invoke(
+                    syncId,
+                    playerInventory,
+                    blockEntity,
+                    ScreenHandlerContext.create(world, pos)
+                )
+            }, PacketCodecs.registryCodec(BlockPos.CODEC))
+        }
+    }
+
+    private val displayName: Text = Text.translatable(
+        "screen.${CraftingTableIIFabric.MOD_ID}.${
+            Registries.BLOCK.getId(block).path
+        }"
+    )
+
+    @Suppress("UNCHECKED_CAST")
     override fun createMenu(
         syncId: Int,
-        playerInventory: PlayerInventory,
+        playerInv: PlayerInventory,
         player: PlayerEntity
     ): ScreenHandler {
         val world = player.world
-        val blockEntity = world.getBlockEntity(pos)
-        return ModBlocks.getContainerInfo(block)!!.screenHandlerClass.java.constructors[0].newInstance(
+        val be = world.getBlockEntity(pos) as B
+        return consumer.invoke(
             syncId,
-            player,
-            blockEntity,
-        ) as ScreenHandler
+            playerInv,
+            be,
+            ScreenHandlerContext.create(world, pos)
+        )
     }
 
-    override fun writeScreenOpeningData(
-        player: ServerPlayerEntity?,
-        buf: PacketByteBuf?
-    ) {
-        buf?.writeBlockPos(pos)
+    override fun getScreenOpeningData(player: ServerPlayerEntity?): BlockPos {
+        return pos
     }
 
-    override fun getDisplayName() = ModBlocks.getContainerInfo(block)!!.title
+    override fun getDisplayName() = displayName
+
 }

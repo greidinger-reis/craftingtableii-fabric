@@ -1,8 +1,10 @@
-package net.johnpgr.craftingtableiifabric.blocks.craftingtableii
+package net.johnpgr.craftingtableiifabric.block
 
 import com.mojang.serialization.MapCodec
-import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
-import net.johnpgr.craftingtableiifabric.blocks.ModBlocks
+import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric.BLOCK
+import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
+import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
 import net.johnpgr.craftingtableiifabric.utils.BlockScreenHandlerFactory
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
@@ -10,12 +12,14 @@ import net.minecraft.block.entity.BlockEntityTicker
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemPlacementContext
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.Properties
 import net.minecraft.util.ActionResult
 import net.minecraft.util.BlockMirror
 import net.minecraft.util.BlockRotation
-import net.minecraft.util.Hand
+import net.minecraft.util.Identifier
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
@@ -23,8 +27,19 @@ import net.minecraft.util.shape.VoxelShape
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
-class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTING_TABLE)) {
-    private val codec = createCodec { CraftingTableII() }
+class CraftingTableIIBlock : BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE)) {
+    companion object {
+        val ID: Identifier = CraftingTableIIFabric.id("craftingtableii")
+        val CODEC: MapCodec<CraftingTableIIBlock> = createCodec { CraftingTableIIBlock() }
+
+        fun register() {
+            Registry.register(
+                Registries.BLOCK,
+                ID,
+                BLOCK
+            )
+        }
+    }
 
     override fun appendProperties(stateManager: StateManager.Builder<Block?, BlockState?>) {
         stateManager.add(Properties.HORIZONTAL_FACING)
@@ -42,8 +57,14 @@ class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTI
         )
     }
 
-    override fun rotate(state: BlockState, rotation: BlockRotation): BlockState {
-        return state.with(Properties.HORIZONTAL_FACING, rotation.rotate(state[Properties.HORIZONTAL_FACING]))
+    override fun rotate(
+        state: BlockState,
+        rotation: BlockRotation
+    ): BlockState {
+        return state.with(
+            Properties.HORIZONTAL_FACING,
+            rotation.rotate(state[Properties.HORIZONTAL_FACING])
+        )
     }
 
     override fun mirror(state: BlockState, mirror: BlockMirror): BlockState? {
@@ -68,20 +89,23 @@ class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTI
     }
 
     override fun getOutlineShape(
-        state: BlockState?,
-        world: BlockView?,
-        pos: BlockPos?,
-        context: ShapeContext?
+        state: BlockState,
+        world: BlockView,
+        pos: BlockPos,
+        context: ShapeContext
     ): VoxelShape {
         return createCuboidShape(1.0, 0.0, 2.0, 15.0, 16.0, 15.0)
     }
 
-    override fun createBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {
+    override fun createBlockEntity(
+        pos: BlockPos,
+        state: BlockState
+    ): BlockEntity {
         return CraftingTableIIEntity(this, pos, state)
     }
 
     override fun getCodec(): MapCodec<out BlockWithEntity> {
-        return codec
+        return CODEC
     }
 
     override fun onUse(
@@ -89,31 +113,28 @@ class CraftingTableII : BlockWithEntity(FabricBlockSettings.copyOf(Blocks.CRAFTI
         world: World,
         pos: BlockPos,
         player: PlayerEntity,
-        hand: Hand,
         hit: BlockHitResult
     ): ActionResult {
-        if (!world.isClient) {
-            player.openHandledScreen(
-                BlockScreenHandlerFactory(this, pos)
-            )
-        }
+        player.openHandledScreen(
+            BlockScreenHandlerFactory(this, pos, ::CraftingTableIIScreenHandler)
+        )
 
         return ActionResult.SUCCESS
     }
 
-    override fun <T : BlockEntity?> getTicker(
-        world: World?,
-        state: BlockState?,
-        type: BlockEntityType<T>?
-    ): BlockEntityTicker<T>? {
-        return BlockWithEntity.validateTicker(
+    override fun <T : BlockEntity> getTicker(
+        world: World,
+        state: BlockState,
+        type: BlockEntityType<T>
+    ): BlockEntityTicker<T> {
+        return validateTicker(
             type,
-            ModBlocks.getEntityType(this)
+            CraftingTableIIFabric.ENTITY_TYPE
         ) { world1, pos, state1, entity ->
             CraftingTableIIEntity.tick(
                 world1, pos, state1, entity as CraftingTableIIEntity
             )
-        }
+        }!!
     }
 
     override fun hasComparatorOutput(state: BlockState): Boolean {

@@ -1,6 +1,8 @@
-package net.johnpgr.craftingtableiifabric.recipes
+package net.johnpgr.craftingtableiifabric.recipe
 
-import net.johnpgr.craftingtableiifabric.blocks.craftingtableii.CraftingTableIIScreenHandler
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
 import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.client.recipebook.RecipeBookGroup
@@ -8,21 +10,42 @@ import net.minecraft.item.ItemStack
 import net.minecraft.recipe.RecipeEntry
 import net.minecraft.recipe.RecipeMatcher
 
-class RecipeManager(
+class CraftingTableIIRecipeManager(
     private val craftingScreenHandler: CraftingTableIIScreenHandler,
     private val player: ClientPlayerEntity,
 ) {
+    companion object {
+        val ID = CraftingTableIIFabric.id("recipe_manager_tick")
+
+        fun register() {
+            ClientTickEvents.END_CLIENT_TICK.register(ID) { client ->
+                (client.player?.currentScreenHandler as? CraftingTableIIScreenHandler)?.tick()
+            }
+        }
+    }
+
     private val recipeMatcher: RecipeMatcher = RecipeMatcher()
     private var recipes: List<RecipeResultCollection> = listOf()
     var recipeItemStacks: List<ItemStack> = listOf()
 
+    /**
+     * Refreshes the inputs for the recipe matcher and updates the list of recipes.
+     * This method clears the current recipe matcher, populates it with the player's inventory
+     * and the crafting screen handler, and retrieves the results for the crafting search group
+     * from the player's recipe book.
+     */
     private fun refreshInputs() {
         this.recipeMatcher.clear()
         this.player.inventory.populateRecipeFinder(this.recipeMatcher)
         this.craftingScreenHandler.populateRecipeFinder(this.recipeMatcher)
-        this.recipes = this.player.recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
+        this.recipes =
+            this.player.recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
     }
 
+    /**
+     * Scrolls through the list of craftable recipes based on the given scroll position.
+     * Updates the current list index in the crafting screen handler and refreshes the displayed recipes.
+     */
     fun scrollCraftableRecipes(scrollPos: Float) {
         val craftableRecipesSize = this.recipeItemStacks.size
         val i = (craftableRecipesSize + 8 - 1) / 8 - 5
@@ -60,6 +83,12 @@ class RecipeManager(
         recipeItemStacks = newRecipeItemStacks
     }
 
+
+    /**
+     * Retrieves the recipe entry for the given item stack.
+     * This method refreshes the inputs, searches through the list of recipes,
+     * and returns the first recipe entry that matches the item in the stack.
+     */
     fun getRecipe(stack: ItemStack): RecipeEntry<*> {
         this.refreshInputs()
         val recipeList =
