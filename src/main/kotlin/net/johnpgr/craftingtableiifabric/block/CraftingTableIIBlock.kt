@@ -131,11 +131,15 @@ class CraftingTableIIBlock :
         player: PlayerEntity,
         hit: BlockHitResult
     ): ActionResult {
+        if (world.isClient) {
+            return ActionResult.SUCCESS
+        }
+
         player.openHandledScreen(
             BlockScreenHandlerFactory(this, pos, ::CraftingTableIIScreenHandler)
         )
 
-        return ActionResult.SUCCESS
+        return ActionResult.CONSUME
     }
 
     override fun <T : BlockEntity> getTicker(

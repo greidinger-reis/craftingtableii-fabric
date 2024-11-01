@@ -52,14 +52,14 @@ data class CraftingTableIIPacket(
                             while (
                                 @Suppress("UNCHECKED_CAST")
                                 (recipe as RecipeEntry<Recipe<RecipeInputInventory>>).value.matches(
-                                    craftingScreenHandler.inputInventory,
+                                    craftingScreenHandler.input,
                                     player.world
                                 )
                             ) {
                                 val cursor =
                                     craftingScreenHandler.cursorStack
                                 val output = recipe.value.craft(
-                                    craftingScreenHandler.inputInventory,
+                                    craftingScreenHandler.input,
                                     server.registryManager
                                 )
 

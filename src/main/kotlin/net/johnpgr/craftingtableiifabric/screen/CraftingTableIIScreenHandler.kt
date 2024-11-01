@@ -32,11 +32,14 @@ import java.util.*
 
 //FIXME: Scrolling mouse on a resultInventory's slot when mouse wheel tweaks from mods are enabled cause ConcurrentModificationException
 //FIXME: Inventory Profiles Next functions to this screen's inventory cause ConcurrentModificationException also
+//FIXME: When the player drags an item in their inventory, the cursor stack doesn't get updated.
+// That duplicates the item stack in the inventory.
+// If the player then clicks on a slot, the full amount of items that were supposed to be split are moved to the slot.
 class CraftingTableIIScreenHandler(
     syncId: Int,
     playerInventory: PlayerInventory,
     val entity: CraftingTableIIEntity,
-    private val blockContext: ScreenHandlerContext,
+    private val context: ScreenHandlerContext,
 ) : AbstractRecipeScreenHandler<RecipeInputInventory>(
     CraftingTableIIMod.SCREEN_HANDLER,
     syncId,
@@ -52,8 +55,8 @@ class CraftingTableIIScreenHandler(
     }
 
     private val player = playerInventory.player
-    val inputInventory = CraftingInventory(this, 3, 3)
-    private val resultInventory = CraftingResultInventory()
+    val input = CraftingInventory(this, 3, 3)
+    private val result = CraftingResultInventory()
     private val inventory = CraftingTableIIInventory(entity, this)
     lateinit var recipeManager: CraftingTableIIRecipeManager
     private var lastCraftedItem = ItemStack.EMPTY
@@ -67,8 +70,8 @@ class CraftingTableIIScreenHandler(
         addSlot(
             CraftingResultSlot(
                 player,
-                inputInventory,
-                resultInventory,
+                input,
+                result,
                 0,
                 -999,
                 -999
@@ -78,7 +81,7 @@ class CraftingTableIIScreenHandler(
         //The Crafting Grid
         for (row in 0 until 3) {
             for (col in 0 until 3) {
-                addSlot(Slot(inputInventory, col + row * 3, -999, -999))
+                addSlot(Slot(input, col + row * 3, -999, -999))
             }
         }
 
@@ -162,6 +165,7 @@ class CraftingTableIIScreenHandler(
         actionType: SlotActionType,
         player: PlayerEntity
     ) {
+        CraftingTableIIMod.LOGGER.info("[${if (player.world.isClient) "CLIENT" else "SERVER"}]: slotIndex: $slotIndex, button: $button, actionType: $actionType")
         super.onSlotClick(slotIndex, button, actionType, player)
 
         val slot = getSlot(slotIndex) ?: return
@@ -182,7 +186,7 @@ class CraftingTableIIScreenHandler(
                 quickCraft
             )
             ClientPlayNetworking.send(payload)
-            lastCraftedItem = slot.stack
+            lastCraftedItem = slot.stack.copy()
         }
     }
 
@@ -229,7 +233,7 @@ class CraftingTableIIScreenHandler(
      * and if the player is within a 64-block radius of the block.
      */
     override fun canUse(player: PlayerEntity): Boolean {
-        return blockContext.get({ world: World, blockPos: BlockPos ->
+        return context.get({ world: World, blockPos: BlockPos ->
             if (world.getBlockState(
                     blockPos
                 ).block != CraftingTableIIMod.BLOCK
@@ -242,20 +246,20 @@ class CraftingTableIIScreenHandler(
     }
 
     override fun populateRecipeFinder(finder: RecipeMatcher?) {
-        inputInventory.provideRecipeInputs(finder)
+        input.provideRecipeInputs(finder)
     }
 
     override fun clearCraftingSlots() {
-        inputInventory.clear()
-        resultInventory.clear()
+        input.clear()
+        result.clear()
     }
 
     override fun matches(recipe: RecipeEntry<out Recipe<RecipeInputInventory>>): Boolean {
-        return recipe.value.matches(inputInventory, player.world)
+        return recipe.value.matches(input, player.world)
     }
 
     fun updateResultSlot(itemStack: ItemStack) {
-        resultInventory.setStack(0, itemStack)
+        result.setStack(0, itemStack)
     }
 
     override fun getCraftingResultSlotIndex(): Int {
@@ -263,11 +267,11 @@ class CraftingTableIIScreenHandler(
     }
 
     override fun getCraftingWidth(): Int {
-        return inputInventory.width
+        return input.width
     }
 
     override fun getCraftingHeight(): Int {
-        return inputInventory.height
+        return input.height
     }
 
     override fun getCraftingSlotCount(): Int {
