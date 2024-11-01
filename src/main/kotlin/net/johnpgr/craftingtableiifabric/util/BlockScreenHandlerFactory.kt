@@ -1,8 +1,8 @@
-package net.johnpgr.craftingtableiifabric.utils
+package net.johnpgr.craftingtableiifabric.util
 
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType
-import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -38,7 +38,7 @@ class BlockScreenHandlerFactory<T : ScreenHandler, B : BlockEntity>(
     }
 
     private val displayName: Text = Text.translatable(
-        "screen.${CraftingTableIIFabric.MOD_ID}.${
+        "screen.${CraftingTableIIMod.MOD_ID}.${
             Registries.BLOCK.getId(block).path
         }"
     )

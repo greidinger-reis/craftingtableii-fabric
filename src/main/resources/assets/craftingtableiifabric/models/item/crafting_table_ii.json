@@ -1,7 +1,7 @@
 {
-  "parent": "craftingtableiifabric:block/craftingtableii",
+  "parent": "craftingtableiifabric:block/crafting_table_ii",
   "textures": {
-    "particle": "craftingtableiifabric:block/craftingtableii"
+    "particle": "craftingtableiifabric:block/crafting_table_ii"
   },
   "gui_light": "side",
   "display": {

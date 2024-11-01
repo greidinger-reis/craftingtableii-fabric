@@ -1,6 +1,6 @@
 package net.johnpgr.craftingtableiifabric.entity
 
-import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.johnpgr.craftingtableiifabric.block.CraftingTableIIBlock
 import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIIInventory
 import net.minecraft.block.BlockState
@@ -24,7 +24,7 @@ class CraftingTableIIEntity(
     pos: BlockPos,
     state: BlockState,
 ) :
-    BlockEntity(CraftingTableIIFabric.ENTITY_TYPE, pos, state),
+    BlockEntity(CraftingTableIIMod.ENTITY_TYPE, pos, state),
     Inventory {
     private var inventory =
         DefaultedList.ofSize(CraftingTableIIInventory.SIZE, ItemStack.EMPTY)
@@ -36,7 +36,7 @@ class CraftingTableIIEntity(
             Registry.register(
                 Registries.BLOCK_ENTITY_TYPE,
                 CraftingTableIIBlock.ID,
-                CraftingTableIIFabric.ENTITY_TYPE,
+                CraftingTableIIMod.ENTITY_TYPE,
             )
         }
 

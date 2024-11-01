@@ -18,13 +18,13 @@
   "entrypoints": {
     "main": [
       {
-        "value": "net.johnpgr.craftingtableiifabric.CraftingTableIIFabric",
+        "value": "net.johnpgr.craftingtableiifabric.CraftingTableIIMod",
         "adapter": "kotlin"
       }
     ],
     "client": [
       {
-        "value": "net.johnpgr.craftingtableiifabric.CraftingTableIIFabricClient",
+        "value": "net.johnpgr.craftingtableiifabric.CraftingTableIIModClient",
         "adapter": "kotlin"
       }
     ]

@@ -1,7 +1,7 @@
 package net.johnpgr.craftingtableiifabric.entity
 
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry
-import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.minecraft.client.model.ModelData
 import net.minecraft.client.model.ModelPartBuilder
 import net.minecraft.client.model.ModelTransform
@@ -20,31 +20,31 @@ object CraftingTableIIEntityModel {
     }
 
     val tableModelLayer = EntityModelLayer(
-        CraftingTableIIFabric.id("craftingtableii"),
+        CraftingTableIIMod.id("craftingtableii"),
         "table"
     )
     val doorModelLayer = EntityModelLayer(
-        CraftingTableIIFabric.id("craftingtableii"),
+        CraftingTableIIMod.id("craftingtableii"),
         "door"
     )
     val doorSideModelLayer = EntityModelLayer(
-        CraftingTableIIFabric.id("craftingtableii"),
+        CraftingTableIIMod.id("craftingtableii"),
         "door_side"
     )
     val doorSide1ModelLayer = EntityModelLayer(
-        CraftingTableIIFabric.id("craftingtableii"),
+        CraftingTableIIMod.id("craftingtableii"),
         "door_side1"
     )
     val doorTopSideModelLayer = EntityModelLayer(
-        CraftingTableIIFabric.id("craftingtableii"),
+        CraftingTableIIMod.id("craftingtableii"),
         "door_top_sider"
     )
     val doorTopSide1ModelLayer = EntityModelLayer(
-        CraftingTableIIFabric.id("craftingtableii"),
+        CraftingTableIIMod.id("craftingtableii"),
         "door_top_side1"
     )
     val bookModelLayer = EntityModelLayer(
-        CraftingTableIIFabric.id("craftingtableii"),
+        CraftingTableIIMod.id("craftingtableii"),
         "book"
     )
 

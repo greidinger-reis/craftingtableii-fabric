@@ -1,7 +1,7 @@
 package net.johnpgr.craftingtableiifabric.recipe
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
 import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection
 import net.minecraft.client.network.ClientPlayerEntity
@@ -15,7 +15,7 @@ class CraftingTableIIRecipeManager(
     private val player: ClientPlayerEntity,
 ) {
     companion object {
-        val ID = CraftingTableIIFabric.id("recipe_manager_tick")
+        val ID = CraftingTableIIMod.id("recipe_manager_tick")
 
         fun register() {
             ClientTickEvents.END_CLIENT_TICK.register(ID) { client ->

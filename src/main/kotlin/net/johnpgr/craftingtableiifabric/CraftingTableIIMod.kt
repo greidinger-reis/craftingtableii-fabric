@@ -4,14 +4,14 @@ import net.fabricmc.api.ModInitializer
 import net.johnpgr.craftingtableiifabric.block.CraftingTableIIBlock
 import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
 import net.johnpgr.craftingtableiifabric.network.CraftingTableIIPacket
-import net.johnpgr.craftingtableiifabric.utils.BlockScreenHandlerFactory
+import net.johnpgr.craftingtableiifabric.util.BlockScreenHandlerFactory
 import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
-import net.johnpgr.craftingtableiifabric.utils.BlockEntityFactory
+import net.johnpgr.craftingtableiifabric.util.BlockEntityFactory
 import net.minecraft.util.Identifier
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-object CraftingTableIIFabric : ModInitializer {
+object CraftingTableIIMod : ModInitializer {
     const val MOD_ID = "craftingtableiifabric"
     val LOGGER: Logger = LoggerFactory.getLogger(MOD_ID)
     val BLOCK = CraftingTableIIBlock()

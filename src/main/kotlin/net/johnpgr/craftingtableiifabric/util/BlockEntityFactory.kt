@@ -1,4 +1,4 @@
-package net.johnpgr.craftingtableiifabric.utils
+package net.johnpgr.craftingtableiifabric.util
 
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider

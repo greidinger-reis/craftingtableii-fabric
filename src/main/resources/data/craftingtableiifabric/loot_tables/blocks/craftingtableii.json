@@ -11,11 +11,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "craftingtableiifabric:craftingtableii"
+          "name": "craftingtableiifabric:crafting_table_ii"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "craftingtableiifabric:blocks/craftingtableii"
+  "random_sequence": "craftingtableiifabric:blocks/crafting_table_ii"
 }

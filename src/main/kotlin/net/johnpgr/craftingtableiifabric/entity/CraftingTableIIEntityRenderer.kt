@@ -1,6 +1,6 @@
 package net.johnpgr.craftingtableiifabric.entity
 
-import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.VertexConsumer
 import net.minecraft.client.render.VertexConsumerProvider
@@ -20,7 +20,7 @@ class CraftingTableIIEntityRenderer(arg: BlockEntityRendererFactory.Context) :
     BlockEntityRenderer<CraftingTableIIEntity> {
     companion object {
         fun register() {
-            BlockEntityRendererFactories.register(CraftingTableIIFabric.ENTITY_TYPE) {
+            BlockEntityRendererFactories.register(CraftingTableIIMod.ENTITY_TYPE) {
                 CraftingTableIIEntityRenderer(it)
             }
         }
@@ -28,7 +28,7 @@ class CraftingTableIIEntityRenderer(arg: BlockEntityRendererFactory.Context) :
 
     private val texture = SpriteIdentifier(
         PlayerScreenHandler.BLOCK_ATLAS_TEXTURE,
-        Identifier(CraftingTableIIFabric.MOD_ID + ":block/craftingtableii")
+        Identifier(CraftingTableIIMod.MOD_ID + ":block/craftingtableii")
     )
     private val table =
         arg.getLayerModelPart(CraftingTableIIEntityModel.tableModelLayer)
@@ -59,7 +59,7 @@ class CraftingTableIIEntityRenderer(arg: BlockEntityRendererFactory.Context) :
         )
         val blockState =
             if (entity.hasWorld()) entity.cachedState
-            else (CraftingTableIIFabric.BLOCK.defaultState.with(
+            else (CraftingTableIIMod.BLOCK.defaultState.with(
                 Properties.HORIZONTAL_FACING, Direction.SOUTH
             ))
         val lightAbove =

@@ -8,13 +8,13 @@ import net.johnpgr.craftingtableiifabric.recipe.CraftingTableIIRecipeManager
 import net.johnpgr.craftingtableiifabric.renderer.CraftingTableIIItemDynamicRenderer
 import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreen
 
-object CraftingTableIIFabricClient : ClientModInitializer {
+object CraftingTableIIModClient : ClientModInitializer {
     override fun onInitializeClient() {
+        CraftingTableIIDescriptions.register()
         CraftingTableIIScreen.register()
         CraftingTableIIEntityModel.register()
         CraftingTableIIEntityRenderer.register()
         CraftingTableIIItemDynamicRenderer.register()
-        CraftingTableIIDescriptions.register()
         CraftingTableIIRecipeManager.register()
     }
 }

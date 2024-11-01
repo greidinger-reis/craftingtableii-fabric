@@ -1,17 +1,17 @@
 package net.johnpgr.craftingtableiifabric.block
 
 import com.mojang.serialization.MapCodec
-import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
-import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric.BLOCK
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
+import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
 import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
-import net.johnpgr.craftingtableiifabric.utils.BlockScreenHandlerFactory
+import net.johnpgr.craftingtableiifabric.util.BlockScreenHandlerFactory
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityTicker
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.item.ItemPlacementContext
+import net.minecraft.item.*
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.state.StateManager
@@ -27,17 +27,33 @@ import net.minecraft.util.shape.VoxelShape
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
-class CraftingTableIIBlock : BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE)) {
+class CraftingTableIIBlock :
+    BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE)) {
     companion object {
-        val ID: Identifier = CraftingTableIIFabric.id("craftingtableii")
-        val CODEC: MapCodec<CraftingTableIIBlock> = createCodec { CraftingTableIIBlock() }
+        val ID: Identifier = CraftingTableIIMod.id("crafting_table_ii")
+        val CODEC: MapCodec<CraftingTableIIBlock> =
+            createCodec { CraftingTableIIBlock() }
 
         fun register() {
             Registry.register(
                 Registries.BLOCK,
                 ID,
-                BLOCK
+                CraftingTableIIMod.BLOCK
             )
+
+            Registry.register(
+                Registries.ITEM,
+                ID,
+                BlockItem(CraftingTableIIMod.BLOCK, Item.Settings())
+            )
+
+            ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL)
+                .register({ content ->
+                    content.addAfter(
+                        Items.CRAFTING_TABLE,
+                        CraftingTableIIMod.BLOCK
+                    )
+                })
         }
     }
 
@@ -129,7 +145,7 @@ class CraftingTableIIBlock : BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE
     ): BlockEntityTicker<T> {
         return validateTicker(
             type,
-            CraftingTableIIFabric.ENTITY_TYPE
+            CraftingTableIIMod.ENTITY_TYPE
         ) { world1, pos, state1, entity ->
             CraftingTableIIEntity.tick(
                 world1, pos, state1, entity as CraftingTableIIEntity

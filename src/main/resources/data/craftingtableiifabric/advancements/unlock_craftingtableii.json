@@ -2,7 +2,7 @@
   "parent": "minecraft:recipes/root",
   "rewards": {
     "recipes": [
-      "craftingtableiifabric:craftingtableii"
+      "craftingtableiifabric:crafting_table_ii"
     ]
   },
   "criteria": {
@@ -22,7 +22,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "craftingtableiifabric:craftingtableii"
+        "recipe": "craftingtableiifabric:crafting_table_ii"
       }
     }
   },

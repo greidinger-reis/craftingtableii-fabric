@@ -40,7 +40,6 @@ class CraftingTableIIInventory(
         if (stack.isEmpty) return
 
         entity.setStack(slot, stack)
-        handler.onContentChanged(this)
     }
 
     override fun markDirty() {

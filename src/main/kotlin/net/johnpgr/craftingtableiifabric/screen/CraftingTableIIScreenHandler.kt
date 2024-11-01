@@ -1,7 +1,7 @@
 package net.johnpgr.craftingtableiifabric.screen
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
-import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.johnpgr.craftingtableiifabric.block.CraftingTableIIBlock
 import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
 import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIIInventory
@@ -38,7 +38,7 @@ class CraftingTableIIScreenHandler(
     val entity: CraftingTableIIEntity,
     private val blockContext: ScreenHandlerContext,
 ) : AbstractRecipeScreenHandler<RecipeInputInventory>(
-    CraftingTableIIFabric.SCREEN_HANDLER,
+    CraftingTableIIMod.SCREEN_HANDLER,
     syncId,
 ) {
     companion object {
@@ -46,7 +46,7 @@ class CraftingTableIIScreenHandler(
             Registry.register(
                 Registries.SCREEN_HANDLER,
                 CraftingTableIIBlock.ID,
-                CraftingTableIIFabric.SCREEN_HANDLER
+                CraftingTableIIMod.SCREEN_HANDLER
             )
         }
     }
@@ -116,7 +116,8 @@ class CraftingTableIIScreenHandler(
         }
 
         if (player.world.isClient) {
-            recipeManager = CraftingTableIIRecipeManager(this, player as ClientPlayerEntity)
+            recipeManager =
+                CraftingTableIIRecipeManager(this, player as ClientPlayerEntity)
         }
     }
 
@@ -222,11 +223,16 @@ class CraftingTableIIScreenHandler(
         return index != craftingResultSlotIndex
     }
 
+    /**
+     * Checks if the player can use the crafting table.
+     * This method verifies if the block at the given position is the crafting table block
+     * and if the player is within a 64-block radius of the block.
+     */
     override fun canUse(player: PlayerEntity): Boolean {
         return blockContext.get({ world: World, blockPos: BlockPos ->
             if (world.getBlockState(
                     blockPos
-                ).block != CraftingTableIIFabric.BLOCK
+                ).block != CraftingTableIIMod.BLOCK
             ) false else player.squaredDistanceTo(
                 blockPos.x + .5,
                 blockPos.y + .5,

@@ -2,7 +2,7 @@ package net.johnpgr.craftingtableiifabric.network
 
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
-import net.johnpgr.craftingtableiifabric.CraftingTableIIFabric
+import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
 import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.network.codec.PacketCodec
@@ -20,7 +20,7 @@ data class CraftingTableIIPacket(
 ) : CustomPayload {
     companion object {
         val ID =
-            CustomPayload.Id<CraftingTableIIPacket>(CraftingTableIIFabric.id("craft_packet"))
+            CustomPayload.Id<CraftingTableIIPacket>(CraftingTableIIMod.id("craft_packet"))
         val PACKET_CODEC = PacketCodec.tuple(
             Identifier.PACKET_CODEC, CraftingTableIIPacket::recipe,
             PacketCodecs.INTEGER, CraftingTableIIPacket::syncId,
