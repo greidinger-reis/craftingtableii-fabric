@@ -193,16 +193,14 @@ class CraftingTableIIScreen(
             16
         )
 
-        for (i in 10 until 50) {
-            val slot = this.screenHandler.getSlot(i) as? CraftingTableIISlot ?: continue
+        for (i in CraftingTableIIScreenHandler.CTII_INVENTORY_INDEX_START..CraftingTableIIScreenHandler.CTII_INVENTORY_INDEX_END) {
+            val slot = screenHandler.getSlot(i) as? CraftingTableIISlot ?: continue
 
             if (isMouseOverSlot(slot, mouseX, mouseY)) {
                 if (slot.stack.isEmpty) continue
 
                 //draw description overlay
-                ctx.drawTexture(
-                    this.descriptionTexture, x - 124, y, 0, 0, 121, 162
-                )
+                ctx.drawTexture(descriptionTexture, x - 124, y, 0, 0, 121, 162)
 
                 val recipe = slot.recipe
                 val ingredientStacks = arrayListOf<ItemStack>()
@@ -282,8 +280,8 @@ class CraftingTableIIScreen(
     }
 
     private fun isMouseOverSlot(slot: Slot, mouseX: Int, mouseY: Int): Boolean {
-        val aX = mouseX - this.x
-        val aY = mouseY - this.y
+        val aX = mouseX - x
+        val aY = mouseY - y
         return aX >= slot.x && aX < slot.x + 18 && aY >= slot.y && aY < slot.y + 18
     }
 

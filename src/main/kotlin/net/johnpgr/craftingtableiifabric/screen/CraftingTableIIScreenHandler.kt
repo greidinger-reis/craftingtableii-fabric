@@ -48,6 +48,16 @@ class CraftingTableIIScreenHandler(
                 Registries.SCREEN_HANDLER, CraftingTableIIBlock.ID, CraftingTableIIMod.SCREEN_HANDLER
             )
         }
+
+        const val RESULT_INDEX = 0
+        const val INPUT_INDEX_START = 1
+        const val INPUT_INDEX_END = 9
+        const val PLAYER_INVENTORY_INDEX_START = 9
+        const val PLAYER_INVENTORY_INDEX_END = 36
+        const val PLAYER_HOTBAR_INDEX_START = 36
+        const val PLAYER_HOTBAR_INDEX_END = 45
+        const val CTII_INVENTORY_INDEX_START = 45
+        const val CTII_INVENTORY_INDEX_END = 85
     }
 
     var currentListIndex = 0
@@ -140,9 +150,7 @@ class CraftingTableIIScreenHandler(
         val itemStack = slot.stack
         val recipe = slot.recipe
 
-        ClientPlayNetworking.send(
-            CraftingTableIIPacket(recipe.id, syncId, quickCraft)
-        )
+        ClientPlayNetworking.send(CraftingTableIIPacket(recipe.id, syncId, quickCraft))
 
         lastCraftedItem = itemStack
     }
