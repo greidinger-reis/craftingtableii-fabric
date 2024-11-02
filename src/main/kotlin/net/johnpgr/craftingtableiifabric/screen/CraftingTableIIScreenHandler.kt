@@ -8,7 +8,8 @@ import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIIInventory
 import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIISlot
 import net.johnpgr.craftingtableiifabric.network.CraftingTableIIPacket
 import net.johnpgr.craftingtableiifabric.recipe.CraftingTableIIRecipeManager
-import net.johnpgr.craftingtableiifabric.recipe.CraftingTableIIRecipeManager.Extensions.firstItemStack
+import net.johnpgr.craftingtableiifabric.recipe.CraftingTableIIRecipeManager.Extensions.first
+import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
@@ -44,9 +45,7 @@ class CraftingTableIIScreenHandler(
     companion object {
         fun register() {
             Registry.register(
-                Registries.SCREEN_HANDLER,
-                CraftingTableIIBlock.ID,
-                CraftingTableIIMod.SCREEN_HANDLER
+                Registries.SCREEN_HANDLER, CraftingTableIIBlock.ID, CraftingTableIIMod.SCREEN_HANDLER
             )
         }
     }
@@ -80,10 +79,7 @@ class CraftingTableIIScreenHandler(
             for (col in 0 until 9) {
                 addSlot(
                     Slot(
-                        playerInventory,
-                        col + row * 9 + 9,
-                        8 + col * 18,
-                        125 + row * 18
+                        playerInventory, col + row * 9 + 9, 8 + col * 18, 125 + row * 18
                     )
                 )
             }
@@ -99,18 +95,14 @@ class CraftingTableIIScreenHandler(
             for (col in 0 until CraftingTableIIInventory.COLS) {
                 addSlot(
                     CraftingTableIISlot(
-                        inventory,
-                        col + row * CraftingTableIIInventory.COLS,
-                        8 + col * 18,
-                        18 + row * 18
+                        inventory, col + row * CraftingTableIIInventory.COLS, 8 + col * 18, 18 + row * 18
                     )
                 )
             }
         }
 
         if (player.world.isClient) {
-            recipeManager =
-                CraftingTableIIRecipeManager(this, player as ClientPlayerEntity)
+            recipeManager = CraftingTableIIRecipeManager(this, player as ClientPlayerEntity)
         }
     }
 
@@ -135,10 +127,7 @@ class CraftingTableIIScreenHandler(
     }
 
     override fun onSlotClick(
-        slotIndex: Int,
-        button: Int,
-        actionType: SlotActionType,
-        player: PlayerEntity
+        slotIndex: Int, button: Int, actionType: SlotActionType, player: PlayerEntity
     ) {
         super.onSlotClick(slotIndex, button, actionType, player)
 
@@ -152,40 +141,43 @@ class CraftingTableIIScreenHandler(
         val recipe = slot.recipe
 
         ClientPlayNetworking.send(
-            CraftingTableIIPacket(
-                recipe.id, syncId, quickCraft
-            )
+            CraftingTableIIPacket(recipe.id, syncId, quickCraft)
         )
 
-        lastCraftedItem = itemStack.copy()
+        lastCraftedItem = itemStack
+    }
+
+    private fun validateLastCrafted(results: List<RecipeResultCollection>): Pair<ItemStack, RecipeEntry<*>>? {
+        results.forEach { result ->
+            val pair = result.first()
+            if (ItemStack.areItemsEqual(pair.first, lastCraftedItem)) {
+                return pair
+            }
+        }
+        return null
     }
 
     fun updateRecipes(shouldRefreshInputs: Boolean) {
         inventory.clear()
         if (shouldRefreshInputs) recipeManager.refreshInputs()
 
-        var max = CraftingTableIIInventory.SIZE
-        var isLastCraftedItemStillValid = false
-        val newList: MutableList<Pair<ItemStack, RecipeEntry<*>>> =
-            mutableListOf()
+        val newList = mutableListOf<Pair<ItemStack, RecipeEntry<*>>>()
+
+        validateLastCrafted(recipeManager.results)?.let {
+            newList.add(it)
+        } ?: run {
+            lastCraftedItem = ItemStack.EMPTY
+        }
+
+        val max = CraftingTableIIInventory.SIZE - newList.size
 
         for (i in currentListIndex until currentListIndex + max) {
-            val result = recipeManager.results.getOrNull(i) ?: break
-            val pair = result.firstItemStack()
-
-            if (pair.first.item == lastCraftedItem.item) {
-                isLastCraftedItemStillValid = true
-                newList.add(0, pair)
-                --max
-            }
-            newList.add(pair)
+            recipeManager.results.getOrNull(i)?.let {
+                newList.add(it.first())
+            } ?: break
         }
 
         newList.forEach { addRecipeItem(it.first, it.second) }
-
-        if (!isLastCraftedItemStillValid) {
-            lastCraftedItem = ItemStack.EMPTY
-        }
     }
 
     override fun canInsertIntoSlot(index: Int): Boolean {

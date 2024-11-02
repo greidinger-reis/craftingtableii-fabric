@@ -45,21 +45,14 @@ class CraftingTableIIRecipeManager(
                 )
                 resultCollection.isInitialized && resultCollection.hasFittingRecipes() && resultCollection.hasCraftableRecipes()
             }
-
-        CraftingTableIIMod.LOGGER.info("Results count: ${results.size}")
     }
 
     companion object Extensions {
-        fun RecipeResultCollection.firstItemStack(): Pair<ItemStack, RecipeEntry<*>> {
+        fun RecipeResultCollection.first(): Pair<ItemStack, RecipeEntry<*>> {
             val recipeEntry = getResults(true).first()
             val itemStack = recipeEntry.value.getResult(registryManager)
 
             return Pair(itemStack, recipeEntry)
-        }
-
-        //TODO: Figure a way to use this
-        fun RecipeResultCollection.allItemStacks(): List<ItemStack> {
-            return getResults(true).map { it.value.getResult(registryManager) }
         }
     }
 }
