@@ -8,7 +8,6 @@ import net.minecraft.item.ItemStack
 
 class CraftingTableIIInventory(
     val entity: CraftingTableIIEntity,
-    val handler: CraftingTableIIScreenHandler
 ) : Inventory {
     companion object {
         const val COLS = 8

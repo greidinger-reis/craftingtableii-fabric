@@ -57,7 +57,7 @@ class CraftingTableIIScreen(
 
     private fun hasScrollbar(): Boolean {
         val craftableRecipesSize =
-            this.screenHandler.recipeManager.recipeItemStacks.size
+            this.screenHandler.recipeManager.results.size
         return craftableRecipesSize > CraftingTableIIInventory.SIZE
     }
 
@@ -109,7 +109,7 @@ class CraftingTableIIScreen(
         this.scrollPosition =
             (mouseY.toFloat() - start.toFloat() - 7.5f) / ((end - start).toFloat() - 15.0f)
         this.scrollPosition = MathHelper.clamp(this.scrollPosition, 0f, 1f)
-        this.screenHandler.recipeManager.scrollCraftableRecipes(
+        this.screenHandler.recipeManager.scroll(
             scrollPosition
         )
         return true
@@ -139,7 +139,7 @@ class CraftingTableIIScreen(
         amount: Double
     ): Boolean {
         val craftableRecipesSize =
-            this.screenHandler.recipeManager.recipeItemStacks.size
+            this.screenHandler.recipeManager.results.size
         if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) {
             return false
         }
@@ -154,7 +154,7 @@ class CraftingTableIIScreen(
 
             this.scrollPosition -= (j / i).toFloat()
             this.scrollPosition = MathHelper.clamp(this.scrollPosition, 0f, 1f)
-            this.screenHandler.recipeManager.scrollCraftableRecipes(
+            this.screenHandler.recipeManager.scroll(
                 scrollPosition
             )
 
@@ -162,6 +162,11 @@ class CraftingTableIIScreen(
         }
 
         return false
+    }
+
+    override fun handledScreenTick() {
+        super.handledScreenTick()
+        screenHandler.tick()
     }
 
     override fun drawBackground(
@@ -176,7 +181,7 @@ class CraftingTableIIScreen(
         )
 
         val craftableRecipesSize =
-            this.screenHandler.recipeManager.recipeItemStacks.size
+            this.screenHandler.recipeManager.results.size
 
         //draw scrollbar
         ctx.drawTexture(

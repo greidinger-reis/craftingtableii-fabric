@@ -50,11 +50,11 @@ class BlockScreenHandlerFactory<T : ScreenHandler, B : BlockEntity>(
         player: PlayerEntity
     ): ScreenHandler {
         val world = player.world
-        val be = world.getBlockEntity(pos) as B
+        val blockEntity = world.getBlockEntity(pos) as B
         return consumer.invoke(
             syncId,
             playerInv,
-            be,
+            blockEntity,
             ScreenHandlerContext.create(world, pos)
         )
     }
