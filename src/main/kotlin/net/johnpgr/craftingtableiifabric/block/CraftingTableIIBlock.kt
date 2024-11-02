@@ -11,18 +11,11 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityTicker
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.*
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
-import net.minecraft.screen.CraftingScreenHandler
-import net.minecraft.screen.NamedScreenHandlerFactory
-import net.minecraft.screen.ScreenHandlerContext
-import net.minecraft.screen.SimpleNamedScreenHandlerFactory
-import net.minecraft.stat.Stats
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.Properties
-import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import net.minecraft.util.BlockMirror
 import net.minecraft.util.BlockRotation
@@ -34,8 +27,7 @@ import net.minecraft.util.shape.VoxelShape
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
-class CraftingTableIIBlock :
-    BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE)) {
+class CraftingTableIIBlock : BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE)) {
     companion object {
         val ID: Identifier = CraftingTableIIMod.id("crafting_table_ii")
         val CODEC: MapCodec<CraftingTableIIBlock> =

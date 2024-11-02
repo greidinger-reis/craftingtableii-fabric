@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem
 import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.johnpgr.craftingtableiifabric.description.CraftingTableIIDescriptions
 import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIIInventory
+import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIISlot
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.gui.screen.ingame.HandledScreens
@@ -24,8 +25,7 @@ class CraftingTableIIScreen(
     companion object {
         fun register() {
             HandledScreens.register(
-                CraftingTableIIMod.SCREEN_HANDLER,
-                ::CraftingTableIIScreen
+                CraftingTableIIMod.SCREEN_HANDLER, ::CraftingTableIIScreen
             )
         }
     }
@@ -56,14 +56,12 @@ class CraftingTableIIScreen(
         get() = this.x + 154
 
     private fun hasScrollbar(): Boolean {
-        val craftableRecipesSize =
-            this.screenHandler.recipeManager.results.size
+        val craftableRecipesSize = this.screenHandler.recipeManager.results.size
         return craftableRecipesSize > CraftingTableIIInventory.SIZE
     }
 
     private fun isClickInScrollbar(mouseX: Double, mouseY: Double): Boolean {
-        return (mouseX in (this.scrollButtonX.toDouble()..(this.scrollButtonX + 16).toDouble()))
-                && (mouseY in (this.scrollBarStartY.toDouble()..this.scrollBarEndY.toDouble()))
+        return (mouseX in (this.scrollButtonX.toDouble()..(this.scrollButtonX + 16).toDouble())) && (mouseY in (this.scrollBarStartY.toDouble()..this.scrollBarEndY.toDouble()))
     }
 
     override fun init() {
@@ -83,9 +81,7 @@ class CraftingTableIIScreen(
     }
 
     override fun mouseReleased(
-        mouseX: Double,
-        mouseY: Double,
-        button: Int
+        mouseX: Double, mouseY: Double, button: Int
     ): Boolean {
         if (button == 0) {
             this.scrolling = false
@@ -94,11 +90,7 @@ class CraftingTableIIScreen(
     }
 
     override fun mouseDragged(
-        mouseX: Double,
-        mouseY: Double,
-        button: Int,
-        deltaX: Double,
-        deltaY: Double
+        mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double
     ): Boolean {
         if (!this.scrolling) {
             return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)
@@ -106,23 +98,17 @@ class CraftingTableIIScreen(
 
         val start = this.scrollBarStartY
         val end = this.scrollBarEndY
-        this.scrollPosition =
-            (mouseY.toFloat() - start.toFloat() - 7.5f) / ((end - start).toFloat() - 15.0f)
+        this.scrollPosition = (mouseY.toFloat() - start.toFloat() - 7.5f) / ((end - start).toFloat() - 15.0f)
         this.scrollPosition = MathHelper.clamp(this.scrollPosition, 0f, 1f)
-        this.screenHandler.recipeManager.scroll(
-            scrollPosition
-        )
+        scrollResults(scrollPosition)
         return true
     }
 
     override fun mouseClicked(
-        mouseX: Double,
-        mouseY: Double,
-        button: Int
+        mouseX: Double, mouseY: Double, button: Int
     ): Boolean {
         if (this.scrolling || button != 0 || !this.isClickInScrollbar(
-                mouseX,
-                mouseY
+                mouseX, mouseY
             )
         ) {
             return super.mouseClicked(mouseX, mouseY, button)
@@ -132,14 +118,30 @@ class CraftingTableIIScreen(
         return true
     }
 
+    /**
+     * Scrolls through the list of craftable recipes based on the given scroll position.
+     * Updates the current list index in the crafting screen handler and refreshes the displayed recipes.
+     */
+    private fun scrollResults(scrollPos: Float) {
+        val results = screenHandler.recipeManager.results
+        val i = (results.size + 8 - 1) / 8 - 5
+        var j = ((scrollPos * i.toFloat()).toDouble() + 0.5).toInt()
+        if (j < 0) {
+            j = 0
+        }
+
+        val listIndex = j * 8
+        if (listIndex < results.size) {
+            this.screenHandler.currentListIndex = listIndex
+        }
+
+        this.screenHandler.updateRecipes(false)
+    }
+
     override fun mouseScrolled(
-        mouseX: Double,
-        mouseY: Double,
-        horizontalAmount: Double,
-        amount: Double
+        mouseX: Double, mouseY: Double, horizontalAmount: Double, amount: Double
     ): Boolean {
-        val craftableRecipesSize =
-            this.screenHandler.recipeManager.results.size
+        val craftableRecipesSize = this.screenHandler.recipeManager.results.size
         if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) {
             return false
         }
@@ -152,11 +154,9 @@ class CraftingTableIIScreen(
             val i = ((craftableRecipesSize + 8 - 1) / 8 - 5).toDouble()
             val j = MathHelper.clamp(amount, -1.0, 1.0)
 
-            this.scrollPosition -= (j / i).toFloat()
-            this.scrollPosition = MathHelper.clamp(this.scrollPosition, 0f, 1f)
-            this.screenHandler.recipeManager.scroll(
-                scrollPosition
-            )
+            scrollPosition -= (j / i).toFloat()
+            scrollPosition = MathHelper.clamp(scrollPosition, 0f, 1f)
+            scrollResults(scrollPosition)
 
             return true
         }
@@ -180,8 +180,7 @@ class CraftingTableIIScreen(
             this.texture, x, y, 0, 0, backgroundWidth, backgroundHeight
         )
 
-        val craftableRecipesSize =
-            this.screenHandler.recipeManager.results.size
+        val craftableRecipesSize = this.screenHandler.recipeManager.results.size
 
         //draw scrollbar
         ctx.drawTexture(
@@ -195,11 +194,9 @@ class CraftingTableIIScreen(
         )
 
         for (i in 10 until 50) {
-            val slot = this.screenHandler.getSlot(i)
-            if (slot is CraftingTableIIScreenHandler.CraftingTableIISlot && isMouseOverSlot(
-                    slot, mouseX, mouseY
-                )
-            ) {
+            val slot = this.screenHandler.getSlot(i) as? CraftingTableIISlot ?: continue
+
+            if (isMouseOverSlot(slot, mouseX, mouseY)) {
                 if (slot.stack.isEmpty) continue
 
                 //draw description overlay
@@ -207,40 +204,33 @@ class CraftingTableIIScreen(
                     this.descriptionTexture, x - 124, y, 0, 0, 121, 162
                 )
 
-                val recipe =
-                    this.screenHandler.recipeManager.getRecipe(slot.stack)
-
-                val recipeStacks = arrayListOf<ItemStack>()
+                val recipe = slot.recipe
+                val ingredientStacks = arrayListOf<ItemStack>()
 
                 //TODO: Find a way to draw all matching stacks. Maybe a timer that loops through the list of matching stacks
                 for (ingredient in recipe.value.ingredients) {
                     if (ingredient.isEmpty) continue
 
                     val item = ingredient.matchingStacks[0]
-                    val index =
-                        recipeStacks.indexOfFirst { it.item == item.item }
+                    val index = ingredientStacks.indexOfFirst { it.item == item.item }
 
                     if (index == -1) {
-                        recipeStacks.add(item.copy())
+                        ingredientStacks.add(item.copy())
                         continue
                     }
-                    recipeStacks[index].count += item.count
+                    ingredientStacks[index].count += item.count
                 }
 
-                recipeStacks.forEachIndexed { r, stack ->
+                ingredientStacks.forEachIndexed { r, stack ->
                     ctx.drawItem(
                         stack, x - 25, y + 5 + r * 18
                     )
                     ctx.drawItemInSlot(
-                        this.client!!.textRenderer,
-                        stack,
-                        x - 25,
-                        y + 5 + r * 18
+                        this.client!!.textRenderer, stack, x - 25, y + 5 + r * 18
                     )
                 }
 
-                val output =
-                    recipe.value.getResult(this.client!!.world!!.registryManager)
+                val output = recipe.value.getResult(this.client!!.world!!.registryManager)
 
                 val titleX = x - 118
                 val titleY = y + 9
@@ -261,8 +251,7 @@ class CraftingTableIIScreen(
                     false,
                 )
 
-                val description =
-                    CraftingTableIIDescriptions.descriptionsDict[output.translationKey] ?: ""
+                val description = CraftingTableIIDescriptions.descriptionsDict[output.translationKey] ?: ""
                 val chunks = this.chunkDescription(description)
                 val descY = titleY + 2
                 val scalef = 0.5f
@@ -270,38 +259,21 @@ class CraftingTableIIScreen(
                 ctx.matrices.push()
                 ctx.matrices.scale(scalef, scalef, 1.0f)
                 ctx.matrices.translate(
-                    (titleX / scalef).toDouble(),
-                    (descY / scalef).toDouble(),
-                    0.0
+                    (titleX / scalef).toDouble(), (descY / scalef).toDouble(), 0.0
                 )
 
                 for ((index, chunk) in chunks.withIndex()) {
                     ctx.drawText(
-                        this.client!!.textRenderer,
-                        chunk,
-                        0,
-                        40 + 10 * index,
-                        0xFFFFFF,
-                        false
+                        this.client!!.textRenderer, chunk, 0, 40 + 10 * index, 0xFFFFFF, false
                     )
                 }
 
                 ctx.drawText(
-                    this.client!!.textRenderer,
-                    "Code name: ",
-                    0,
-                    268,
-                    0xFFFFFF,
-                    false
+                    this.client!!.textRenderer, "Code name: ", 0, 268, 0xFFFFFF, false
                 )
 
                 ctx.drawText(
-                    this.client!!.textRenderer,
-                    output.item.toString(),
-                    0,
-                    280,
-                    0xFFFFFF,
-                    false
+                    this.client!!.textRenderer, output.item.toString(), 0, 280, 0xFFFFFF, false
                 )
 
                 ctx.matrices.pop()

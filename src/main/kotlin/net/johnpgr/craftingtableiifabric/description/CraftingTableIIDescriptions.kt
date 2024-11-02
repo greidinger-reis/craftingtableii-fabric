@@ -1,6 +1,5 @@
 package net.johnpgr.craftingtableiifabric.description
 
-import com.google.gson.GsonBuilder
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
@@ -18,7 +17,7 @@ object CraftingTableIIDescriptions {
 
     fun register() {
         ClientLifecycleEvents.CLIENT_STARTED.register({ client ->
-            if(!loaded) {
+            if (!loaded) {
                 load(client)
                 loaded = true
             }

@@ -5,6 +5,7 @@ import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.johnpgr.craftingtableiifabric.block.CraftingTableIIBlock
 import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
 import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIIInventory
+import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIISlot
 import net.johnpgr.craftingtableiifabric.network.CraftingTableIIPacket
 import net.johnpgr.craftingtableiifabric.recipe.CraftingTableIIRecipeManager
 import net.johnpgr.craftingtableiifabric.recipe.CraftingTableIIRecipeManager.Extensions.firstItemStack
@@ -13,7 +14,6 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
-import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Recipe
@@ -32,9 +32,6 @@ import net.minecraft.world.World
 
 //FIXME: Scrolling mouse on a resultInventory's slot when mouse wheel tweaks from mods are enabled cause ConcurrentModificationException
 //FIXME: Inventory Profiles Next functions to this screen's inventory cause ConcurrentModificationException also
-//FIXME: When the player drags an item in their inventory, the cursor stack doesn't get updated.
-// That duplicates the item stack in the inventory.
-// If the player then clicks on a slot, the full amount of items that were supposed to be split are moved to the slot.
 class CraftingTableIIScreenHandler(
     syncId: Int,
     playerInventory: PlayerInventory,
@@ -124,18 +121,17 @@ class CraftingTableIIScreenHandler(
         }
     }
 
-    private fun addRecipeItem(stack: ItemStack) {
+    private fun addRecipeItem(stack: ItemStack, recipe: RecipeEntry<*>) {
         for (i in 0 until inventory.size()) {
             if (inventory.getStack(i).isEmpty) {
-                inventory.setStack(i, stack)
+                inventory.setStack(i, stack, recipe)
                 return
             }
         }
     }
 
-    private fun getValidSlot(index: Int): Slot? {
-        if (!(index >= 0 && index < slots.size)) return null
-        return super.getSlot(index)
+    private fun isValidCTIISlot(index: Int): Boolean {
+        return index >= 0 && index < slots.size
     }
 
     override fun onSlotClick(
@@ -144,51 +140,48 @@ class CraftingTableIIScreenHandler(
         actionType: SlotActionType,
         player: PlayerEntity
     ) {
-        CraftingTableIIMod.LOGGER.info("[${if (player.world.isClient) "CLIENT" else "SERVER"}]: slotIndex: $slotIndex, button: $button, actionType: $actionType")
         super.onSlotClick(slotIndex, button, actionType, player)
 
-        val slot = getValidSlot(slotIndex) ?: return
-        if (slot is CraftingTableIISlot && button == 0) {
-            if (!slot.hasStack()) {
-                return
-            }
+        if (!player.world.isClient || !isValidCTIISlot(slotIndex) || button != 0) return
 
-            if (!player.world.isClient) {
-                return
-            }
+        val slot = getSlot(slotIndex) as? CraftingTableIISlot ?: return
+        if (!slot.hasStack()) return
 
-            val quickCraft = actionType == SlotActionType.QUICK_MOVE
-            val recipe = recipeManager.getRecipe(slot.stack)
-            val payload = CraftingTableIIPacket(
+        val quickCraft = actionType == SlotActionType.QUICK_MOVE
+        val itemStack = slot.stack
+        val recipe = slot.recipe
+
+        ClientPlayNetworking.send(
+            CraftingTableIIPacket(
                 recipe.id, syncId, quickCraft
             )
-            ClientPlayNetworking.send(payload)
-            lastCraftedItem = slot.stack.copy()
-        }
+        )
+
+        lastCraftedItem = itemStack.copy()
     }
 
     fun updateRecipes(shouldRefreshInputs: Boolean) {
-        CraftingTableIIMod.LOGGER.info("Updating recipes")
         inventory.clear()
         if (shouldRefreshInputs) recipeManager.refreshInputs()
 
         var max = CraftingTableIIInventory.SIZE
         var isLastCraftedItemStillValid = false
-        val newList: MutableList<ItemStack> = mutableListOf()
+        val newList: MutableList<Pair<ItemStack, RecipeEntry<*>>> =
+            mutableListOf()
 
         for (i in currentListIndex until currentListIndex + max) {
             val result = recipeManager.results.getOrNull(i) ?: break
-            val itemStack = result.firstItemStack()
+            val pair = result.firstItemStack()
 
-            if (itemStack.item == lastCraftedItem.item) {
+            if (pair.first.item == lastCraftedItem.item) {
                 isLastCraftedItemStillValid = true
-                newList.add(0, itemStack.copy())
+                newList.add(0, pair)
                 --max
             }
-            newList.add(itemStack.copy())
+            newList.add(pair)
         }
 
-        newList.forEach { addRecipeItem(it) }
+        newList.forEach { addRecipeItem(it.first, it.second) }
 
         if (!isLastCraftedItemStillValid) {
             lastCraftedItem = ItemStack.EMPTY
@@ -256,15 +249,5 @@ class CraftingTableIIScreenHandler(
         playerEntity: PlayerEntity, invSlot: Int
     ): ItemStack {
         return ItemStack.EMPTY
-    }
-
-    class CraftingTableIISlot(
-        inventory: Inventory, index: Int, x: Int, y: Int
-    ) : Slot(
-        inventory, index, x, y
-    ) {
-        override fun canInsert(stack: ItemStack): Boolean {
-            return false
-        }
     }
 }

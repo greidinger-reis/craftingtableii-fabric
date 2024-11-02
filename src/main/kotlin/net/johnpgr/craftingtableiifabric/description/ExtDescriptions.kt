@@ -9,13 +9,13 @@ import java.io.File
 import java.io.FileWriter
 import java.nio.file.Files
 
-fun Resource.toDescriptionsDict(): HashMap<String,String> {
+fun Resource.toDescriptionsDict(): HashMap<String, String> {
     val inputStream = this.inputStream
     val json = inputStream.bufferedReader().use { it.readText() }
 
     val res = Gson().fromJson(
         json, HashMap::class.java
-    ) as HashMap<String,String>
+    ) as HashMap<String, String>
     return res
 }
 

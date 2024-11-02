@@ -23,9 +23,7 @@ class CraftingTableIIEntity(
     block: CraftingTableIIBlock,
     pos: BlockPos,
     state: BlockState,
-) :
-    BlockEntity(CraftingTableIIMod.ENTITY_TYPE, pos, state),
-    Inventory {
+) : BlockEntity(CraftingTableIIMod.ENTITY_TYPE, pos, state), Inventory {
     private var inventory =
         DefaultedList.ofSize(CraftingTableIIInventory.SIZE, ItemStack.EMPTY)
     private var doorState = DoorState.CLOSED

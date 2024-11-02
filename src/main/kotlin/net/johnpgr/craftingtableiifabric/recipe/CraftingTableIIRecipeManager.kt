@@ -1,6 +1,6 @@
 package net.johnpgr.craftingtableiifabric.recipe
 
-import com.google.common.collect.Lists
+import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
 import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection
 import net.minecraft.client.network.ClientPlayerEntity
@@ -31,74 +31,33 @@ class CraftingTableIIRecipeManager(
     }
 
     /**
-     * Scrolls through the list of craftable recipes based on the given scroll position.
-     * Updates the current list index in the crafting screen handler and refreshes the displayed recipes.
-     */
-    fun scroll(scrollPos: Float) {
-        val size = this.results.size
-        val i = (size + 8 - 1) / 8 - 5
-        var j = ((scrollPos * i.toFloat()).toDouble() + 0.5).toInt()
-        if (j < 0) {
-            j = 0
-        }
-
-        val listIndex = j * 8
-        if (listIndex < size) {
-            this.screenHandler.currentListIndex = listIndex
-        }
-
-        this.screenHandler.updateRecipes(false)
-    }
-
-    /**
      * Refreshes the list of craftable items based on the current state of the player's inventory and recipe book.
      * This method updates the `recipeItemStacks` property with the new list of craftable item stacks.
      */
     private fun refreshResults() {
-        val list: List<RecipeResultCollection> =
-            recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
-        list.forEach({ resultCollection: RecipeResultCollection ->
-            resultCollection.computeCraftables(
-               recipeMatcher,
-                screenHandler.getCraftingWidth(),
-                screenHandler.getCraftingHeight(),
-                recipeBook
-            )
-        })
-        val list2 = Lists.newArrayList(list)
-        list2.removeIf { resultCollection: RecipeResultCollection -> !resultCollection.isInitialized }
-        list2.removeIf { resultCollection: RecipeResultCollection -> !resultCollection.hasFittingRecipes() }
-        list2.removeIf { resultCollection: RecipeResultCollection -> !resultCollection.hasCraftableRecipes() }
-        results = list2
-    }
+        results = recipeBook.getResultsForGroup(RecipeBookGroup.CRAFTING_SEARCH)
+            .filter { resultCollection ->
+                resultCollection.computeCraftables(
+                    recipeMatcher,
+                    screenHandler.craftingWidth,
+                    screenHandler.craftingHeight,
+                    recipeBook
+                )
+                resultCollection.isInitialized && resultCollection.hasFittingRecipes() && resultCollection.hasCraftableRecipes()
+            }
 
-    /**
-     * Retrieves the recipe entry for the given item stack.
-     * This method refreshes the inputs, searches through the list of recipes,
-     * and returns the first recipe entry that matches the item in the stack.
-     */
-    fun getRecipe(stack: ItemStack): RecipeEntry<*> {
-        val recipeList =
-            results
-                .mapNotNull { result ->
-                    result.getResults(false).firstOrNull { recipe ->
-                        recipe.value.getResult(result.registryManager).item == stack.item
-                    }
-                }
-
-        return recipeList.first()
+        CraftingTableIIMod.LOGGER.info("Results count: ${results.size}")
     }
 
     companion object Extensions {
-        /**
-         * Retrieves the first item stack from the recipe result collection.
-         */
-        fun RecipeResultCollection.firstItemStack(): ItemStack {
-            return getResults(true).first().value.getResult(registryManager)
+        fun RecipeResultCollection.firstItemStack(): Pair<ItemStack, RecipeEntry<*>> {
+            val recipeEntry = getResults(true).first()
+            val itemStack = recipeEntry.value.getResult(registryManager)
+
+            return Pair(itemStack, recipeEntry)
         }
-        /**
-         * Retrieves all item stacks from the recipe result collection.
-         */
+
+        //TODO: Figure a way to use this
         fun RecipeResultCollection.allItemStacks(): List<ItemStack> {
             return getResults(true).map { it.value.getResult(registryManager) }
         }

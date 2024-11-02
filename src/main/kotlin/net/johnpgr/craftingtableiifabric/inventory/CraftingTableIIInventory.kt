@@ -1,10 +1,10 @@
 package net.johnpgr.craftingtableiifabric.inventory
 
-import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
 import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
+import net.minecraft.recipe.RecipeEntry
 
 class CraftingTableIIInventory(
     val entity: CraftingTableIIEntity,
@@ -14,6 +14,8 @@ class CraftingTableIIInventory(
         const val ROWS = 5
         const val SIZE = ROWS * COLS
     }
+
+    val recipes: MutableList<RecipeEntry<*>> = mutableListOf()
 
     override fun size(): Int {
         return entity.size()
@@ -38,7 +40,12 @@ class CraftingTableIIInventory(
     override fun setStack(slot: Int, stack: ItemStack) {
         if (stack.isEmpty) return
 
-        entity.setStack(slot, stack)
+        entity.setStack(slot, stack.copy())
+    }
+
+    fun setStack(slot: Int, stack: ItemStack, recipe: RecipeEntry<*>) {
+        setStack(slot, stack)
+        recipes.add(slot, recipe)
     }
 
     override fun markDirty() {
@@ -51,5 +58,6 @@ class CraftingTableIIInventory(
 
     override fun clear() {
         entity.clear()
+        recipes.clear()
     }
 }
