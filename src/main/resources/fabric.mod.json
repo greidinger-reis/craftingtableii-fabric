@@ -8,8 +8,8 @@
     "johnpgr"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod",
+    "homepage": "https://modrinth.com/mod/craftingtable-ii-refabricated",
+    "sources": "https://github.com/johnpgr/craftingtableii-refabricated",
     "issues": "https://github.com/johnpgr/craftingtableii-refabricated/issues"
   },
   "license": "MIT",
