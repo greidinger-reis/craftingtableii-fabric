@@ -30,7 +30,6 @@ data class CraftingTableIIPacket(
             ::CraftingTableIIPacket,
         )
 
-
         @Suppress("UNCHECKED_CAST")
         fun register() {
             PayloadTypeRegistry.playC2S().register(ID, PACKET_CODEC)

@@ -64,5 +64,4 @@ class BlockScreenHandlerFactory<T : ScreenHandler, B : BlockEntity>(
     }
 
     override fun getDisplayName() = displayName
-
 }

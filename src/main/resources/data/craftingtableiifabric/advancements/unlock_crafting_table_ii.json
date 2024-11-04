@@ -6,7 +6,7 @@
     ]
   },
   "criteria": {
-    "has_craftingtableii": {
+    "has_crafting_table_ii": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
@@ -28,7 +28,7 @@
   },
   "requirements": [
     [
-      "has_craftingtableii",
+      "has_crafting_table_ii",
       "has_the_recipe"
     ]
   ]

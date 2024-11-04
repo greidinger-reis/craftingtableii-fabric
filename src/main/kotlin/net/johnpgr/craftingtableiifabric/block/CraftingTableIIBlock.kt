@@ -47,12 +47,12 @@ class CraftingTableIIBlock : BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE
             )
 
             ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL)
-                .register({ content ->
+                .register { content ->
                     content.addAfter(
                         Items.CRAFTING_TABLE,
                         CraftingTableIIMod.BLOCK
                     )
-                })
+                }
         }
     }
 
