@@ -18,21 +18,20 @@
   "entrypoints": {
     "main": [
       {
-        "value": "net.johnpgr.craftingtableiifabric.CraftingTableIIFabric",
+        "value": "net.johnpgr.craftingtableiifabric.CraftingTableIIMod",
         "adapter": "kotlin"
       }
     ],
     "client": [
       {
-        "value": "net.johnpgr.craftingtableiifabric.CraftingTableIIFabricClient",
+        "value": "net.johnpgr.craftingtableiifabric.CraftingTableIIModClient",
         "adapter": "kotlin"
       }
     ]
   },
   "depends": {
     "fabricloader": ">=0.15.1",
-    "minecraft": "~1.20.4",
-    "java": ">=17",
+    "minecraft": "1.20.4",
     "fabric-api": "*",
     "fabric-language-kotlin": ">=1.9.5"
   },

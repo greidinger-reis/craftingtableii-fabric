@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "craftingtableiifabric:crafting_table_ii"
+    ]
+  },
+  "criteria": {
+    "has_crafting_table_ii": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:crafting_table"
+          },
+          {
+            "item": "minecraft:book"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "craftingtableiifabric:crafting_table_ii"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_crafting_table_ii",
+      "has_the_recipe"
+    ]
+  ]
+}
