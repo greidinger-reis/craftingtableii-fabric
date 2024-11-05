@@ -4,7 +4,6 @@ import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
-import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeEntry
 
 class CraftingTableIIInventory(
