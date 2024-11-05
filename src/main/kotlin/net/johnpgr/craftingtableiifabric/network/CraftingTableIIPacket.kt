@@ -8,6 +8,7 @@ import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.network.codec.PacketCodec
 import net.minecraft.network.codec.PacketCodecs
 import net.minecraft.network.packet.CustomPayload
+import net.minecraft.recipe.CraftingRecipe
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeEntry
 import net.minecraft.util.Identifier
@@ -47,7 +48,7 @@ data class CraftingTableIIPacket(
                     val res = server.recipeManager.get(data.recipe)
                     val recipe =
                         (res.getOrNull()
-                            ?: return@registerGlobalReceiver) as RecipeEntry<Recipe<RecipeInputInventory>>
+                            ?: return@registerGlobalReceiver) as RecipeEntry<CraftingRecipe>
 
                     craftingScreenHandler.fillInputSlots(
                         data.quickCraft,
@@ -56,14 +57,14 @@ data class CraftingTableIIPacket(
                     )
 
                     while (recipe.value.matches(
-                            craftingScreenHandler.input,
+                            craftingScreenHandler.input.createRecipeInput(),
                             player.world
                         )
                     ) {
                         val cursor =
                             craftingScreenHandler.cursorStack
                         val output = recipe.value.craft(
-                            craftingScreenHandler.input,
+                            craftingScreenHandler.input.createRecipeInput(),
                             server.registryManager
                         )
 

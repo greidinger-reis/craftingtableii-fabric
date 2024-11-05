@@ -35,20 +35,21 @@ class CraftingTableIIItemDynamicRenderer : BuiltinItemRendererRegistry.DynamicIt
             BlockPos.ORIGIN,
             CraftingTableIIMod.BLOCK.defaultState
         )
+        val instance = MinecraftClient.getInstance()
 
         val dummyRenderer = CraftingTableIIEntityRenderer(
             BlockEntityRendererFactory.Context(
-                MinecraftClient.getInstance().blockEntityRenderDispatcher,
-                MinecraftClient.getInstance().blockRenderManager,
-                MinecraftClient.getInstance().itemRenderer,
-                MinecraftClient.getInstance().entityRenderDispatcher,
-                MinecraftClient.getInstance().entityModelLoader,
-                MinecraftClient.getInstance().textRenderer
+                instance.blockEntityRenderDispatcher,
+                instance.blockRenderManager,
+                instance.itemRenderer,
+                instance.entityRenderDispatcher,
+                instance.entityModelLoader,
+                instance.textRenderer
             )
         )
         dummyRenderer.render(
             tableEntity,
-            MinecraftClient.getInstance().tickDelta,
+            instance.renderTickCounter.getTickDelta(true),
             matrixStack,
             vertexConsumerProvider,
             lightmap,

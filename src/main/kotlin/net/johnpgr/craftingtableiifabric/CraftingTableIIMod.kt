@@ -18,7 +18,7 @@ object CraftingTableIIMod : ModInitializer {
     val SCREEN_HANDLER = BlockScreenHandlerFactory.createHandlerType(::CraftingTableIIScreenHandler)
     val ENTITY_TYPE = BlockEntityFactory.createEntityType<CraftingTableIIEntity>(BLOCK)
 
-    fun id(name: String) = Identifier(MOD_ID, name)
+    fun id(name: String) = Identifier.of(MOD_ID, name)!!
 
     override fun onInitialize() {
         CraftingTableIIBlock.register()

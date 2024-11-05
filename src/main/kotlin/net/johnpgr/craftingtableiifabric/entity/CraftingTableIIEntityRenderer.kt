@@ -28,7 +28,7 @@ class CraftingTableIIEntityRenderer(arg: BlockEntityRendererFactory.Context) :
 
     private val texture = SpriteIdentifier(
         PlayerScreenHandler.BLOCK_ATLAS_TEXTURE,
-        Identifier(CraftingTableIIMod.MOD_ID + ":block/craftingtableii")
+        Identifier.of(CraftingTableIIMod.MOD_ID + ":block/craftingtableii")!!
     )
     private val table =
         arg.getLayerModelPart(CraftingTableIIEntityModel.tableModelLayer)

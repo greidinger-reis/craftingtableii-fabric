@@ -9,6 +9,7 @@ import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIISlot
 import net.johnpgr.craftingtableiifabric.network.CraftingTableIIPacket
 import net.johnpgr.craftingtableiifabric.recipe.CraftingTableIIRecipeManager
 import net.johnpgr.craftingtableiifabric.recipe.CraftingTableIIRecipeManager.Extensions.first
+import net.minecraft.block.Blocks
 import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -17,13 +18,17 @@ import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
 import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.item.ItemStack
+import net.minecraft.recipe.CraftingRecipe
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeEntry
 import net.minecraft.recipe.RecipeMatcher
 import net.minecraft.recipe.book.RecipeBookCategory
+import net.minecraft.recipe.input.CraftingRecipeInput
+import net.minecraft.recipe.input.RecipeInput
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.screen.AbstractRecipeScreenHandler
+import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.screen.slot.CraftingResultSlot
 import net.minecraft.screen.slot.Slot
@@ -38,7 +43,7 @@ class CraftingTableIIScreenHandler(
     playerInventory: PlayerInventory,
     entity: CraftingTableIIEntity,
     private val context: ScreenHandlerContext,
-) : AbstractRecipeScreenHandler<RecipeInputInventory>(
+) : AbstractRecipeScreenHandler<CraftingRecipeInput, CraftingRecipe>(
     CraftingTableIIMod.SCREEN_HANDLER,
     syncId,
 ) {
@@ -47,6 +52,8 @@ class CraftingTableIIScreenHandler(
             Registry.register(
                 Registries.SCREEN_HANDLER, CraftingTableIIBlock.ID, CraftingTableIIMod.SCREEN_HANDLER
             )
+
+            Blocks.CRAFTING_TABLE
         }
 
         const val RESULT_INDEX = 0
@@ -217,9 +224,10 @@ class CraftingTableIIScreenHandler(
         result.clear()
     }
 
-    override fun matches(recipe: RecipeEntry<out Recipe<RecipeInputInventory>>): Boolean {
-        return recipe.value.matches(input, player.world)
+    override fun matches(recipe: RecipeEntry<CraftingRecipe>): Boolean {
+        return recipe.value.matches(input.createRecipeInput(), player.world)
     }
+
 
     fun updateResultSlot(itemStack: ItemStack) {
         result.setStack(0, itemStack)

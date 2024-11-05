@@ -7,7 +7,6 @@ import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.network.codec.PacketCodecs
 import net.minecraft.registry.Registries
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerContext
@@ -33,7 +32,7 @@ class BlockScreenHandlerFactory<T : ScreenHandler, B : BlockEntity>(
                     blockEntity,
                     ScreenHandlerContext.create(world, pos)
                 )
-            }, PacketCodecs.registryCodec(BlockPos.CODEC))
+            }, BlockPos.PACKET_CODEC)
         }
     }
 
