@@ -148,7 +148,7 @@ class CraftingTableIIScreen(
         //check if the mouse is in our inventory bounds
         if ((aX >= 0 && aY >= 0 && aX < 176) && aY < backgroundHeight - 100) {
             val i = ((craftableRecipesSize + 8 - 1) / 8 - 5).toDouble()
-            val j = MathHelper.clamp(amount, -1.0, 1.0)
+            val j = MathHelper.clamp(verticalAmount, -1.0, 1.0)
 
             scrollPosition -= (j / i).toFloat()
             scrollPosition = MathHelper.clamp(scrollPosition, 0f, 1f)
@@ -198,7 +198,7 @@ class CraftingTableIIScreen(
                 //draw description overlay
                 ctx.drawTexture(descriptionTexture, x - 124, y, 0, 0, 121, 162)
 
-                val recipe = slot.recipe
+                val recipe = slot.recipe ?: continue
                 val ingredientStacks = arrayListOf<ItemStack>()
 
                 //TODO: Find a way to draw all matching stacks. Maybe a timer that loops through the list of matching stacks
