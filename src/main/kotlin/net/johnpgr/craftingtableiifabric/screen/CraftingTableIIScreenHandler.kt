@@ -148,7 +148,7 @@ class CraftingTableIIScreenHandler(
 
         val quickCraft = actionType == SlotActionType.QUICK_MOVE
         val itemStack = slot.stack
-        val recipe = slot.recipe
+        val recipe = slot.recipe ?: return
 
         ClientPlayNetworking.send(CraftingTableIIPacket(recipe.id, syncId, quickCraft))
 
