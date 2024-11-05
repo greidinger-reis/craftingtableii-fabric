@@ -17,5 +17,5 @@ class CraftingTableIISlot(
     }
 
     val recipe
-        get(): Recipe<*> = (inventory as CraftingTableIIInventory).recipes[index]
+        get(): Recipe<*>? = (inventory as CraftingTableIIInventory).recipes.getOrNull(index)
 }
