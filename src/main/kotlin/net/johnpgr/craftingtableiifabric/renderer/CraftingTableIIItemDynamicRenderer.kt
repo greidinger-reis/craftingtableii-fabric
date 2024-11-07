@@ -1,5 +1,7 @@
 package net.johnpgr.craftingtableiifabric.renderer
 
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry
 import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
@@ -12,6 +14,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.item.ModelTransformationMode
 import net.minecraft.util.math.BlockPos
 
+@Environment(EnvType.CLIENT)
 class CraftingTableIIItemDynamicRenderer : BuiltinItemRendererRegistry.DynamicItemRenderer {
     companion object {
         fun register() {

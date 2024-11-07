@@ -1,5 +1,7 @@
 package net.johnpgr.craftingtableiifabric.description
 
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
@@ -7,6 +9,7 @@ import net.minecraft.client.MinecraftClient
 import java.io.File
 import kotlin.jvm.optionals.getOrNull
 
+@Environment(EnvType.CLIENT)
 object CraftingTableIIDescriptions {
     private const val FALLBACK_LANG = "en_us"
     lateinit var descriptionsDict: HashMap<String, String>

@@ -1,5 +1,7 @@
 package net.johnpgr.craftingtableiifabric.entity
 
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.VertexConsumer
@@ -16,6 +18,7 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.math.Direction
 import net.minecraft.util.math.RotationAxis
 
+@Environment(EnvType.CLIENT)
 class CraftingTableIIEntityRenderer(arg: BlockEntityRendererFactory.Context) :
     BlockEntityRenderer<CraftingTableIIEntity> {
     companion object {

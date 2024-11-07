@@ -41,7 +41,10 @@ class CraftingTableIIBlock : BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE
             Registry.register(
                 Registries.ITEM,
                 ITEM_REGISTRY_KEY,
-                BlockItem(CraftingTableIIMod.BLOCK, Item.Settings().useBlockPrefixedTranslationKey().registryKey(ITEM_REGISTRY_KEY))
+                BlockItem(
+                    CraftingTableIIMod.BLOCK,
+                    Item.Settings().useBlockPrefixedTranslationKey().registryKey(ITEM_REGISTRY_KEY)
+                )
             )
 
             ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL)
@@ -58,6 +61,7 @@ class CraftingTableIIBlock : BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE
         stateManager.add(Properties.HORIZONTAL_FACING)
     }
 
+    //FIXME: Maybe this is an unnecessary hack
     override fun getPlacementState(ctx: ItemPlacementContext): BlockState {
         return defaultState.with(
             Properties.HORIZONTAL_FACING,

@@ -1,5 +1,7 @@
 package net.johnpgr.craftingtableiifabric.entity
 
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry
 import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.minecraft.client.model.ModelData
@@ -8,6 +10,7 @@ import net.minecraft.client.model.ModelTransform
 import net.minecraft.client.model.TexturedModelData
 import net.minecraft.client.render.entity.model.EntityModelLayer
 
+@Environment(EnvType.CLIENT)
 object CraftingTableIIEntityModel {
     private const val TEXTURE_WIDTH = 128
     private const val TEXTURE_HEIGHT = 64

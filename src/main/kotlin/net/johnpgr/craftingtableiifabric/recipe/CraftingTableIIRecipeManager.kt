@@ -53,8 +53,18 @@ class CraftingTableIIRecipeManager(
         }
     }
 
-
-    data class Result(val id: NetworkRecipeId, val displayItems: List<ItemStack>, val ingredients: List<Ingredient>) {
+    /**
+     * Represents a result of a recipe, containing the recipe ID, display items, and ingredients.
+     *
+     * @property id The unique identifier for the recipe.
+     * @property displayItems The list of item stacks to display for this recipe.
+     * @property ingredients The list of ingredients required for this recipe.
+     */
+    data class Result(
+        val id: NetworkRecipeId,
+        val displayItems: List<ItemStack>,
+        val ingredients: List<Ingredient>
+    ) {
         fun getDisplayStack(currentIndex: Int): ItemStack {
             if (displayItems.isEmpty()) {
                 return ItemStack.EMPTY
