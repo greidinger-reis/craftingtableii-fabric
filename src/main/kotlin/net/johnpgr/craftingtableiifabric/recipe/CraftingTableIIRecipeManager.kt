@@ -10,7 +10,6 @@ import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.recipe.NetworkRecipeId
 import net.minecraft.recipe.RecipeFinder
-import net.minecraft.recipe.book.RecipeBookGroup
 import net.minecraft.recipe.display.SlotDisplayContexts
 import kotlin.jvm.optionals.getOrDefault
 
@@ -41,16 +40,19 @@ class CraftingTableIIRecipeManager(
      * Refreshes the list of craftable items based on the current state of the player's inventory and recipe book.
      * This method updates the `recipeItemStacks` property with the new list of craftable item stacks.
      */
-    private fun refreshResults() {
-        val recipes = recipeBook.getResultsForCategory(RecipeBookType.CRAFTING as RecipeBookGroup)
-            .map { it.filter(RecipeFilterMode.CRAFTABLE) }
 
-        this.results = recipes.stream().flatMap { entries ->
-            entries.stream().map { entry ->
-                Result(entry.id(), entry.getStacks(ctx), entry.craftingRequirements.getOrDefault(listOf()));
+    private fun refreshResults() {
+        val collections = recipeBook.getResultsForCategory(RecipeBookType.CRAFTING).onEach { collection ->
+            collection.populateRecipes(recipeFinder) { screenHandler.canDisplay(it) }
+        }
+
+        this.results = collections.flatMap { collection ->
+            collection.filter(RecipeFilterMode.CRAFTABLE).map { entry ->
+                Result(entry.id(), entry.getStacks(ctx), entry.craftingRequirements.getOrDefault(emptyList()))
             }
-        }.toList();
+        }
     }
+
 
     data class Result(val id: NetworkRecipeId, val displayItems: List<ItemStack>, val ingredients: List<Ingredient>) {
         fun getDisplayStack(currentIndex: Int): ItemStack {

@@ -15,6 +15,9 @@ import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.book.RecipeBookType
+import net.minecraft.recipe.display.RecipeDisplay
+import net.minecraft.recipe.display.ShapedCraftingRecipeDisplay
+import net.minecraft.recipe.display.ShapelessCraftingRecipeDisplay
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.screen.AbstractCraftingScreenHandler
@@ -233,5 +236,13 @@ class CraftingTableIIScreenHandler(
         playerEntity: PlayerEntity, invSlot: Int
     ): ItemStack {
         return ItemStack.EMPTY
+    }
+
+    fun canDisplay(display: RecipeDisplay): Boolean {
+        return when (display) {
+            is ShapedCraftingRecipeDisplay -> width >= display.width() && height >= display.height()
+            is ShapelessCraftingRecipeDisplay -> width * height >= display.ingredients().size
+            else -> false;
+        }
     }
 }
