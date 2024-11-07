@@ -172,10 +172,20 @@ class CraftingTableIIScreen(
     ) {
         //draw inventory
         ctx.drawTexture(
-            RenderLayer::getGuiTextured, TEXTURE, x, y, 0.0f, 0.0f, backgroundWidth, backgroundHeight, 256, 256
+            RenderLayer::getGuiTextured,
+            TEXTURE,
+            x,
+            y,
+            0.0f,
+            0.0f,
+            backgroundWidth,
+            backgroundHeight,
+            256,
+            256
         )
 
         val craftableRecipesSize = this.screenHandler.recipeManager.results.size
+        val hasScroll = craftableRecipesSize > CraftingTableIIInventory.SIZE
 
         //draw scrollbar
         ctx.drawTexture(
@@ -183,12 +193,12 @@ class CraftingTableIIScreen(
             TEXTURE,
             scrollButtonX,
             scrollButtonY,
-            if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) 16f else 0f,
+            if(hasScroll) 0f else 16f,
             208f,
-            0,
-            0,
+            16,
+            16,
             256,
-            256,
+            256
         )
 
         for (i in CraftingTableIIScreenHandler.CTII_INVENTORY_INDEX_START..CraftingTableIIScreenHandler.CTII_INVENTORY_INDEX_END) {

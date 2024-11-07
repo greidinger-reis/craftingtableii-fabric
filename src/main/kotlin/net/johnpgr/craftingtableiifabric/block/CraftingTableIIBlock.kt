@@ -6,12 +6,21 @@ import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntity
 import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
 import net.johnpgr.craftingtableiifabric.util.BlockScreenHandlerFactory
-import net.minecraft.block.*
+import net.minecraft.block.Block
+import net.minecraft.block.BlockRenderType
+import net.minecraft.block.BlockState
+import net.minecraft.block.BlockWithEntity
+import net.minecraft.block.Blocks
+import net.minecraft.block.ShapeContext
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityTicker
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.item.*
+import net.minecraft.item.BlockItem
+import net.minecraft.item.Item
+import net.minecraft.item.ItemGroups
+import net.minecraft.item.ItemPlacementContext
+import net.minecraft.item.Items
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.registry.RegistryKey
@@ -57,7 +66,7 @@ class CraftingTableIIBlock : BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE
         }
     }
 
-    override fun appendProperties(stateManager: StateManager.Builder<Block?, BlockState?>) {
+    override fun appendProperties(stateManager: StateManager.Builder<Block, BlockState>) {
         stateManager.add(Properties.HORIZONTAL_FACING)
     }
 
@@ -92,7 +101,7 @@ class CraftingTableIIBlock : BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE
         return BlockRenderType.ENTITYBLOCK_ANIMATED
     }
 
-    override fun hasSidedTransparency(state: BlockState?): Boolean {
+    override fun hasSidedTransparency(state: BlockState): Boolean {
         return true
     }
 
