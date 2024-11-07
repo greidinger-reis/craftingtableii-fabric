@@ -1,7 +1,7 @@
 package net.johnpgr.craftingtableiifabric.inventory
 
+import net.johnpgr.craftingtableiifabric.recipe.CraftingTableIIRecipeManager
 import net.minecraft.item.ItemStack
-import net.minecraft.recipe.RecipeEntry
 import net.minecraft.screen.slot.Slot
 
 class CraftingTableIISlot(
@@ -17,6 +17,6 @@ class CraftingTableIISlot(
     }
 
     val recipe
-        get(): RecipeEntry<*>? =
+        get(): CraftingTableIIRecipeManager.Result? =
             (inventory as CraftingTableIIInventory).recipes.getOrNull(index)
 }

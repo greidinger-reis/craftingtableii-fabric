@@ -1,5 +1,6 @@
 package net.johnpgr.craftingtableiifabric.util
 
+import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.entity.BlockEntity
@@ -12,7 +13,7 @@ object BlockEntityFactory {
         apiRegistrations: (BlockEntityType<T>) -> Unit = {}
     ): BlockEntityType<T> {
         val ent = (block as BlockEntityProvider).let {
-            BlockEntityType.Builder.create({ blockPos, blockState ->
+            FabricBlockEntityTypeBuilder.create({ blockPos, blockState ->
                 block.createBlockEntity(
                     blockPos,
                     blockState,

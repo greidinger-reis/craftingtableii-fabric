@@ -8,27 +8,16 @@ import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIIInventory
 import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIISlot
 import net.johnpgr.craftingtableiifabric.network.CraftingTableIIPacket
 import net.johnpgr.craftingtableiifabric.recipe.CraftingTableIIRecipeManager
-import net.johnpgr.craftingtableiifabric.recipe.CraftingTableIIRecipeManager.Extensions.first
-import net.minecraft.block.Blocks
-import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
-import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.item.ItemStack
-import net.minecraft.recipe.CraftingRecipe
-import net.minecraft.recipe.Recipe
-import net.minecraft.recipe.RecipeEntry
-import net.minecraft.recipe.RecipeMatcher
-import net.minecraft.recipe.book.RecipeBookCategory
-import net.minecraft.recipe.input.CraftingRecipeInput
-import net.minecraft.recipe.input.RecipeInput
+import net.minecraft.recipe.book.RecipeBookType
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
-import net.minecraft.screen.AbstractRecipeScreenHandler
-import net.minecraft.screen.ScreenHandler
+import net.minecraft.screen.AbstractCraftingScreenHandler
 import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.screen.slot.CraftingResultSlot
 import net.minecraft.screen.slot.Slot
@@ -43,17 +32,17 @@ class CraftingTableIIScreenHandler(
     playerInventory: PlayerInventory,
     entity: CraftingTableIIEntity,
     private val context: ScreenHandlerContext,
-) : AbstractRecipeScreenHandler<CraftingRecipeInput, CraftingRecipe>(
+) : AbstractCraftingScreenHandler(
     CraftingTableIIMod.SCREEN_HANDLER,
     syncId,
+    3,
+    3,
 ) {
     companion object {
         fun register() {
             Registry.register(
                 Registries.SCREEN_HANDLER, CraftingTableIIBlock.ID, CraftingTableIIMod.SCREEN_HANDLER
             )
-
-            Blocks.CRAFTING_TABLE
         }
 
         const val RESULT_INDEX = 0
@@ -130,10 +119,10 @@ class CraftingTableIIScreenHandler(
         }
     }
 
-    private fun addRecipeItem(stack: ItemStack, recipe: RecipeEntry<*>) {
+    private fun addRecipeItem(recipe: CraftingTableIIRecipeManager.Result) {
         for (i in 0 until inventory.size()) {
             if (inventory.getStack(i).isEmpty) {
-                inventory.setStack(i, stack, recipe)
+                inventory.setStack(i, recipe)
                 return
             }
         }
@@ -162,11 +151,11 @@ class CraftingTableIIScreenHandler(
         lastCraftedItem = itemStack
     }
 
-    private fun validateLastCrafted(results: List<RecipeResultCollection>): Pair<ItemStack, RecipeEntry<*>>? {
+    private fun validateLastCrafted(results: List<CraftingTableIIRecipeManager.Result>): CraftingTableIIRecipeManager.Result? {
         results.forEach { result ->
-            val pair = result.first()
-            if (ItemStack.areItemsEqual(pair.first, lastCraftedItem)) {
-                return pair
+            val itemStack = result.getDisplayStack()
+            if (ItemStack.areItemsEqual(itemStack, lastCraftedItem)) {
+                return result
             }
         }
         return null
@@ -176,7 +165,7 @@ class CraftingTableIIScreenHandler(
         inventory.clear()
         if (shouldRefreshInputs) recipeManager.refreshInputs()
 
-        val newList = mutableListOf<Pair<ItemStack, RecipeEntry<*>>>()
+        val newList = mutableListOf<CraftingTableIIRecipeManager.Result>()
 
         validateLastCrafted(recipeManager.results)?.let {
             newList.add(it)
@@ -188,15 +177,15 @@ class CraftingTableIIScreenHandler(
 
         for (i in currentListIndex until currentListIndex + max) {
             recipeManager.results.getOrNull(i)?.let {
-                newList.add(it.first())
+                newList.add(it)
             } ?: break
         }
 
-        newList.forEach { addRecipeItem(it.first, it.second) }
+        newList.forEach { addRecipeItem(it) }
     }
 
-    override fun canInsertIntoSlot(index: Int): Boolean {
-        return index != craftingResultSlotIndex
+    override fun canInsertIntoSlot(slot: Slot?): Boolean {
+        return slot !is CraftingTableIISlot
     }
 
     /**
@@ -215,42 +204,29 @@ class CraftingTableIIScreenHandler(
         }, true)
     }
 
-    override fun populateRecipeFinder(finder: RecipeMatcher?) {
-        input.provideRecipeInputs(finder)
-    }
-
-    override fun clearCraftingSlots() {
+    fun clearCraftingSlots() {
         input.clear()
         result.clear()
     }
-
-    override fun matches(recipe: RecipeEntry<CraftingRecipe>): Boolean {
-        return recipe.value.matches(input.createRecipeInput(), player.world)
-    }
-
 
     fun updateResultSlot(itemStack: ItemStack) {
         result.setStack(0, itemStack)
     }
 
-    override fun getCraftingResultSlotIndex(): Int {
-        return 0
+    override fun getCategory(): RecipeBookType {
+        return RecipeBookType.CRAFTING
     }
 
-    override fun getCraftingWidth(): Int {
-        return input.width
+    override fun getOutputSlot(): Slot {
+        return getSlot(0)
     }
 
-    override fun getCraftingHeight(): Int {
-        return input.height
+    override fun getInputSlots(): MutableList<Slot> {
+        return slots.subList(1, 10)
     }
 
-    override fun getCraftingSlotCount(): Int {
-        return 10
-    }
-
-    override fun getCategory(): RecipeBookCategory {
-        return RecipeBookCategory.CRAFTING
+    override fun getPlayer(): PlayerEntity {
+        return player
     }
 
     override fun quickMove(

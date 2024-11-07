@@ -4,28 +4,23 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
-import net.minecraft.inventory.RecipeInputInventory
 import net.minecraft.network.codec.PacketCodec
 import net.minecraft.network.codec.PacketCodecs
 import net.minecraft.network.packet.CustomPayload
 import net.minecraft.recipe.CraftingRecipe
-import net.minecraft.recipe.Recipe
+import net.minecraft.recipe.NetworkRecipeId
 import net.minecraft.recipe.RecipeEntry
-import net.minecraft.util.Identifier
-import kotlin.jvm.optionals.getOrNull
+import net.minecraft.server.world.ServerWorld
 
 data class CraftingTableIIPacket(
-    val recipe: Identifier,
-    val syncId: Int,
-    val quickCraft: Boolean
+    val recipe: NetworkRecipeId, val syncId: Int, val quickCraft: Boolean
 ) : CustomPayload {
     override fun getId() = ID
 
     companion object {
-        val ID =
-            CustomPayload.Id<CraftingTableIIPacket>(CraftingTableIIMod.id("craft_packet"))
+        val ID = CustomPayload.Id<CraftingTableIIPacket>(CraftingTableIIMod.id("craft_packet"))
         val PACKET_CODEC = PacketCodec.tuple(
-            Identifier.PACKET_CODEC, CraftingTableIIPacket::recipe,
+            NetworkRecipeId.PACKET_CODEC, CraftingTableIIPacket::recipe,
             PacketCodecs.INTEGER, CraftingTableIIPacket::syncId,
             PacketCodecs.BOOL, CraftingTableIIPacket::quickCraft,
             ::CraftingTableIIPacket,
@@ -38,45 +33,29 @@ data class CraftingTableIIPacket(
             ServerPlayNetworking.registerGlobalReceiver(ID) { data, context ->
                 val player = context.player()
                 val server = player.server
-                if (
-                    player.currentScreenHandler.syncId == data.syncId &&
-                    player.currentScreenHandler is CraftingTableIIScreenHandler
-                ) {
-                    val craftingScreenHandler =
-                        player.currentScreenHandler as CraftingTableIIScreenHandler
+                val creative = player.isCreative
+                val world = player.world as ServerWorld
+                val playerInventory = player.inventory
 
-                    val res = server.recipeManager.get(data.recipe)
-                    val recipe =
-                        (res.getOrNull()
-                            ?: return@registerGlobalReceiver) as RecipeEntry<CraftingRecipe>
+                if (player.currentScreenHandler.syncId == data.syncId && player.currentScreenHandler is CraftingTableIIScreenHandler) {
+                    val craftingScreenHandler = player.currentScreenHandler as CraftingTableIIScreenHandler
 
-                    craftingScreenHandler.fillInputSlots(
-                        data.quickCraft,
-                        recipe,
-                        player
-                    )
+                    val recipe = (server.recipeManager.get(data.recipe)?.parent
+                        ?: return@registerGlobalReceiver) as? RecipeEntry<CraftingRecipe>
+                        ?: return@registerGlobalReceiver
 
-                    while (recipe.value.matches(
-                            craftingScreenHandler.input.createRecipeInput(),
-                            player.world
-                        )
-                    ) {
-                        val cursor =
-                            craftingScreenHandler.cursorStack
-                        val output = recipe.value.craft(
-                            craftingScreenHandler.input.createRecipeInput(),
-                            server.registryManager
-                        )
+                    craftingScreenHandler.fillInputSlots(data.quickCraft, creative, recipe, world, playerInventory)
+
+                    while (recipe.value.matches(craftingScreenHandler.input.createRecipeInput(), player.world)) {
+                        val cursor = craftingScreenHandler.cursorStack
+                        val output =
+                            recipe.value.craft(craftingScreenHandler.input.createRecipeInput(), server.registryManager)
 
                         craftingScreenHandler.updateResultSlot(output)
 
                         // This will not take the item stack, just update the input inventory
-                        val resultSlot =
-                            craftingScreenHandler.getSlot(craftingScreenHandler.craftingResultSlotIndex)!!
-                        resultSlot.onTakeItem(
-                            player,
-                            output
-                        )
+                        val resultSlot = craftingScreenHandler.getSlot(CraftingTableIIScreenHandler.RESULT_INDEX)!!
+                        resultSlot.onTakeItem(player, output)
 
                         when {
                             cursor.isEmpty -> {

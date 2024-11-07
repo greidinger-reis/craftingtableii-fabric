@@ -1,6 +1,7 @@
 package net.johnpgr.craftingtableiifabric.screen
 
-import com.mojang.blaze3d.systems.RenderSystem
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.johnpgr.craftingtableiifabric.CraftingTableIIMod
 import net.johnpgr.craftingtableiifabric.description.CraftingTableIIDescriptions
 import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIIInventory
@@ -8,21 +9,23 @@ import net.johnpgr.craftingtableiifabric.inventory.CraftingTableIISlot
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.gui.screen.ingame.HandledScreens
-import net.minecraft.client.render.GameRenderer
+import net.minecraft.client.render.RenderLayer
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.slot.Slot
 import net.minecraft.text.Text
 import net.minecraft.util.math.MathHelper
 
+@Environment(EnvType.CLIENT)
 class CraftingTableIIScreen(
-    screenHandler: CraftingTableIIScreenHandler,
-    playerInventory: PlayerInventory,
-    title: Text
+    screenHandler: CraftingTableIIScreenHandler, playerInventory: PlayerInventory, title: Text
 ) : HandledScreen<CraftingTableIIScreenHandler>(
     screenHandler, playerInventory, title
 ) {
     companion object {
+        private val TEXTURE = CraftingTableIIMod.id("textures/gui/crafttableii.png")
+        private val DESCRIPTION_TEXTURE = CraftingTableIIMod.id("textures/gui/crafttableii_description.png")
+
         fun register() {
             HandledScreens.register(
                 CraftingTableIIMod.SCREEN_HANDLER, ::CraftingTableIIScreen
@@ -30,12 +33,7 @@ class CraftingTableIIScreen(
         }
     }
 
-    private val texture = CraftingTableIIMod.id(
-        "textures/gui/crafttableii.png"
-    )
-    private val descriptionTexture = CraftingTableIIMod.id(
-        "textures/gui/crafttableii_description.png"
-    )
+
     private var scrolling = false
     private var scrollPosition = 0.0f
     private val scrollBarStartY: Int
@@ -172,25 +170,25 @@ class CraftingTableIIScreen(
     override fun drawBackground(
         ctx: DrawContext, delta: Float, mouseX: Int, mouseY: Int
     ) {
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram)
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
-
         //draw inventory
         ctx.drawTexture(
-            this.texture, x, y, 0, 0, backgroundWidth, backgroundHeight
+            RenderLayer::getGuiTextured, TEXTURE, x, y, 0.0f, 0.0f, backgroundWidth, backgroundHeight, 256, 256
         )
 
         val craftableRecipesSize = this.screenHandler.recipeManager.results.size
 
         //draw scrollbar
         ctx.drawTexture(
-            this.texture,
-            this.scrollButtonX,
-            this.scrollButtonY,
-            if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) 16 else 0,
-            208,
-            16,
-            16
+            RenderLayer::getGuiTextured,
+            TEXTURE,
+            scrollButtonX,
+            scrollButtonY,
+            if (craftableRecipesSize <= CraftingTableIIInventory.SIZE) 16f else 0f,
+            208f,
+            0,
+            0,
+            256,
+            256,
         )
 
         for (i in CraftingTableIIScreenHandler.CTII_INVENTORY_INDEX_START..CraftingTableIIScreenHandler.CTII_INVENTORY_INDEX_END) {
@@ -200,35 +198,46 @@ class CraftingTableIIScreen(
                 if (slot.stack.isEmpty) continue
 
                 //draw description overlay
-                ctx.drawTexture(descriptionTexture, x - 124, y, 0, 0, 121, 162)
+                ctx.drawTexture(
+                    RenderLayer::getGuiTextured,
+                    DESCRIPTION_TEXTURE,
+                    x - 124,
+                    y,
+                    0f,
+                    0f,
+                    121,
+                    162,
+                    256,
+                    256
+                )
 
                 val recipe = slot.recipe ?: continue
                 val ingredientStacks = arrayListOf<ItemStack>()
 
                 //TODO: Find a way to draw all matching stacks. Maybe a timer that loops through the list of matching stacks
-                for (ingredient in recipe.value.ingredients) {
-                    if (ingredient.isEmpty) continue
+                for (ingredient in recipe.ingredients) {
+                    if (ingredient.matchingItems.isEmpty()) continue
 
-                    val item = ingredient.matchingStacks[0]
-                    val index = ingredientStacks.indexOfFirst { it.item == item.item }
+                    val item = ingredient.matchingItems.first().value()
+                    val index = ingredientStacks.indexOfFirst { it.item == item }
 
                     if (index == -1) {
-                        ingredientStacks.add(item.copy())
+                        ingredientStacks.add(item.defaultStack.copy())
                         continue
                     }
-                    ingredientStacks[index].count += item.count
+                    ingredientStacks[index].count += item.defaultStack.count
                 }
 
                 ingredientStacks.forEachIndexed { r, stack ->
                     ctx.drawItem(
                         stack, x - 25, y + 5 + r * 18
                     )
-                    ctx.drawItemInSlot(
+                    ctx.drawStackOverlay(
                         this.client!!.textRenderer, stack, x - 25, y + 5 + r * 18
                     )
                 }
 
-                val output = recipe.value.getResult(this.client!!.world!!.registryManager)
+                val output = recipe.getDisplayStack()
 
                 val titleX = x - 118
                 val titleY = y + 9
@@ -249,7 +258,7 @@ class CraftingTableIIScreen(
                     false,
                 )
 
-                val description = CraftingTableIIDescriptions.descriptionsDict[output.translationKey] ?: ""
+                val description = CraftingTableIIDescriptions.descriptionsDict[output.item.translationKey] ?: ""
                 val chunks = this.chunkDescription(description)
                 val descY = titleY + 2
                 val scalef = 0.5f

@@ -14,12 +14,13 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.*
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
+import net.minecraft.registry.RegistryKey
+import net.minecraft.registry.RegistryKeys
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.Properties
 import net.minecraft.util.ActionResult
 import net.minecraft.util.BlockMirror
 import net.minecraft.util.BlockRotation
-import net.minecraft.util.Identifier
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
@@ -27,23 +28,20 @@ import net.minecraft.util.shape.VoxelShape
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
-class CraftingTableIIBlock : BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE)) {
+class CraftingTableIIBlock : BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE).registryKey(REGISTRY_KEY)) {
     companion object {
-        val ID: Identifier = CraftingTableIIMod.id("crafting_table_ii")
-        val CODEC: MapCodec<CraftingTableIIBlock> =
-            createCodec { CraftingTableIIBlock() }
+        val ID = CraftingTableIIMod.id("crafting_table_ii")
+        val REGISTRY_KEY = RegistryKey.of(RegistryKeys.BLOCK, ID)
+        val ITEM_REGISTRY_KEY = RegistryKey.of(RegistryKeys.ITEM, ID)
+        val CODEC: MapCodec<CraftingTableIIBlock> = createCodec { CraftingTableIIBlock() }
 
         fun register() {
-            Registry.register(
-                Registries.BLOCK,
-                ID,
-                CraftingTableIIMod.BLOCK
-            )
+            Registry.register(Registries.BLOCK, ID, CraftingTableIIMod.BLOCK)
 
             Registry.register(
                 Registries.ITEM,
-                ID,
-                BlockItem(CraftingTableIIMod.BLOCK, Item.Settings())
+                ITEM_REGISTRY_KEY,
+                BlockItem(CraftingTableIIMod.BLOCK, Item.Settings().useBlockPrefixedTranslationKey().registryKey(ITEM_REGISTRY_KEY))
             )
 
             ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL)
@@ -116,7 +114,7 @@ class CraftingTableIIBlock : BlockWithEntity(Settings.copy(Blocks.CRAFTING_TABLE
         pos: BlockPos,
         state: BlockState
     ): BlockEntity {
-        return CraftingTableIIEntity(this, pos, state)
+        return CraftingTableIIEntity(pos, state)
     }
 
     override fun getCodec(): MapCodec<out BlockWithEntity> {

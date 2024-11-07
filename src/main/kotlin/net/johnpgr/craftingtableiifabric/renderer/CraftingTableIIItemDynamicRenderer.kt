@@ -7,34 +7,29 @@ import net.johnpgr.craftingtableiifabric.entity.CraftingTableIIEntityRenderer
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory
-import net.minecraft.client.render.model.json.ModelTransformationMode
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
+import net.minecraft.item.ModelTransformationMode
 import net.minecraft.util.math.BlockPos
 
 class CraftingTableIIItemDynamicRenderer : BuiltinItemRendererRegistry.DynamicItemRenderer {
     companion object {
         fun register() {
             BuiltinItemRendererRegistry.INSTANCE.register(
-                CraftingTableIIMod.BLOCK,
-                CraftingTableIIItemDynamicRenderer()
+                CraftingTableIIMod.BLOCK, CraftingTableIIItemDynamicRenderer()
             )
         }
     }
 
     override fun render(
-        stack: ItemStack,
+        itemStack: ItemStack,
         mode: ModelTransformationMode,
         matrixStack: MatrixStack,
         vertexConsumerProvider: VertexConsumerProvider,
         lightmap: Int,
         overlay: Int
     ) {
-        val tableEntity = CraftingTableIIEntity(
-            CraftingTableIIMod.BLOCK,
-            BlockPos.ORIGIN,
-            CraftingTableIIMod.BLOCK.defaultState
-        )
+        val tableEntity = CraftingTableIIEntity(BlockPos.ORIGIN, CraftingTableIIMod.BLOCK.defaultState)
         val instance = MinecraftClient.getInstance()
 
         val dummyRenderer = CraftingTableIIEntityRenderer(

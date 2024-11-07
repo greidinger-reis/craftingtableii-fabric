@@ -20,7 +20,6 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
 class CraftingTableIIEntity(
-    block: CraftingTableIIBlock,
     pos: BlockPos,
     state: BlockState,
 ) : BlockEntity(CraftingTableIIMod.ENTITY_TYPE, pos, state), Inventory {
@@ -64,7 +63,6 @@ class CraftingTableIIEntity(
                 entity.doorAngle += OPEN_SPEED
                 if (entity.doorAngle > 1.8f) entity.doorAngle = 1.8f
 
-                //TODO: run the block animation
                 if (entity.doorState != DoorState.OPEN) {
                     entity.doorState = DoorState.OPEN
                     world.playSound(
@@ -82,7 +80,6 @@ class CraftingTableIIEntity(
                 entity.doorAngle -= OPEN_SPEED
                 if (entity.doorAngle < 0f) entity.doorAngle = 0f
 
-                //TODO: run the block animation
                 if (entity.doorState != DoorState.CLOSED) {
                     entity.doorState = DoorState.CLOSED
                     world.playSound(

@@ -7,6 +7,8 @@ import net.johnpgr.craftingtableiifabric.network.CraftingTableIIPacket
 import net.johnpgr.craftingtableiifabric.screen.CraftingTableIIScreenHandler
 import net.johnpgr.craftingtableiifabric.util.BlockEntityFactory
 import net.johnpgr.craftingtableiifabric.util.BlockScreenHandlerFactory
+import net.minecraft.item.BlockItem
+import net.minecraft.item.Item
 import net.minecraft.util.Identifier
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
